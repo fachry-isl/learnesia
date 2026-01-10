@@ -1,5 +1,7 @@
 import SidebarItem from "./components/SidebarItem";
 import { useState } from "react";
+import CourseList from "./pages/CourseList";
+import CreateCourse from "./pages/CreateCourse";
 
 function App() {
   // Active SideItem - Course List
@@ -8,7 +10,15 @@ function App() {
   // Sidebar Click Handler
   const handleSidebarItemClick = (item) => {
     setActiveSidebar(item);
-    console.log(item);
+  };
+
+  const renderSidebarContent = () => {
+    switch (activeSidebar) {
+      case "course_list":
+        return <CourseList />;
+      case "create_course":
+        return <CreateCourse onSubmit={() => handleCreateCourseSubmit} />;
+    }
   };
 
   return (
@@ -16,34 +26,19 @@ function App() {
       <div className="bg-black w-50 flex-col p-5 mr-5">
         <SidebarItem
           label="course_list"
-          item_name="Database"
+          item_name="Courses"
           isActive={activeSidebar === "course_list"}
           onClick={() => handleSidebarItemClick("course_list")}
         />
         <SidebarItem
-          label="generate_course"
-          item_name="Generate Course"
-          isActive={activeSidebar === "generate_course"}
-          onClick={() => handleSidebarItemClick("generate_course")}
+          label="create_course"
+          item_name="Create Course"
+          isActive={activeSidebar === "create_course"}
+          onClick={() => handleSidebarItemClick("create_course")}
         />
       </div>
 
-      <div className="bg-white border border-black flex-1 p-10">
-        {/* Course Item */}
-        <div className="border border-black w-50 p-2">
-          <h1 id="title" className="text-black font-semibold">
-            Artificial Intelligence
-          </h1>
-          <p id="description" className="text-black">
-            This course covers about The fundamental of using AI and it's basic
-            applications.
-          </p>
-
-          <div className="text-black">Lesson Count: 5</div>
-          <div className="text-black">Index Count: 5</div>
-          <div className="text-black">Version: 1</div>
-        </div>
-      </div>
+      {renderSidebarContent()}
     </div>
   );
 }
