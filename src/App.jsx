@@ -23,7 +23,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-linear-to-br bg-white p-8 text-white flex">
-      <div className="bg-black w-50 flex-col p-5 mr-5">
+      <div className="bg-black w-78 flex-col p-5 mr-5">
         <SidebarItem
           label="course_list"
           item_name="Courses"
