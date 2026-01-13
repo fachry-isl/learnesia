@@ -1,8 +1,10 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 class Course(models.Model):
     course_name = models.CharField(max_length=255)
     course_description = models.TextField(blank=True)
+    course_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -12,8 +14,25 @@ class Course(models.Model):
 class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
     lesson_name = models.CharField(max_length=255)
+    lesson_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
     lesson_content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.lesson_name
+
+class LessonReference(models.Model):
+    REFERENCE_TYPE_CHOICES = [
+        ('link', 'Link'),
+        ('document', 'Document'),
+        ('video', 'Video'),
+    ]
+
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='references')
+    reference_title = models.CharField(max_length=255)
+    reference_url = models.URLField(blank=True, null=True)
+    reference_type = models.CharField(max_length=50, choices=REFERENCE_TYPE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.reference_title
