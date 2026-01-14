@@ -2,6 +2,8 @@ import SidebarItem from "./components/SidebarItem";
 import { useState } from "react";
 import CourseList from "./pages/CourseList";
 import CreateCourse from "./pages/CreateCourse";
+import IntegrationSandbox from "./pages/IntegrationSandbox";
+import ContentContainer from "./pages/ContentContainer";
 
 function App() {
   // Active SideItem - Course List
@@ -18,6 +20,8 @@ function App() {
         return <CourseList />;
       case "create_course":
         return <CreateCourse onSubmit={() => handleCreateCourseSubmit} />;
+      case "integration_sandbox":
+        return <IntegrationSandbox />;
     }
   };
 
@@ -36,9 +40,15 @@ function App() {
           isActive={activeSidebar === "create_course"}
           onClick={() => handleSidebarItemClick("create_course")}
         />
+        <SidebarItem
+          label="integration_sandbox"
+          item_name="Integration Sandbox"
+          isActive={activeSidebar === "integration_sandbox"}
+          onClick={() => handleSidebarItemClick("integration_sandbox")}
+        />
       </div>
 
-      {renderSidebarContent()}
+      <ContentContainer>{renderSidebarContent()}</ContentContainer>
     </div>
   );
 }

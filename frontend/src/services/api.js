@@ -32,10 +32,56 @@ export async function queryPerplexica(query) {
       throw new Error(`API error: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error("Perplexica API error:", error);
+    throw error;
+  }
+}
+
+export async function geminiApiRequest(query) {
+  try {
+    const response = await fetch("http://localhost:8000/api/gemini/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: query,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        JSON.stringify(errorData) || `HTTP error! status ${response.status}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Gemini API error: ", error);
+    throw error;
+  }
+}
+
+export async function createCourse() {
+  try {
+    const response = await fetch("http://localhost:8000/api/create_course/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        JSON.stringify(response.data) || `HTTP error! status ${response.status}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
     throw error;
   }
 }

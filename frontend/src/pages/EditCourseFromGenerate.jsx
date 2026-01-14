@@ -1,28 +1,10 @@
 import React, { useState } from "react";
 
-const EditCourseFromGenerate = () => {
-  const [course, setCourse] = useState({
-    course_name: "Artificial Intelligence Fundamentals",
-    course_learning_objectives:
-      "Understand AI basics, machine learning, and neural networks",
-    course_lessons_description:
-      "A comprehensive introduction to AI concepts and applications",
-    lessons: [
-      {
-        lesson_name: "Introduction to AI",
-        learning_objectives: "Learn what AI is and its applications",
-      },
-      {
-        lesson_name: "Machine Learning Basics",
-        learning_objectives: "Understand supervised and unsupervised learning",
-      },
-      {
-        lesson_name: "Neural Networks",
-        learning_objectives:
-          "Learn how neural networks work and their applications",
-      },
-    ],
-  });
+const EditCourseFromGenerate = ({ course_prop }) => {
+  const [course, setCourse] = useState(JSON.parse(course_prop));
+
+  console.log("onEditCoursePage: ", course);
+  console.log("onEditCoursePage -att: ", course.course_name);
 
   const handleCourseChange = (field, value) => {
     setCourse({ ...course, [field]: value });
@@ -54,8 +36,7 @@ const EditCourseFromGenerate = () => {
   return (
     <div className="w-full">
       <div className="text-black font-bold text-2xl mb-8">Edit Course</div>
-
-      {/* Course Level Fields */}
+      Course Level Fields
       <div className="mb-8 space-y-4">
         <div>
           <label className="text-black font-semibold block mb-2">
@@ -97,7 +78,6 @@ const EditCourseFromGenerate = () => {
           ></textarea>
         </div>
       </div>
-
       {/* Lessons Section */}
       <div className="mb-8">
         <div className="text-black font-bold text-xl mb-4">Lessons</div>
@@ -162,7 +142,6 @@ const EditCourseFromGenerate = () => {
           + Add Lesson
         </button>
       </div>
-
       {/* Action Buttons */}
       <div className="flex gap-3">
         <button

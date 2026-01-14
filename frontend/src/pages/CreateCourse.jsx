@@ -1,16 +1,36 @@
 import React from "react";
 import EditCourseFromGenerate from "./EditCourseFromGenerate";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createCourse } from "../services/api";
 
 const CreateCourse = () => {
   const [step, setStep] = useState("create_course_structure");
+  const [courseData, setCourseData] = useState("");
+
+  const fetchCourseGeneration = async () => {
+    try {
+      const response = await createCourse();
+      setCourseData(JSON.stringify(response));
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    if (courseData) {
+      console.log("Course data received:", courseData);
+      setStep("edit_course_structure");
+    }
+  }, [courseData]);
+
   const handleCreateCourseSubmit = (e) => {
     e.preventDefault();
     // window.alert(`Prompt: ${e.target.Prompt.value}`);
 
     console.log("Course Submit");
+    fetchCourseGeneration();
 
-    setStep("edit_course_structure");
+    //setStep("edit_course_structure");
   };
 
   const breadcrumbs = {
@@ -30,7 +50,7 @@ const CreateCourse = () => {
   const renderCreateCourse = () => {
     switch (step) {
       case "edit_course_structure":
-        return <EditCourseFromGenerate />;
+        return <EditCourseFromGenerate course_prop={courseData} />;
       case "create_course_structure":
         return (
           <div>
@@ -67,10 +87,10 @@ const CreateCourse = () => {
     }
   };
   return (
-    <div className="bg-white border border-black flex-1 p-10">
+    <>
       {renderBreadCrumbs()}
       {renderCreateCourse()}
-    </div>
+    </>
   );
 };
 
