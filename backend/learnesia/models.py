@@ -15,7 +15,7 @@ class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
     lesson_name = models.CharField(max_length=255)
     lesson_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
-    lesson_content = models.TextField()
+    lesson_content = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
