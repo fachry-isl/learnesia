@@ -280,7 +280,7 @@ const CourseLibrary = () => {
                     onClick={() => toggleLessonObjectives(course.id, idx)}
                     className="w-full flex items-start gap-2 text-xs text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded transition-colors"
                   >
-                    <div className="w-4 h-4 rounded bg-gray-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-4 h-4 rounded bg-gray-900 flex items-center justify-center shrink-0 mt-0.5">
                       <span className="text-xs font-semibold text-white">
                         {idx + 1}
                       </span>
@@ -289,9 +289,9 @@ const CourseLibrary = () => {
                       {lesson.lesson_name}
                     </span>
                     {expandedLessonObjectives[`${course.id}-${idx}`] ? (
-                      <ChevronDown className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                      <ChevronDown className="w-4 h-4 text-gray-600 shrink-0 mt-0.5" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0 mt-0.5" />
+                      <ChevronRight className="w-4 h-4 text-gray-600 shrink-0 mt-0.5" />
                     )}
                   </button>
                   {expandedLessonObjectives[`${course.id}-${idx}`] && (

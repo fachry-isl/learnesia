@@ -30,7 +30,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-gradient-to-b from-gray-900 to-black flex flex-col fixed h-screen">
+      <aside className="w-64 bg-linear-to-b from-gray-900 to-black flex flex-col fixed h-screen">
         {/* Logo/Brand Section */}
         <div className="p-6 border-b border-gray-800">
           <h1 className="text-2xl font-bold text-white tracking-tight">
