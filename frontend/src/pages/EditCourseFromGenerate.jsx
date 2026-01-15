@@ -1,10 +1,8 @@
 import React, { useState } from "react";
+import { createCourse, createLesson } from "../services/api";
 
 const EditCourseFromGenerate = ({ course_prop }) => {
   const [course, setCourse] = useState(JSON.parse(course_prop));
-
-  console.log("onEditCoursePage: ", course);
-  console.log("onEditCoursePage -att: ", course.course_name);
 
   const handleCourseChange = (field, value) => {
     setCourse({ ...course, [field]: value });
@@ -33,9 +31,64 @@ const EditCourseFromGenerate = ({ course_prop }) => {
     });
   };
 
+  const fetchCreateCourse = async () => {
+    try {
+      // Pass Course Payload
+      // For Learning Objectives turns the string with  into array of learning objectives.
+      const response = await createCourse({
+        course_name: course.course_name,
+        course_description: course.course_description,
+        course_learning_objectives:
+          course.course_learning_objectives.split(","),
+      });
+
+      if (response) {
+        console.log("Course Submitted: ", course.course_name);
+        console.log(JSON.stringify(response));
+        console.log("Response Id: ", response.id);
+      }
+
+      return response.id;
+    } catch (error) {
+      console.error("Error fetchCreateCourse: ", error);
+    }
+  };
+
+  const fetchCreateLessonsFromCourse = async (course_id, lesson_data) => {
+    console.log("Course ID: ", course_id);
+    console.log("Lesson_Data: ", lesson_data);
+    try {
+      for (let i = 0; i <= lesson_data.length - 1; i++) {
+        lesson_data[i]["course"] = course_id;
+        lesson_data[i]["lesson_learning_objectives"] =
+          lesson_data[i].learning_objectives.split(",");
+        const response = await createLesson(lesson_data[i]);
+
+        if (response) {
+          console.log("Lesson Submitted: ", lesson_data[i]);
+          console.log(JSON.stringify(response));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetchCreateLessonFromCourse: ", error);
+    }
+  };
+
+  const handleCourseStructureSubmit = async () => {
+    // Store Course and Return Course ID for storing the lesson.
+
+    // 1. Store Course
+    const course_id = await fetchCreateCourse();
+
+    // 2. Store Lessons
+    fetchCreateLessonsFromCourse(course_id, course.lessons);
+  };
+
   return (
     <div className="w-full">
-      <div className="text-black font-bold text-2xl mb-8">Edit Course</div>
+      <div className="text-black font-bold text-2xl mb-8">
+        Edit Course Structure
+      </div>
       Course Level Fields
       <div className="mb-8 space-y-4">
         <div>
@@ -69,9 +122,9 @@ const EditCourseFromGenerate = ({ course_prop }) => {
             Course Description
           </label>
           <textarea
-            value={course.course_lessons_description}
+            value={course.course_description}
             onChange={(e) =>
-              handleCourseChange("course_lessons_description", e.target.value)
+              handleCourseChange("course_description", e.target.value)
             }
             className="border-2 border-black w-full text-black p-3 resize-none"
             rows={3}
@@ -146,9 +199,9 @@ const EditCourseFromGenerate = ({ course_prop }) => {
       <div className="flex gap-3">
         <button
           className="border-2 border-black bg-black text-white cursor-pointer px-5 py-2 font-semibold hover:bg-gray-800"
-          onClick={() => window.alert(JSON.stringify(course))}
+          onClick={handleCourseStructureSubmit}
         >
-          Submit Course
+          Submit Course Structure
         </button>
         <button className="border-2 text-black border-black cursor-pointer px-5 py-2 font-semibold hover:bg-gray-100">
           Back

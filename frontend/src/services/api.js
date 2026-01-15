@@ -1,3 +1,104 @@
+export async function generateCourse() {
+  try {
+    const response = await fetch("http://localhost:8000/api/generate_course/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        JSON.stringify(response.data) || `HTTP error! status ${response.status}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function createCourse(courseData) {
+  try {
+    const response = await fetch("http://localhost:8000/api/courses/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(courseData),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        JSON.stringify(response.data) || `HTTP error! status ${response.status}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function createLesson(lessonData) {
+  try {
+    const response = await fetch("http://localhost:8000/api/lessons/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(lessonData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+
+      throw new Error(
+        errorData.message ||
+          errorData.detail ||
+          `HTTP error! status ${response.status}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    // Check if it's a network error (backend not responding)
+    if (error.message === "Failed to fetch" || error.name === "TypeError") {
+      throw new Error(
+        "Cannot connect to server. Please check your internet connection or try again later."
+      );
+    }
+    throw error;
+  }
+}
+
+export async function geminiApiRequest(query) {
+  try {
+    const response = await fetch("http://localhost:8000/api/gemini/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: query,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        JSON.stringify(errorData) || `HTTP error! status ${response.status}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Gemini API error: ", error);
+    throw error;
+  }
+}
+
 const PERPLEXICA_API_URL = "http://100.122.67.1:3000";
 
 const perplexicaConfig = {
@@ -35,53 +136,6 @@ export async function queryPerplexica(query) {
     return await response.json();
   } catch (error) {
     console.error("Perplexica API error:", error);
-    throw error;
-  }
-}
-
-export async function geminiApiRequest(query) {
-  try {
-    const response = await fetch("http://localhost:8000/api/gemini/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: query,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        JSON.stringify(errorData) || `HTTP error! status ${response.status}`
-      );
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Gemini API error: ", error);
-    throw error;
-  }
-}
-
-export async function createCourse() {
-  try {
-    const response = await fetch("http://localhost:8000/api/create_course/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        JSON.stringify(response.data) || `HTTP error! status ${response.status}`
-      );
-    }
-
-    return await response.json();
-  } catch (error) {
     throw error;
   }
 }

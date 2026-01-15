@@ -1,18 +1,29 @@
 import React from "react";
 import EditCourseFromGenerate from "./EditCourseFromGenerate";
 import { useState, useEffect } from "react";
-import { createCourse } from "../services/api";
+import { generateCourse } from "../services/api";
+import { toast, Toaster } from "react-hot-toast";
 
 const CreateCourse = () => {
   const [step, setStep] = useState("create_course_structure");
   const [courseData, setCourseData] = useState("");
 
   const fetchCourseGeneration = async () => {
+    // Show loading toast
+    const loadingToast = toast.loading("Creating lesson...");
     try {
-      const response = await createCourse();
+      const response = await generateCourse();
       setCourseData(JSON.stringify(response));
+
+      // Dismiss loading and show success
+      toast.dismiss(loadingToast);
+      toast.success("Lesson created successfully!");
     } catch (error) {
-      throw error;
+      // Dismiss loading and show error
+      toast.dismiss(loadingToast);
+      toast.error(error.message || "Something went wrong!");
+
+      console.error("Error creating lesson:", error);
     }
   };
 
@@ -25,9 +36,19 @@ const CreateCourse = () => {
 
   const handleCreateCourseSubmit = (e) => {
     e.preventDefault();
-    // window.alert(`Prompt: ${e.target.Prompt.value}`);
 
-    console.log("Course Submit");
+    const prompt = e.target.Prompt.value.trim();
+
+    if (!prompt || prompt.length < 10) {
+      toast.error("Please enter a detailed prompt (at least 10 characters)");
+      return;
+    }
+
+    if (prompt.length > 1000) {
+      toast.error("Prompt is too long (max 1000 characters)");
+      return;
+    }
+
     fetchCourseGeneration();
 
     //setStep("edit_course_structure");
@@ -54,6 +75,7 @@ const CreateCourse = () => {
       case "create_course_structure":
         return (
           <div>
+            <Toaster />
             {/* Create Course Page */}
             <form
               className="flex flex-col mt-2 mb-5"

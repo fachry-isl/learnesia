@@ -1,5 +1,5 @@
 import React from "react";
-import { geminiApiRequest, createCourse } from "../services/api";
+import { geminiApiRequest, generateCourse } from "../services/api";
 import { useState } from "react";
 import { SpinnerDotted } from "spinners-react";
 
@@ -14,7 +14,7 @@ const IntegrationSandbox = () => {
       setOutput("");
       setLoading(true);
 
-      const response = await createCourse();
+      const response = await generateCourse();
       // Wait 5 seconds before showing the result
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
