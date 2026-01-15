@@ -3,6 +3,7 @@ import { createCourse, createLesson } from "../services/api";
 
 const EditCourseFromGenerate = ({ course_prop }) => {
   const [course, setCourse] = useState(JSON.parse(course_prop));
+  console.log("CourseProp: ", course);
 
   const handleCourseChange = (field, value) => {
     setCourse({ ...course, [field]: value });
@@ -38,8 +39,7 @@ const EditCourseFromGenerate = ({ course_prop }) => {
       const response = await createCourse({
         course_name: course.course_name,
         course_description: course.course_description,
-        course_learning_objectives:
-          course.course_learning_objectives.split(","),
+        course_learning_objectives: course.course_learning_objectives,
       });
 
       if (response) {
@@ -60,8 +60,6 @@ const EditCourseFromGenerate = ({ course_prop }) => {
     try {
       for (let i = 0; i <= lesson_data.length - 1; i++) {
         lesson_data[i]["course"] = course_id;
-        lesson_data[i]["lesson_learning_objectives"] =
-          lesson_data[i].learning_objectives.split(",");
         const response = await createLesson(lesson_data[i]);
 
         if (response) {
@@ -107,14 +105,40 @@ const EditCourseFromGenerate = ({ course_prop }) => {
           <label className="text-black font-semibold block mb-2">
             Learning Objectives
           </label>
-          <textarea
+          {/* <textarea
             value={course.course_learning_objectives}
             onChange={(e) =>
               handleCourseChange("course_learning_objectives", e.target.value)
             }
             className="border-2 border-black w-full text-black p-3 resize-none"
             rows={3}
-          ></textarea>
+          ></textarea> */}
+
+          <div className="flex flex-col text-black p-2 resize-none">
+            {course.course_learning_objectives.map((lob, lobIndex) => (
+              // <div className="text-black">{`Learning Objective ke ${
+              //   lobIndex + 1
+              // } = ${lob}`}</div>
+
+              <input
+                onChange={(e) => {
+                  console.log(`Test: ${e.target.value}`);
+
+                  const updatedLob = [...course.course_learning_objectives];
+
+                  // getUpdated LOB
+                  updatedLob[lobIndex] = e.target.value;
+
+                  setCourse({
+                    ...course,
+                    course_learning_objectives: updatedLob,
+                  });
+                }}
+                className="text-black border-black border-2 mb-5 p-2"
+                value={lob}
+              ></input>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -171,7 +195,27 @@ const EditCourseFromGenerate = ({ course_prop }) => {
                 <label className="text-black font-semibold block mb-2">
                   Learning Objectives
                 </label>
-                <textarea
+
+                <div className="flex flex-col text-black p-2 resize-none">
+                  {lesson.lesson_learning_objectives.map((lob, lobIndex) => (
+                    <input
+                      onChange={(e) => {
+                        const updatedLessons = [...course.lessons];
+                        const updatedObjectives = [
+                          ...updatedLessons[index].lesson_learning_objectives,
+                        ];
+                        updatedObjectives[lobIndex] = e.target.value;
+                        updatedLessons[index].lesson_learning_objectives =
+                          updatedObjectives;
+                        setCourse({ ...course, lessons: updatedLessons });
+                      }}
+                      className="text-black border-black border-2 mb-5 p-2"
+                      value={lob}
+                    ></input>
+                  ))}
+                </div>
+
+                {/* <textarea
                   value={lesson.learning_objectives}
                   onChange={(e) =>
                     handleLessonChange(
@@ -182,7 +226,7 @@ const EditCourseFromGenerate = ({ course_prop }) => {
                   }
                   className="border-2 border-black w-full text-black p-2 resize-none"
                   rows={2}
-                ></textarea>
+                ></textarea> */}
               </div>
             </div>
           </div>
