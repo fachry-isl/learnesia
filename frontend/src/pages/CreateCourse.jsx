@@ -54,6 +54,11 @@ const CreateCourse = () => {
     //setStep("edit_course_structure");
   };
 
+  const onBackButtonCallbackHandler = () => {
+    setCourseData("");
+    setStep("create_course_structure");
+  };
+
   const breadcrumbs = {
     create_course_structure: ["Create Structure"],
     edit_course_structure: ["Create Structure", "Edit Structure"],
@@ -71,7 +76,12 @@ const CreateCourse = () => {
   const renderCreateCourse = () => {
     switch (step) {
       case "edit_course_structure":
-        return <EditCourseFromGenerate course_prop={courseData} />;
+        return (
+          <EditCourseFromGenerate
+            course_prop={courseData}
+            onBackButtonCallback={onBackButtonCallbackHandler}
+          />
+        );
       case "create_course_structure":
         return (
           <div>

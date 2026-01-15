@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { createCourse, createLesson } from "../services/api";
 
-const EditCourseFromGenerate = ({ course_prop }) => {
+const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
   const [course, setCourse] = useState(JSON.parse(course_prop));
   console.log("CourseProp: ", course);
+
+  const onBackButtonClick = () => {
+    onBackButtonCallback();
+  };
 
   const handleCourseChange = (field, value) => {
     setCourse({ ...course, [field]: value });
@@ -20,7 +24,11 @@ const EditCourseFromGenerate = ({ course_prop }) => {
       ...course,
       lessons: [
         ...course.lessons,
-        { lesson_name: "", learning_objectives: "", lessons_content: "" },
+        {
+          lesson_name: "",
+          lesson_learning_objectives: [""],
+          lessons_content: "",
+        },
       ],
     });
   };
@@ -247,7 +255,10 @@ const EditCourseFromGenerate = ({ course_prop }) => {
         >
           Submit Course Structure
         </button>
-        <button className="border-2 text-black border-black cursor-pointer px-5 py-2 font-semibold hover:bg-gray-100">
+        <button
+          onClick={onBackButtonClick}
+          className="border-2 text-black border-black cursor-pointer px-5 py-2 font-semibold hover:bg-gray-100"
+        >
           Back
         </button>
       </div>
