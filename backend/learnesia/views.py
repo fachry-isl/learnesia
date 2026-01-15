@@ -59,7 +59,7 @@ def gemini_api_call(request):
         )
     
 @api_view(['POST'])
-def create_course(request):
+def generate_course(request):
     return Response(
-        {"course_name":"Artificial Intelligence Fundamentals (Dummy)","course_learning_objectives":"Understand AI basics, machine learning, and neural networks","course_lessons_description":"A comprehensive introduction to AI concepts and applications","lessons":[{"lesson_name":"Introduction to AI","learning_objectives":"Learn what AI is and its applications"},{"lesson_name":"Machine Learning Basics","learning_objectives":"Understand supervised and unsupervised learning"},{"lesson_name":"Neural Networks","learning_objectives":"Learn how neural networks work and their applications"}]}
+        {"course_name":"Artificial Intelligence Fundamentals (Dummy)","course_learning_objectives":"Understand AI basics (Dummy Change),Understanding Machine Learning (basics),Understanding the application of Neural Networks","course_description":"A comprehensive introduction to AI concepts and applications","lessons":[{"lesson_name":"Introduction to AI","learning_objectives":"Learn what AI is and its applications"},{"lesson_name":"Machine Learning Basics","learning_objectives":"Understand supervised and unsupervised learning"},{"lesson_name":"Neural Networks","learning_objectives":"Learn how neural networks work and their applications"}]}
     , status=status.HTTP_200_OK)
