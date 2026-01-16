@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { createCourse, createLesson } from "../services/api";
 
 const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
-  const [course, setCourse] = useState(JSON.parse(course_prop));
-  console.log("CourseProp: ", course);
+  const [course, setCourse] = useState(course_prop);
 
   const onBackButtonClick = () => {
     onBackButtonCallback();
@@ -95,7 +94,6 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
       <div className="text-black font-bold text-2xl mb-8">
         Edit Course Structure
       </div>
-      Course Level Fields
       <div className="mb-8 space-y-4">
         <div>
           <label className="text-black font-semibold block mb-2">
@@ -113,14 +111,6 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
           <label className="text-black font-semibold block mb-2">
             Learning Objectives
           </label>
-          {/* <textarea
-            value={course.course_learning_objectives}
-            onChange={(e) =>
-              handleCourseChange("course_learning_objectives", e.target.value)
-            }
-            className="border-2 border-black w-full text-black p-3 resize-none"
-            rows={3}
-          ></textarea> */}
 
           <div className="flex flex-col text-black p-2 resize-none">
             {course.course_learning_objectives.map((lob, lobIndex) => (

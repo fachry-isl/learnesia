@@ -8,12 +8,14 @@ const CreateCourse = () => {
   const [step, setStep] = useState("create_course_structure");
   const [courseData, setCourseData] = useState("");
 
-  const fetchCourseGeneration = async () => {
+  const fetchCourseGeneration = async (prompt) => {
     // Show loading toast
     const loadingToast = toast.loading("Creating lesson...");
     try {
-      const response = await generateCourse();
-      setCourseData(JSON.stringify(response));
+      const result = await generateCourse(prompt);
+      console.log(result);
+
+      setCourseData(JSON.parse(result.response));
 
       // Dismiss loading and show success
       toast.dismiss(loadingToast);
@@ -44,12 +46,12 @@ const CreateCourse = () => {
       return;
     }
 
-    if (prompt.length > 1000) {
-      toast.error("Prompt is too long (max 1000 characters)");
+    if (prompt.length > 5000) {
+      toast.error("Prompt is too long (max 5000 characters)");
       return;
     }
 
-    fetchCourseGeneration();
+    fetchCourseGeneration(prompt);
 
     //setStep("edit_course_structure");
   };
@@ -76,6 +78,10 @@ const CreateCourse = () => {
   const renderCreateCourse = () => {
     switch (step) {
       case "edit_course_structure":
+        // Don't render until we have valid data
+        if (!courseData || courseData === "") {
+          return <div className="text-black">Loading course data...</div>;
+        }
         return (
           <EditCourseFromGenerate
             course_prop={courseData}

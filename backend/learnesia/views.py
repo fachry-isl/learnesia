@@ -11,6 +11,11 @@ from rest_framework import status
 import os
 from dotenv import load_dotenv
 
+# Langchain and Structured Output
+from pydantic import BaseModel, Field
+from langchain.chat_models import init_chat_model
+from typing import Dict, Any, List, Optional, Mapping
+
 # Load environment variable
 load_dotenv()
 
@@ -23,44 +28,10 @@ class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
 
-
-@api_view(['POST'])
-def gemini_api_call(request):
-    try:
-        user_message = request.data.get('message')
-        
-        if not user_message:
-            return Response(
-                {'error': 'Message is required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Get API key
-        api_key = os.environ.get('GEMINI_API_KEY')
-        
-        # Initialize client with new syntax
-        client = genai.Client(api_key=api_key)
-        
-        # Generate response
-        response = client.models.generate_content(
-            model='gemini-2.0-flash-exp',
-            contents=user_message
-        )
-        
-        return Response({
-            'user_message': user_message,
-            'bot_response': response.text
-        }, status=status.HTTP_200_OK)
-        
-    except Exception as e:
-        return Response(
-            {'error': str(e)}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
     
 
 @api_view(['POST'])
-def generate_course(request):
+def generate_dummy_course(request):
     return Response(
         {
             "course_name": "Artificial Intelligence Fundamentals (Dummy)",
@@ -96,3 +67,59 @@ def generate_course(request):
         },
         status=status.HTTP_200_OK
     )
+
+
+
+# Generate Course Endpoint
+## Define Class for Structured Output
+# Create structured output for learning roadmap
+class LessonStructure(BaseModel):
+    """
+    Represents a single lesson in the subject
+    """
+    lesson_name: str = Field(..., description="The name of the module")
+    lesson_learning_objectives: List[str] = Field(..., description="A list of learning objective of the lesson")
+        
+class CourseStructure(BaseModel):
+    """
+    Represents roadmap for specific subject
+    """
+    course_name: str = Field(..., description="The name of the main subject")
+        
+    # Specific learning objective that this roadmap accomplish
+    course_learning_objectives: List[str] = Field(..., description="A list of learning objective of the course") 
+
+    # Course Description
+    course_description: str = Field(..., description="A short description of the course")
+        
+    # A single roadmap can consist of multiple module.
+    lessons: List[LessonStructure]
+
+## Define generate course endpoint
+@api_view(['POST'])
+def generate_course(request):
+    try:
+        user_message = request.data.get('prompt')
+        print(user_message)
+        
+        if not user_message:
+            return Response(
+                {'error': 'Prompt is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        model = init_chat_model("gemini-2.0-flash", model_provider="google_genai", temperature=0)
+        structured_llm = model.with_structured_output(schema=CourseStructure)
+
+        result = structured_llm.invoke(user_message)
+
+        
+        return Response({
+            'query': user_message,
+            'response': result.model_dump_json()
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

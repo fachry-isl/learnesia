@@ -1,10 +1,30 @@
-export async function generateCourse() {
+export async function getCourse() {
+  try {
+    const response = await fetch("http://localhost:8000/api/courses/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function generateCourse(prompt) {
   try {
     const response = await fetch("http://localhost:8000/api/generate_course/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({ prompt }),
     });
 
     if (!response.ok) {

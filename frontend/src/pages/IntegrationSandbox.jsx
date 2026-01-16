@@ -14,7 +14,8 @@ const IntegrationSandbox = () => {
       setOutput("");
       setLoading(true);
 
-      const response = await generateCourse();
+      //const response = await generateCourse();
+      const response = await geminiApiRequest(query);
       // Wait 5 seconds before showing the result
       await new Promise((resolve) => setTimeout(resolve, 2000));
 

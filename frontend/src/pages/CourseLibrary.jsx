@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BookOpen,
   ChevronDown,
@@ -6,155 +6,22 @@ import {
   Target,
   Layers,
 } from "lucide-react";
+import { getCourse } from "../services/api";
 
 const CourseLibrary = () => {
   const [expandedCourseObjectives, setExpandedCourseObjectives] = useState({});
   const [expandedLessonObjectives, setExpandedLessonObjectives] = useState({});
 
-  const courses = [
-    {
-      id: 1,
-      course_name: "Artificial Intelligence Fundamentals",
-      course_learning_objectives: [
-        "Understand AI basics",
-        "Understanding Machine Learning (basics)",
-        "Understanding the application of Neural Networks",
-      ],
-      course_description:
-        "A comprehensive introduction to AI concepts and applications",
-      lessons: [
-        {
-          lesson_name: "Introduction to AI",
-          lesson_learning_objectives: [
-            "Learn what AI is and its applications",
-            "Understand the history and evolution of AI",
-          ],
-        },
-        {
-          lesson_name: "Machine Learning Basics",
-          lesson_learning_objectives: [
-            "Understand supervised and unsupervised learning",
-            "Learn about common ML algorithms",
-          ],
-        },
-        {
-          lesson_name: "Neural Networks",
-          lesson_learning_objectives: [
-            "Learn how neural networks work and their applications",
-            "Understand backpropagation and training processes",
-          ],
-        },
-      ],
-    },
-    {
-      id: 2,
-      course_name: "Full-Stack Web Development Bootcamp",
-      course_learning_objectives: [
-        "Build complete web applications from scratch",
-        "Master front-end and back-end technologies",
-        "Deploy production-ready applications",
-      ],
-      course_description:
-        "Master modern web development with hands-on projects",
-      lessons: [
-        {
-          lesson_name: "HTML & CSS Foundations",
-          lesson_learning_objectives: [
-            "Create semantic HTML structures",
-            "Style responsive layouts with CSS",
-          ],
-        },
-        {
-          lesson_name: "JavaScript Essentials",
-          lesson_learning_objectives: [
-            "Master JavaScript fundamentals",
-            "Work with DOM manipulation",
-            "Understand asynchronous programming",
-          ],
-        },
-        {
-          lesson_name: "React.js Framework",
-          lesson_learning_objectives: [
-            "Build component-based UIs",
-            "Manage state with hooks",
-          ],
-        },
-        {
-          lesson_name: "Node.js and Express",
-          lesson_learning_objectives: [
-            "Create RESTful APIs",
-            "Implement authentication",
-            "Connect to databases",
-          ],
-        },
-      ],
-    },
-    {
-      id: 3,
-      course_name: "Data Science with Python",
-      course_learning_objectives: [
-        "Analyze data using Python libraries",
-        "Build predictive models",
-        "Visualize data insights effectively",
-      ],
-      course_description:
-        "Transform raw data into actionable insights using Python",
-      lessons: [
-        {
-          lesson_name: "Python for Data Analysis",
-          lesson_learning_objectives: [
-            "Use pandas for data manipulation",
-            "Clean and preprocess datasets",
-            "Perform exploratory data analysis",
-          ],
-        },
-        {
-          lesson_name: "Statistical Methods",
-          lesson_learning_objectives: [
-            "Apply statistical tests",
-            "Interpret statistical results",
-          ],
-        },
-        {
-          lesson_name: "Machine Learning Models",
-          lesson_learning_objectives: [
-            "Build classification and regression models",
-            "Evaluate model performance",
-            "Deploy models to production",
-          ],
-        },
-      ],
-    },
-    {
-      id: 4,
-      course_name: "UX Design Principles",
-      course_learning_objectives: [
-        "Apply user-centered design methodologies",
-        "Create effective wireframes and prototypes",
-        "Conduct user research and usability testing",
-      ],
-      course_description:
-        "Learn user-centered design methodologies and best practices",
-      lessons: [
-        {
-          lesson_name: "User Research Methods",
-          lesson_learning_objectives: [
-            "Plan and conduct user interviews",
-            "Analyze user research data",
-            "Create user personas",
-          ],
-        },
-        {
-          lesson_name: "Wireframing and Prototyping",
-          lesson_learning_objectives: [
-            "Design low and high-fidelity wireframes",
-            "Build interactive prototypes",
-            "Test prototypes with users",
-          ],
-        },
-      ],
-    },
-  ];
+  const [courses, setCourses] = useState(null);
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    const course_data = await getCourse();
+    setCourses(course_data);
+  };
 
   const toggleCourseObjectives = (courseId) => {
     setExpandedCourseObjectives((prev) => ({
@@ -181,7 +48,7 @@ const CourseLibrary = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {courses.map((course) => (
+        {courses?.map((course) => (
           <div
             key={course.id}
             className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-shadow"
