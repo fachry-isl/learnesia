@@ -4,7 +4,7 @@ import CourseList from "./pages/CourseList";
 import CreateCourse from "./pages/CreateCourse";
 import IntegrationSandbox from "./pages/IntegrationSandbox";
 import ContentContainer from "./pages/ContentContainer";
-import CourseLibrary from "./pages/CourseLibrary";
+import CourseTemplateLibrary from "./pages/CourseTemplateLibrary";
 import { BookOpen, PlusCircle, Code2 } from "lucide-react";
 import CreateLesson from "./pages/CreateLesson";
 
@@ -20,7 +20,7 @@ function App() {
   const renderSidebarContent = () => {
     switch (activeSidebar) {
       case "course_library":
-        return <CourseLibrary />;
+        return <CourseTemplateLibrary />;
       case "create_course_template":
         return <CreateCourse onSubmit={() => handleCreateCourseSubmit} />;
       case "create_course_lessons":
