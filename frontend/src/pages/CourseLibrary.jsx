@@ -42,7 +42,7 @@ const CourseLibrary = () => {
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Course Library
+          Course Template Library
         </h1>
         <p className="text-gray-600">Manage your course syllabus</p>
       </div>
@@ -115,19 +115,14 @@ const CourseLibrary = () => {
                   </div>
                 </div>
                 <div className="bg-gray-50 rounded p-2">
-                  <div className="text-xs text-gray-500">Avg/Les</div>
+                  <div className="text-xs text-gray-500">Estimated Time</div>
                   <div className="text-base font-bold text-gray-900">
-                    {(
-                      course.lessons.reduce(
-                        (sum, lesson) =>
-                          sum + lesson.lesson_learning_objectives.length,
-                        0
-                      ) / course.lessons.length
-                    ).toFixed(1)}
+                    {course.lessons.length * 10}
                   </div>
                 </div>
+
                 <div className="bg-gray-50 rounded p-2">
-                  <div className="text-xs text-gray-500">Total</div>
+                  <div className="text-xs text-gray-500">Total Objectives</div>
                   <div className="text-base font-bold text-gray-900">
                     {course.lessons.reduce(
                       (sum, lesson) =>

@@ -6,6 +6,7 @@ import IntegrationSandbox from "./pages/IntegrationSandbox";
 import ContentContainer from "./pages/ContentContainer";
 import CourseLibrary from "./pages/CourseLibrary";
 import { BookOpen, PlusCircle, Code2 } from "lucide-react";
+import CreateLesson from "./pages/CreateLesson";
 
 function App() {
   // Active SideItem - Course List
@@ -22,6 +23,8 @@ function App() {
         return <CourseLibrary />;
       case "create_course_template":
         return <CreateCourse onSubmit={() => handleCreateCourseSubmit} />;
+      case "create_course_lessons":
+        return <CreateLesson />;
       case "integration_sandbox":
         return <IntegrationSandbox />;
     }
@@ -54,6 +57,13 @@ function App() {
             icon={<PlusCircle className="w-5 h-5" />}
             isActive={activeSidebar === "create_course_template"}
             onClick={() => handleSidebarItemClick("create_course_template")}
+          />
+          <SidebarItem
+            label="create_course_lessons"
+            item_name="Create Course Lessons"
+            icon={<PlusCircle className="w-5 h-5" />}
+            isActive={activeSidebar === "create_course_lessons"}
+            onClick={() => handleSidebarItemClick("create_course_lessons")}
           />
           <SidebarItem
             label="integration_sandbox"
