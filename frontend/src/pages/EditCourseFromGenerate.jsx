@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { createCourse, createLesson } from "../services/api";
+import { useSidebar } from "../contexts/SidebarContext";
+import { toast, Toaster } from "react-hot-toast";
 
 const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
   const [course, setCourse] = useState(course_prop);
+
+  // Change Active Sidebar
+  const { setActiveSidebar } = useSidebar();
 
   const onBackButtonClick = () => {
     onBackButtonCallback();
@@ -86,11 +91,15 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
     const course_id = await fetchCreateCourse();
 
     // 2. Store Lessons
-    fetchCreateLessonsFromCourse(course_id, course.lessons);
+    await fetchCreateLessonsFromCourse(course_id, course.lessons);
+
+    // 3. Navigate to Course Template Library
+    setActiveSidebar("course_library");
   };
 
   return (
     <div className="w-full">
+      <Toaster />
       <div className="text-black font-bold text-2xl mb-8">
         Edit Course Structure
       </div>
@@ -212,19 +221,6 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
                     ></input>
                   ))}
                 </div>
-
-                {/* <textarea
-                  value={lesson.learning_objectives}
-                  onChange={(e) =>
-                    handleLessonChange(
-                      index,
-                      "learning_objectives",
-                      e.target.value
-                    )
-                  }
-                  className="border-2 border-black w-full text-black p-2 resize-none"
-                  rows={2}
-                ></textarea> */}
               </div>
             </div>
           </div>

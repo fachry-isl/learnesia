@@ -1,16 +1,15 @@
 import SidebarItem from "./components/SidebarItem";
-import { useState } from "react";
-import CourseList from "./pages/CourseList";
 import CreateCourse from "./pages/CreateCourse";
 import IntegrationSandbox from "./pages/IntegrationSandbox";
 import ContentContainer from "./pages/ContentContainer";
 import CourseTemplateLibrary from "./pages/CourseTemplateLibrary";
 import { BookOpen, PlusCircle, Code2 } from "lucide-react";
 import CreateLesson from "./pages/CreateLesson";
+import { useSidebar } from "./contexts/SidebarContext";
 
 function App() {
-  // Active SideItem - Course List
-  const [activeSidebar, setActiveSidebar] = useState("course_library");
+  // Use Context
+  const { activeSidebar, setActiveSidebar } = useSidebar();
 
   // Sidebar Click Handler
   const handleSidebarItemClick = (item) => {
