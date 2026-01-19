@@ -6,10 +6,18 @@ import CourseTemplateLibrary from "./pages/CourseTemplateLibrary";
 import { BookOpen, PlusCircle, Code2 } from "lucide-react";
 import CreateLesson from "./pages/CreateLesson";
 import { useSidebar } from "./contexts/SidebarContext";
+import SidebarLessonItem from "./components/SidebarLessonItem";
 
 function App() {
   // Use Context
-  const { activeSidebar, setActiveSidebar } = useSidebar();
+  const {
+    activeSidebar,
+    setActiveSidebar,
+    sidebarMode,
+    sidebarData,
+    activeLessonId,
+    setActiveLessonId,
+  } = useSidebar();
 
   // Sidebar Click Handler
   const handleSidebarItemClick = (item) => {
@@ -43,34 +51,50 @@ function App() {
 
         {/* Navigation Section */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <SidebarItem
-            label="course_library"
-            item_name="Course Template"
-            icon={<BookOpen className="w-5 h-5" />}
-            isActive={activeSidebar === "course_library"}
-            onClick={() => handleSidebarItemClick("course_library")}
-          />
-          <SidebarItem
-            label="create_course_template"
-            item_name="Create Course Template"
-            icon={<PlusCircle className="w-5 h-5" />}
-            isActive={activeSidebar === "create_course_template"}
-            onClick={() => handleSidebarItemClick("create_course_template")}
-          />
-          <SidebarItem
-            label="create_course_lessons"
-            item_name="Create Course Lessons"
-            icon={<PlusCircle className="w-5 h-5" />}
-            isActive={activeSidebar === "create_course_lessons"}
-            onClick={() => handleSidebarItemClick("create_course_lessons")}
-          />
-          <SidebarItem
-            label="integration_sandbox"
-            item_name="Integration Sandbox"
-            icon={<Code2 className="w-5 h-5" />}
-            isActive={activeSidebar === "integration_sandbox"}
-            onClick={() => handleSidebarItemClick("integration_sandbox")}
-          />
+          {sidebarMode === "default" ? (
+            <>
+              <SidebarItem
+                label="course_library"
+                item_name="Course Template"
+                icon={<BookOpen className="w-5 h-5" />}
+                isActive={activeSidebar === "course_library"}
+                onClick={() => handleSidebarItemClick("course_library")}
+              />
+              <SidebarItem
+                label="create_course_template"
+                item_name="Create Course Template"
+                icon={<PlusCircle className="w-5 h-5" />}
+                isActive={activeSidebar === "create_course_template"}
+                onClick={() => handleSidebarItemClick("create_course_template")}
+              />
+              <SidebarItem
+                label="create_course_lessons"
+                item_name="Create Course Lessons"
+                icon={<PlusCircle className="w-5 h-5" />}
+                isActive={activeSidebar === "create_course_lessons"}
+                onClick={() => handleSidebarItemClick("create_course_lessons")}
+              />
+
+              <SidebarItem
+                label="integration_sandbox"
+                item_name="Integration Sandbox"
+                icon={<Code2 className="w-5 h-5" />}
+                isActive={activeSidebar === "integration_sandbox"}
+                onClick={() => handleSidebarItemClick("integration_sandbox")}
+              />
+            </>
+          ) : (
+            <>
+              {sidebarData?.lessons.map((lesson, idx) => (
+                <SidebarLessonItem
+                  key={idx}
+                  lesson_name={lesson.lesson_name}
+                  isActive={activeLessonId === lesson.id}
+                  onClick={() => setActiveLessonId(lesson.id)}
+                />
+              ))}
+            </>
+          )}
         </nav>
 
         {/* Footer Section - Fixed at bottom */}

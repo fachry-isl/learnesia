@@ -123,10 +123,6 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
 
           <div className="flex flex-col text-black p-2 resize-none">
             {course.course_learning_objectives.map((lob, lobIndex) => (
-              // <div className="text-black">{`Learning Objective ke ${
-              //   lobIndex + 1
-              // } = ${lob}`}</div>
-
               <input
                 onChange={(e) => {
                   console.log(`Test: ${e.target.value}`);

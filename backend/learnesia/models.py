@@ -2,10 +2,23 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 class Course(models.Model):
+    STATUS_CHOICES = [
+        ('template', 'Template'),
+        ('draft', 'Draft'),
+        ('published', 'Published'),
+    ]
+
     course_name = models.CharField(max_length=255)
     course_description = models.TextField(blank=True)
     course_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='template',
+        db_index=True
+    )
 
     def __str__(self):
         return self.course_name

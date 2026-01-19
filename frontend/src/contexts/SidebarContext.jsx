@@ -13,8 +13,28 @@ export const useSidebar = () => {
 export const SidebarProvider = ({ children }) => {
   const [activeSidebar, setActiveSidebar] = useState("course_library");
 
+  // Sidebar mode (Default or Lesson)
+  const [sidebarMode, setSidebarMode] = useState("default");
+
+  // Sidebar Course/Lesson Data
+  const [sidebarData, setSidebarData] = useState(null);
+
+  // Active Lesson ID
+  const [activeLessonId, setActiveLessonId] = useState(null);
+
   return (
-    <SidebarContext.Provider value={{ activeSidebar, setActiveSidebar }}>
+    <SidebarContext.Provider
+      value={{
+        activeSidebar,
+        setActiveSidebar,
+        sidebarMode,
+        setSidebarMode,
+        sidebarData,
+        setSidebarData,
+        activeLessonId,
+        setActiveLessonId,
+      }}
+    >
       {children}
     </SidebarContext.Provider>
   );
