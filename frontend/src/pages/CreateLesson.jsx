@@ -22,7 +22,7 @@ const CreateLesson = () => {
   };
 
   const renderBreadCrumbs = () => (
-    <div className="text-black font-semibold mb-3 text-sm">
+    <div className="text-black font-semibold mb-5">
       {breadcrumbs[step].join(" > ")}
     </div>
   );
@@ -46,17 +46,18 @@ const CreateLesson = () => {
       {renderBreadCrumbs()}
 
       {/* Course Selection - Fixed Height */}
-      <div className="mb-3 shrink-0">
+      <div className="mb-4 shrink-0">
+        <label className="block text-black font-semibold text-lg mb-2">
+          Select Course Template
+        </label>
         <select
-          className="bg-gray-800 border border-gray-700 text-white p-2.5 w-full rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm"
+          className="border-2 border-black p-2.5 w-full bg-white text-black focus:outline-none focus:border-gray-600 transition-colors"
           onChange={(e) => onCourseTopicChange(e.target.value)}
           defaultValue=""
         >
-          <option value="" className="bg-gray-800">
-            -- Select a Course --
-          </option>
+          <option value="">-- Select a Course --</option>
           {courses?.map((course) => (
-            <option key={course.id} value={course.id} className="bg-gray-800">
+            <option key={course.id} value={course.id}>
               {course.course_name}
             </option>
           ))}
@@ -65,17 +66,21 @@ const CreateLesson = () => {
 
       {/* Course Details - Flex Container with Two Columns */}
       {selectedCourse && (
-        <div className="flex-1 flex gap-3 overflow-hidden">
+        <div className="flex-1 flex gap-4 overflow-hidden">
           {/* Left Column - Course Info (40% width) */}
-          <div className="w-[40%] bg-gray-900 border border-gray-800 rounded-lg p-4 overflow-y-auto flex flex-col">
+          <div className="w-[40%] border-2 border-black p-5 overflow-y-auto flex flex-col bg-white">
             {/* Course Header */}
-            <div className="mb-3 shrink-0">
-              <h2 className="text-xl font-bold text-white mb-2">
+            <div className="mb-4 shrink-0">
+              <h2 className="text-2xl font-bold text-black mb-2">
                 {selectedCourse.course_name}
               </h2>
-              <div className="flex gap-3 text-xs text-gray-400">
-                <span>ID: {selectedCourse.id}</span>
+              <div className="flex gap-4 text-sm text-gray-600">
                 <span>
+                  <span className="font-semibold">Course ID:</span>{" "}
+                  {selectedCourse.id}
+                </span>
+                <span>
+                  <span className="font-semibold">Created:</span>{" "}
                   {new Date(selectedCourse.created_at).toLocaleDateString(
                     "id-ID",
                     { day: "numeric", month: "long", year: "numeric" },
@@ -85,25 +90,25 @@ const CreateLesson = () => {
             </div>
 
             {/* Course Description */}
-            <div className="mb-3 shrink-0">
-              <h3 className="text-sm font-semibold text-white mb-1.5">
+            <div className="mb-4 shrink-0">
+              <h3 className="text-lg font-semibold text-black mb-2">
                 Course Description
               </h3>
-              <p className="text-xs text-gray-300 leading-relaxed">
+              <p className="text-sm text-gray-700 leading-relaxed">
                 {selectedCourse.course_description}
               </p>
             </div>
 
             {/* Learning Objectives - Scrollable */}
             <div className="flex-1 overflow-y-auto">
-              <h3 className="text-sm font-semibold text-white mb-2 sticky top-0 bg-gray-900 pb-1">
+              <h3 className="text-lg font-semibold text-black mb-3 sticky top-0 bg-white pb-2">
                 Learning Objectives
               </h3>
-              <ul className="list-none space-y-1.5">
+              <ul className="list-none space-y-2">
                 {selectedCourse.course_learning_objectives.map(
                   (objective, idx) => (
-                    <li key={idx} className="text-xs text-gray-300 flex">
-                      <span className="font-semibold mr-2 text-blue-400 shrink-0">
+                    <li key={idx} className="text-sm text-gray-700 flex">
+                      <span className="font-semibold mr-2 text-black shrink-0">
                         {idx + 1}.
                       </span>
                       <span>{objective}</span>
@@ -115,46 +120,47 @@ const CreateLesson = () => {
           </div>
 
           {/* Right Column - Existing Lessons (60% width) */}
-          <div className="w-[60%] bg-gray-900 border border-gray-800 rounded-lg p-4 flex flex-col overflow-hidden">
-            <div className="shrink-0 mb-3">
-              <h3 className="text-sm font-semibold text-white mb-2">
+          <div className="w-[60%] border-2 border-black p-5 flex flex-col overflow-hidden bg-white">
+            <div className="shrink-0 mb-4">
+              <h3 className="text-lg font-semibold text-black mb-2">
                 Existing Course Structure
               </h3>
-              <p className="text-xs text-gray-400">
-                Total Lessons: {selectedCourse.lessons.length}
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold">Total Lessons:</span>{" "}
+                {selectedCourse.lessons.length}
               </p>
             </div>
 
             {/* Scrollable Lessons List */}
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
               {selectedCourse.lessons.map((lesson, idx) => (
                 <div
                   key={lesson.id}
-                  className="border-l-4 border-blue-500 bg-gray-950 rounded-r-lg overflow-hidden"
+                  className="border-2 border-black overflow-hidden"
                 >
                   {/* Lesson Header */}
                   <button
                     onClick={() => toggleLessonExpand(lesson.id)}
-                    className="w-full text-left p-3 hover:bg-gray-800 transition-colors focus:outline-none flex items-center justify-between"
+                    className="w-full text-left p-4 hover:bg-gray-100 transition-colors focus:outline-none flex items-center justify-between bg-white"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <span className="font-semibold text-white text-xs">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-black text-sm">
                           Lesson {idx + 1}
                         </span>
-                        <span className="text-[10px] text-gray-500 mr-2">
+                        <span className="text-xs text-gray-500 mr-2">
                           ID: {lesson.id}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-300 font-medium truncate">
+                      <p className="text-sm text-gray-700 font-medium">
                         {lesson.lesson_name}
                       </p>
                     </div>
 
                     {/* Expand Icon */}
-                    <div className="ml-3 shrink-0">
+                    <div className="ml-4 shrink-0">
                       <svg
-                        className={`w-4 h-4 text-gray-400 transition-transform ${
+                        className={`w-5 h-5 text-black transition-transform ${
                           expandedLessons[lesson.id] ? "rotate-180" : ""
                         }`}
                         fill="none"
@@ -173,18 +179,18 @@ const CreateLesson = () => {
 
                   {/* Expandable Learning Objectives */}
                   {expandedLessons[lesson.id] && (
-                    <div className="px-3 pb-3 border-t border-gray-800 pt-2 bg-gray-950">
-                      <h4 className="text-[10px] font-semibold text-white mb-1.5">
+                    <div className="px-4 pb-4 border-t-2 border-black pt-3 bg-gray-50">
+                      <h4 className="text-xs font-semibold text-black mb-2">
                         Learning Objectives:
                       </h4>
-                      <ul className="space-y-1">
+                      <ul className="space-y-1.5">
                         {lesson.lesson_learning_objectives.map(
                           (objective, objIdx) => (
                             <li
                               key={objIdx}
-                              className="text-[10px] text-gray-400 flex"
+                              className="text-xs text-gray-700 flex"
                             >
-                              <span className="text-blue-400 mr-1.5 shrink-0">
+                              <span className="text-black mr-2 shrink-0 font-semibold">
                                 •
                               </span>
                               <span>{objective}</span>
@@ -199,9 +205,9 @@ const CreateLesson = () => {
             </div>
 
             {/* Action Button - Fixed at Bottom */}
-            <div className="mt-3 shrink-0">
+            <div className="mt-4 shrink-0">
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors w-full"
+                className="border-2 border-black cursor-pointer p-3 text-black w-full font-bold hover:bg-black hover:text-white transition-colors"
                 onClick={() => setStep("create_course_lessons")}
               >
                 Create Lesson
@@ -213,10 +219,12 @@ const CreateLesson = () => {
 
       {/* Placeholder when no course selected */}
       {!selectedCourse && courses && (
-        <div className="flex-1 flex items-center justify-center text-center text-gray-500 border-2 border-dashed border-gray-700 rounded-lg bg-gray-900">
+        <div className="flex-1 flex items-center justify-center text-center border-2 border-dashed border-gray-400 bg-white">
           <div>
-            <p className="text-base">Select a course template to begin</p>
-            <p className="text-sm mt-2">
+            <p className="text-lg text-gray-600">
+              Select a course template to begin
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
               {courses.length} course{courses.length !== 1 ? "s" : ""} available
             </p>
           </div>
