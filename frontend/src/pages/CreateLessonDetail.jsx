@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useSidebar } from "../contexts/SidebarContext";
 import { Save, RefreshCw, ExternalLink, Info, BookOpen } from "lucide-react";
+import { editLesson } from "../services/api";
 
-const CreateLessonDetail = ({ course }) => {
+const CreateLessonDetail = ({ course, onLessonUpdate }) => {
+  console.log("Course: ", course);
   const { activeLessonId } = useSidebar();
 
-  // Find the lesson in the course prop
-  const lessonData = course?.lessons.find((l) => l.id === activeLessonId);
+  // Sort lessons by order column before finding
+  const sortedLessons = course?.lessons
+    ? [...course.lessons].sort((a, b) => a.order - b.order)
+    : [];
+
+  // Find the lesson in the sorted lessons
+  const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
 
   // Local state for editability
   const [content, setContent] = useState("");
@@ -14,10 +21,29 @@ const CreateLessonDetail = ({ course }) => {
 
   useEffect(() => {
     if (lessonData) {
-      // Use 'message' if it comes from the new API format, otherwise 'content'
-      setContent(lessonData.message || lessonData.content || "");
+      setContent(lessonData.lesson_content || "");
     }
   }, [lessonData, activeLessonId]);
+
+  const updateLessonApi = async (lesson_id, lesson_content) => {
+    console.log(lesson_id, lesson_content);
+    const response = await editLesson(lesson_id, lesson_content);
+    console.log(JSON.stringify(response));
+  };
+
+  const onSaveChanges = () => {
+    try {
+      console.log(lessonData);
+
+      // Update lesson on the backend
+      updateLessonApi(lessonData.id, content);
+
+      // Update lesson on the frontend
+      onLessonUpdate(lessonData.id, content);
+    } catch (error) {
+      throw error;
+    }
+  };
 
   if (!lessonData) {
     return (
@@ -50,7 +76,10 @@ const CreateLessonDetail = ({ course }) => {
           >
             {isEditing ? "VIEW PREVIEW" : "EDIT CONTENT"}
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-black text-white border-2 border-black font-bold hover:bg-gray-800 transition-all active:translate-y-1">
+          <button
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white border-2 border-black font-bold hover:bg-gray-800 transition-all active:translate-y-1"
+            onClick={onSaveChanges}
+          >
             <Save className="w-4 h-4" /> SAVE CHANGES
           </button>
         </div>

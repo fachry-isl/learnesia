@@ -17,6 +17,32 @@ export async function getCourse() {
   }
 }
 
+export async function editLesson(lessonId, lesson_content) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/api/lessons/${lessonId}/`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ lesson_content }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        JSON.stringify(response.data) ||
+          `HTTP error! status ${response.status}`,
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function generateCourse(prompt) {
   try {
     const response = await fetch("http://localhost:8000/api/generate_course/", {
@@ -29,7 +55,8 @@ export async function generateCourse(prompt) {
 
     if (!response.ok) {
       throw new Error(
-        JSON.stringify(response.data) || `HTTP error! status ${response.status}`
+        JSON.stringify(response.data) ||
+          `HTTP error! status ${response.status}`,
       );
     }
 
@@ -51,7 +78,8 @@ export async function createCourse(courseData) {
 
     if (!response.ok) {
       throw new Error(
-        JSON.stringify(response.data) || `HTTP error! status ${response.status}`
+        JSON.stringify(response.data) ||
+          `HTTP error! status ${response.status}`,
       );
     }
 
@@ -77,7 +105,7 @@ export async function createLesson(lessonData) {
       throw new Error(
         errorData.message ||
           errorData.detail ||
-          `HTTP error! status ${response.status}`
+          `HTTP error! status ${response.status}`,
       );
     }
 
@@ -86,7 +114,7 @@ export async function createLesson(lessonData) {
     // Check if it's a network error (backend not responding)
     if (error.message === "Failed to fetch" || error.name === "TypeError") {
       throw new Error(
-        "Cannot connect to server. Please check your internet connection or try again later."
+        "Cannot connect to server. Please check your internet connection or try again later.",
       );
     }
     throw error;
@@ -108,7 +136,7 @@ export async function geminiApiRequest(query) {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        JSON.stringify(errorData) || `HTTP error! status ${response.status}`
+        JSON.stringify(errorData) || `HTTP error! status ${response.status}`,
       );
     }
 

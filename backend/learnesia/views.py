@@ -93,21 +93,29 @@ class CourseStructure(BaseModel):
 @api_view(['POST'])
 def generate_course(request):
     try:
-        user_message = request.data.get('prompt')
-        print(user_message)
+        prompt = request.data.get('prompt')
+        print(prompt)
         
-        if not user_message:
+        if not prompt:
             return Response(
                 {'error': 'Prompt is required'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         model = init_chat_model("gemini-2.0-flash", model_provider="google_genai", temperature=0)
         structured_llm = model.with_structured_output(schema=CourseStructure)
-        result = structured_llm.invoke(user_message)
+        result = structured_llm.invoke(prompt)
+        
+        # Convert Pydantic model to dict
+        course_data = result.model_dump()
+        
+        # Add order field to each lesson based on list position
+        for index, lesson in enumerate(course_data['lessons'], start=1):
+            lesson['order'] = index
+        
         return Response({
-            'query': user_message,
-            'response': result.model_dump_json()
-        }, status=status.HTTP_200_OK)
+            'query': prompt,
+            'response': course_data  # Return dict instead of JSON string
+        }, status=200)
         
     except Exception as e:
         return Response(
@@ -166,9 +174,17 @@ def generate_course_structured(request):
         """
         
         result = structured_llm.invoke(prompt)
+        
+        # Convert Pydantic model to dict
+        course_data = result.model_dump()
+        
+        # Add order field to each lesson based on list position
+        for index, lesson in enumerate(course_data['lessons'], start=1):
+            lesson['order'] = index
+        
         return Response({
             'query': prompt,
-            'response': result.model_dump_json()
+            'response': course_data  # Return dict instead of JSON string
         }, status=200)
         
     except Exception as e:

@@ -18,7 +18,9 @@ const CreateCourse = () => {
     const loadingToast = toast.loading("Creating lesson...");
     try {
       const result = await generateCourse(prompt);
-      setCourseData(JSON.parse(result.response));
+      // console.log("Generated Course: ", result.response);
+      setCourseData(result.response);
+
       toast.dismiss(loadingToast);
       toast.success("Lesson created successfully!");
     } catch (error) {

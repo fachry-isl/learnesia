@@ -58,6 +58,18 @@ const CreateLesson = () => {
     }
   };
 
+  // Update Parent Selected Lesson when Lesson Changes on Lesson Detail Page
+  const handleLessonUpdate = (lessonId, updatedContent) => {
+    setSelectedCourse((prevCourse) => ({
+      ...prevCourse,
+      lessons: prevCourse.lessons.map((lesson) =>
+        lesson.id === lessonId
+          ? { ...lesson, lesson_content: updatedContent }
+          : lesson,
+      ),
+    }));
+  };
+
   const renderContent = () => {
     switch (step) {
       case "choose_course_template":
@@ -252,7 +264,12 @@ const CreateLesson = () => {
           </>
         );
       case "create_course_lessons":
-        return <CreateLessonDetail course={selectedCourse} />;
+        return (
+          <CreateLessonDetail
+            course={selectedCourse}
+            onLessonUpdate={handleLessonUpdate}
+          />
+        );
       default:
         return null;
     }

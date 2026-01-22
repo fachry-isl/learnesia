@@ -13,6 +13,7 @@ class Course(models.Model):
     course_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -30,6 +31,8 @@ class Lesson(models.Model):
     lesson_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
     lesson_content = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    order = models.PositiveIntegerField(default=0, db_index=True)
 
     def __str__(self):
         return self.lesson_name
