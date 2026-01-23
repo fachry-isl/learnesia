@@ -1,13 +1,6 @@
-import React, { useEffect, useState } from "react";
-import {
-  BookOpen,
-  ChevronDown,
-  ChevronRight,
-  Target,
-  Layers,
-} from "lucide-react";
+import React from "react";
+import { useState, useEffect } from "react";
 import { getCourse } from "../services/api";
-import CourseTemplateStructureInfo from "../components/CourseTemplateStructureInfo";
 import CourseCardItem from "../components/CourseCardItem";
 
 const CourseLibrary = () => {
@@ -16,25 +9,34 @@ const CourseLibrary = () => {
   useEffect(() => {
     fetchCourses();
   }, []);
-
   const fetchCourses = async () => {
     const course_data = await getCourse();
 
-    setCourses(course_data);
-  };
+    // Draft or Published Course Only
+    const filtered_course = course_data.filter(
+      (course) => course.status === "draft" || course.status === "published",
+    );
 
+    console.log("Filtered Course; ", filtered_course);
+
+    setCourses(filtered_course);
+  };
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Course Template Library
+          Course Library
         </h1>
-        <p className="text-gray-600">Manage your course syllabus</p>
+        <p className="text-gray-600">Draft and Published Course</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses?.map((course, idx) => (
-          <CourseCardItem key={idx} course={course} />
+          <CourseCardItem
+            key={idx}
+            course={course}
+            isDraftorPublished="published"
+          />
         ))}
       </div>
     </div>

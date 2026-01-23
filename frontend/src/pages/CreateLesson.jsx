@@ -77,9 +77,6 @@ const CreateLesson = () => {
           <>
             {/* Course Selection - Fixed Height */}
             <div className="mb-4 shrink-0">
-              <label className="block text-black font-semibold text-lg mb-2">
-                Select Course Template
-              </label>
               <select
                 className="border-2 border-black p-2.5 w-full bg-gray-200 text-black focus:outline-none focus:border-gray-600 transition-colors"
                 onChange={(e) => onCourseTopicChange(e.target.value)}

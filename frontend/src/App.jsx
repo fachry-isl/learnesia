@@ -7,6 +7,7 @@ import { BookOpen, PlusCircle, Code2 } from "lucide-react";
 import CreateLesson from "./pages/CreateLesson";
 import { useSidebar } from "./contexts/SidebarContext";
 import SidebarLessonItem from "./components/SidebarLessonItem";
+import CourseLibrary from "./pages/CourseLibrary";
 
 function App() {
   // Use Context
@@ -27,6 +28,8 @@ function App() {
   const renderSidebarContent = () => {
     switch (activeSidebar) {
       case "course_library":
+        return <CourseLibrary />;
+      case "course_template_library":
         return <CourseTemplateLibrary />;
       case "create_course_template":
         return <CreateCourse onSubmit={() => handleCreateCourseSubmit} />;
@@ -55,11 +58,22 @@ function App() {
             <>
               <SidebarItem
                 label="course_library"
-                item_name="Course Template"
+                item_name="Course Library"
                 icon={<BookOpen className="w-5 h-5" />}
                 isActive={activeSidebar === "course_library"}
                 onClick={() => handleSidebarItemClick("course_library")}
               />
+
+              <SidebarItem
+                label="course_template_library"
+                item_name="Course Template"
+                icon={<BookOpen className="w-5 h-5" />}
+                isActive={activeSidebar === "course_template_library"}
+                onClick={() =>
+                  handleSidebarItemClick("course_template_library")
+                }
+              />
+
               <SidebarItem
                 label="create_course_template"
                 item_name="Create Course Template"
