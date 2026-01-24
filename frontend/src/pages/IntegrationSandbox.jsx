@@ -1,5 +1,4 @@
-import React from "react";
-import { geminiApiRequest, generateCourse } from "../services/api";
+import { geminiApiRequest } from "../services/api";
 import { useState } from "react";
 import { SpinnerDotted } from "spinners-react";
 
@@ -8,8 +7,6 @@ const IntegrationSandbox = () => {
   const [isLoading, setLoading] = useState(false);
 
   const fetchAnyApi = async (query) => {
-    // const response = await geminiApiRequest(query);
-    // setOutput(response.bot_response);
     try {
       setOutput("");
       setLoading(true);

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { generateCourse } from "../services/api";
 import { toast, Toaster } from "react-hot-toast";
 
-const CreateCourse = () => {
+const CreateCourseTemplate = () => {
   const [step, setStep] = useState("create_course_structure");
   const [courseData, setCourseData] = useState("");
 
@@ -228,7 +228,7 @@ Return a valid JSON structure with the course outline.`;
 
               <button
                 type="submit"
-                className="border-black border-2 cursor-pointer p-5 pt-2 pb-2 text-black mt-10 font-bold hover:bg-black hover:text-white transition-colors"
+                className="border-black border-2 cursor-pointer p-5 pt-2 pb-2 text-black mt-10 font-bold hover:bg-white hover:text-black transition-colors"
               >
                 Generate
               </button>
@@ -248,4 +248,4 @@ Return a valid JSON structure with the course outline.`;
   );
 };
 
-export default CreateCourse;
+export default CreateCourseTemplate;

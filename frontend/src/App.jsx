@@ -1,5 +1,5 @@
 import SidebarItem from "./components/SidebarItem";
-import CreateCourse from "./pages/CreateCourse";
+import CreateCourseTemplate from "./pages/CreateCourseTemplate";
 import IntegrationSandbox from "./pages/IntegrationSandbox";
 import ContentContainer from "./pages/ContentContainer";
 import CourseTemplateLibrary from "./pages/CourseTemplateLibrary";
@@ -14,6 +14,7 @@ function App() {
   const {
     activeSidebar,
     setActiveSidebar,
+    setSidebarMode,
     sidebarMode,
     sidebarData,
     activeLessonId,
@@ -32,12 +33,22 @@ function App() {
       case "course_template_library":
         return <CourseTemplateLibrary />;
       case "create_course_template":
-        return <CreateCourse onSubmit={() => handleCreateCourseSubmit} />;
+        return (
+          <CreateCourseTemplate onSubmit={() => handleCreateCourseSubmit} />
+        );
       case "create_course_lessons":
         return <CreateLesson />;
       case "integration_sandbox":
         return <IntegrationSandbox />;
     }
+  };
+
+  const onBackButtonClicked = () => {
+    // Reset Sidebar to Default instead of content specific
+    setSidebarMode("default");
+
+    // Reset Container
+    setActiveSidebar("course_library");
   };
 
   return (
@@ -99,7 +110,7 @@ function App() {
             </>
           ) : (
             <>
-              {sidebarData?.lessons.map((lesson, idx) => (
+              {sidebarData?.map((lesson, idx) => (
                 <SidebarLessonItem
                   key={idx}
                   lesson_name={lesson.lesson_name}
@@ -110,6 +121,15 @@ function App() {
             </>
           )}
         </nav>
+
+        {sidebarMode != "default" && (
+          <button
+            onClick={onBackButtonClicked}
+            className="border-2 border-gray text-white mb-5 mr-5 ml-5 cursor-pointer hover:bg-white hover:text-black transition-colors"
+          >
+            Back
+          </button>
+        )}
 
         {/* Footer Section - Fixed at bottom */}
         <div className="p-4 border-t border-gray-800 mt-auto">

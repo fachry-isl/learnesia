@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSidebar } from "../contexts/SidebarContext";
 import { Save, RefreshCw, ExternalLink, Info, BookOpen } from "lucide-react";
-import { editLesson } from "../services/api";
+import { changeCourseStatus, editLesson } from "../services/api";
 
-const CreateLessonDetail = ({ course, onLessonUpdate }) => {
+const CourseDetail = ({ course, onLessonUpdate }) => {
   console.log("Course: ", course);
   const { activeLessonId } = useSidebar();
 
@@ -14,6 +14,7 @@ const CreateLessonDetail = ({ course, onLessonUpdate }) => {
 
   // Find the lesson in the sorted lessons
   const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
+  // console.log("Lesson Data: ", lessonData);
 
   // Local state for editability
   const [content, setContent] = useState("");
@@ -33,8 +34,6 @@ const CreateLessonDetail = ({ course, onLessonUpdate }) => {
 
   const onSaveChanges = () => {
     try {
-      console.log(lessonData);
-
       // Update lesson on the backend
       updateLessonApi(lessonData.id, content);
 
@@ -55,6 +54,25 @@ const CreateLessonDetail = ({ course, onLessonUpdate }) => {
       </div>
     );
   }
+
+  const changeCourseStatusApi = async (course_id, newStatus) => {
+    try {
+      console.log("Body ChangeStatus: ", JSON.stringify({ status: newStatus }));
+      const response = await changeCourseStatus(course_id, newStatus);
+
+      console.log("On ChangeStatus Course API: ", response);
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
+
+  // By default each course start from a Template or Structure
+  // This function will turn it into Draft
+  // Draft then can be Turn into Pusblished
+  const onClickTurntoDraft = () => {
+    // Pass course id and new course status (draft)
+    changeCourseStatusApi(course.id, "draft");
+  };
 
   return (
     <div className="flex flex-col h-full overflow-hidden font-sans">
@@ -185,10 +203,21 @@ const CreateLessonDetail = ({ course, onLessonUpdate }) => {
               </button>
             </div>
           </div>
+
+          <div className="border-4 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="space-y-3">
+              <button
+                onClick={onClickTurntoDraft}
+                className="bg-white text-black w-full py-2 border-2 border-black font-bold text-sm cursor-pointer hover:text-white hover:bg-blue-500"
+              >
+                Turn to Draft
+              </button>
+            </div>
+          </div>
         </aside>
       </div>
     </div>
   );
 };
 
-export default CreateLessonDetail;
+export default CourseDetail;

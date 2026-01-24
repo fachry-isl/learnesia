@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getCourse } from "../services/api";
-import CreateLessonDetail from "./CreateLessonDetail";
+import CourseDetail from "./CourseDetail";
 import { useSidebar } from "../contexts/SidebarContext";
 
 const CreateLesson = () => {
@@ -10,7 +10,14 @@ const CreateLesson = () => {
   const [expandedLessons, setExpandedLessons] = useState({});
 
   // Add Context
-  const { setSidebarMode, setSidebarData, setActiveLessonId } = useSidebar();
+  const { sidebarMode, setSidebarMode, setSidebarData, setActiveLessonId } =
+    useSidebar();
+
+  useEffect(() => {
+    if (sidebarMode === "default") {
+      setStep("choose_course_template");
+    }
+  }, [sidebarMode]);
 
   useEffect(() => {
     fetchCourses();
@@ -50,7 +57,7 @@ const CreateLesson = () => {
     setStep("create_course_lessons");
 
     setSidebarMode("create_lesson");
-    setSidebarData(selectedCourse);
+    setSidebarData(selectedCourse.lessons);
 
     // Automatically select the first lesson if available
     if (selectedCourse.lessons?.length > 0) {
@@ -262,7 +269,7 @@ const CreateLesson = () => {
         );
       case "create_course_lessons":
         return (
-          <CreateLessonDetail
+          <CourseDetail
             course={selectedCourse}
             onLessonUpdate={handleLessonUpdate}
           />

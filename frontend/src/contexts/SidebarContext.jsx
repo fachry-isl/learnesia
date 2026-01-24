@@ -16,7 +16,7 @@ export const SidebarProvider = ({ children }) => {
   // Sidebar mode (Default or Lesson)
   const [sidebarMode, setSidebarMode] = useState("default");
 
-  // Sidebar Course/Lesson Data
+  // Sidebar Lessons (course.lessons) Data
   const [sidebarData, setSidebarData] = useState(null);
 
   // Active Lesson ID

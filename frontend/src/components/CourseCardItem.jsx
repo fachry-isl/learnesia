@@ -6,11 +6,21 @@ import {
   ChevronRight,
   Target,
   Layers,
+  FileEdit,
+  CheckCircle2,
 } from "lucide-react";
 
-const CourseCardItem = ({ course, isDraftorPublished }) => {
+const CourseCardItem = ({
+  course,
+  isonClickActive,
+  onCourseCardClickCallback,
+}) => {
   const [expandedCourseObjectives, setExpandedCourseObjectives] = useState({});
   const [expandedLessonObjectives, setExpandedLessonObjectives] = useState({});
+
+  const onCourseCardClick = () => {
+    onCourseCardClickCallback(course);
+  };
 
   const toggleCourseObjectives = (courseId) => {
     setExpandedCourseObjectives((prev) => ({
@@ -27,25 +37,60 @@ const CourseCardItem = ({ course, isDraftorPublished }) => {
     }));
   };
 
+  // Status badge configuration
+  const statusConfig = {
+    draft: {
+      bgColor: "bg-amber-50",
+      textColor: "text-amber-700",
+      borderColor: "border-amber-200",
+      dotColor: "bg-amber-400",
+      icon: FileEdit,
+      label: "Draft",
+    },
+    published: {
+      bgColor: "bg-emerald-50",
+      textColor: "text-emerald-700",
+      borderColor: "border-emerald-200",
+      dotColor: "bg-emerald-400",
+      icon: CheckCircle2,
+      label: "Published",
+    },
+  };
+
+  const currentStatus = statusConfig[course.status];
+  const StatusIcon = currentStatus?.icon;
+
   return (
     <div
       key={course.id}
-      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-shadow"
+      className={`bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-shadow ${isonClickActive ? "cursor-pointer" : ""}`}
+      {...(isonClickActive && { onClick: onCourseCardClick })}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
           <BookOpen className="w-5 h-5 text-gray-900" />
         </div>
 
-        {isDraftorPublished === "draft" && (
-          <div className="pl-3 pr-3 pt-1 pb-1 font-light text-sm bg-yellow-100">
-            Draft
-          </div>
-        )}
+        {/* Improved Status Badge */}
+        {currentStatus && (
+          <div
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${currentStatus.bgColor} ${currentStatus.textColor} ${currentStatus.borderColor}`}
+          >
+            {/* Animated status dot */}
+            <span className="relative flex h-2 w-2">
+              <span
+                className={`animate-ping absolute inline-flex h-full w-full rounded-full ${currentStatus.dotColor} opacity-75`}
+              ></span>
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${currentStatus.dotColor}`}
+              ></span>
+            </span>
 
-        {isDraftorPublished === "published" && (
-          <div className="pl-3 pr-3 pt-1 pb-1 font-light text-sm bg-green-100">
-            Published
+            {/* Status icon */}
+            <StatusIcon className="w-3.5 h-3.5" />
+
+            {/* Status label */}
+            <span className="text-xs font-semibold">{currentStatus.label}</span>
           </div>
         )}
       </div>

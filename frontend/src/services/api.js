@@ -66,6 +66,32 @@ export async function generateCourse(prompt) {
   }
 }
 
+export async function changeCourseStatus(course_id, newStatus) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/api/courses/${course_id}/`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        JSON.stringify(response.data) ||
+          `HTTP error! status ${response.status}`,
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function createCourse(courseData) {
   try {
     const response = await fetch("http://localhost:8000/api/courses/", {

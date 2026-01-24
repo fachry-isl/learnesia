@@ -10,7 +10,7 @@ import { getCourse } from "../services/api";
 import CourseTemplateStructureInfo from "../components/CourseTemplateStructureInfo";
 import CourseCardItem from "../components/CourseCardItem";
 
-const CourseLibrary = () => {
+const CourseTemplateLibrary = () => {
   const [courses, setCourses] = useState(null);
 
   useEffect(() => {
@@ -20,7 +20,16 @@ const CourseLibrary = () => {
   const fetchCourses = async () => {
     const course_data = await getCourse();
 
-    setCourses(course_data);
+    // Filter the template course only
+    // Improvement: Create endpoint that only fetch Course Template
+    const filtered_course = course_data.filter(
+      (course) => course.status === "template",
+    );
+
+    // For Debug
+    // console.log("Filtered Course; ", filtered_course);
+
+    setCourses(filtered_course);
   };
 
   return (
@@ -41,4 +50,4 @@ const CourseLibrary = () => {
   );
 };
 
-export default CourseLibrary;
+export default CourseTemplateLibrary;
