@@ -37,6 +37,11 @@ const CourseCardItem = ({
     }));
   };
 
+  // Sort lessons by order column before finding
+  const sortedLessons = course?.lessons
+    ? [...course.lessons].sort((a, b) => a.order - b.order)
+    : [];
+
   // Status badge configuration
   const statusConfig = {
     draft: {
@@ -162,7 +167,7 @@ const CourseCardItem = ({
 
       {/* Lessons with Objectives */}
       <div className="space-y-2">
-        {course.lessons.map((lesson, idx) => (
+        {sortedLessons.map((lesson, idx) => (
           <div key={idx}>
             <button
               onClick={() => toggleLessonObjectives(course.id, idx)}
