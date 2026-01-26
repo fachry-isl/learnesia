@@ -8,6 +8,7 @@ import CreateLesson from "./pages/CreateLesson";
 import { useSidebar } from "./contexts/SidebarContext";
 import SidebarLessonItem from "./components/SidebarLessonItem";
 import CourseLibrary from "./pages/CourseLibrary";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   // Use Context
@@ -53,6 +54,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      <Toaster />
       {/* Sidebar */}
       <aside className="w-64 bg-linear-to-b from-gray-900 to-black flex flex-col fixed h-screen">
         {/* Logo/Brand Section */}

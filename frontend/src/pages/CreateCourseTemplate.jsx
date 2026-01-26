@@ -2,7 +2,7 @@ import React from "react";
 import EditCourseFromGenerate from "./EditCourseFromGenerate";
 import { useState, useEffect } from "react";
 import { generateCourse } from "../services/api";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 const CreateCourseTemplate = () => {
   const [step, setStep] = useState("create_course_structure");
@@ -21,11 +21,11 @@ const CreateCourseTemplate = () => {
       // console.log("Generated Course: ", result.response);
       setCourseData(result.response);
 
-      toast.dismiss(loadingToast);
-      toast.success("Lesson created successfully!");
+      toast.success("Lesson created successfully!", { id: loadingToast });
     } catch (error) {
-      toast.dismiss(loadingToast);
-      toast.error(error.message || "Something went wrong!");
+      toast.error(error.message || "Something went wrong!", {
+        id: loadingToast,
+      });
       console.error("Error creating lesson:", error);
     }
   };
@@ -125,7 +125,6 @@ Return a valid JSON structure with the course outline.`;
       case "create_course_structure":
         return (
           <div>
-            <Toaster />
             <form
               className="flex flex-col mt-2 mb-5"
               onSubmit={handleCreateCourseSubmit}

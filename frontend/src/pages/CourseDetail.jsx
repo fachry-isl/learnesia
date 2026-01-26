@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSidebar } from "../contexts/SidebarContext";
 import { Save, RefreshCw, ExternalLink, Info, BookOpen } from "lucide-react";
 import { changeCourseStatus, editLesson } from "../services/api";
+import toast from "react-hot-toast";
 
 const CourseDetail = ({ course, onLessonUpdate }) => {
   console.log("Course: ", course);
@@ -13,6 +14,7 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
     : [];
 
   // Find the lesson in the sorted lessons
+  console.log("Sorted Lessons: ", sortedLessons);
   const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
   // console.log("Lesson Data: ", lessonData);
 
@@ -39,6 +41,8 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
 
       // Update lesson on the frontend
       onLessonUpdate(lessonData.id, content);
+
+      toast.success("Lesson is Saved!");
     } catch (error) {
       throw error;
     }

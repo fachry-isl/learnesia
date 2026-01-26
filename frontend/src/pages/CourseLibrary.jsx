@@ -10,15 +10,14 @@ const CourseLibrary = () => {
   const { sidebarMode, setSidebarMode, setSidebarData, setActiveLessonId } =
     useSidebar();
   const [step, setStep] = useState("course_library");
+  const [courses, setCourses] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   useEffect(() => {
     if (sidebarMode === "default") {
       setStep("course_library");
     }
   }, [sidebarMode]);
-
-  const [courses, setCourses] = useState(null);
-  const [selectedCourse, setSelectedCourse] = useState(null);
 
   useEffect(() => {
     fetchCourses();
@@ -38,7 +37,7 @@ const CourseLibrary = () => {
   };
 
   const onCourseCardClickHandler = (course) => {
-    console.log("CourseLibrary: ", course);
+    // console.log("CourseLibrary: ", course);
 
     // Update Sidebar
     setSidebarMode("course_detail");
@@ -59,6 +58,20 @@ const CourseLibrary = () => {
     if (course.lessons?.length > 0) {
       setActiveLessonId(course.lessons[0].id);
     }
+  };
+
+  const handleLessonUpdate = (lessonId, updatedContent) => {
+    // Refresh lesson for the selected course
+    setSelectedCourse((prev) => ({
+      ...prev,
+      lessons: prev.lessons.map((lesson) => {
+        return lesson.id === lessonId
+          ? { ...lesson, lesson_content: updatedContent }
+          : lesson;
+      }),
+    }));
+
+    console.log("Selected Course After Updated Content: ", selectedCourse);
   };
 
   const renderContent = () => {
@@ -86,7 +99,12 @@ const CourseLibrary = () => {
           </div>
         );
       case "course_detail":
-        return <CourseDetail course={selectedCourse} />;
+        return (
+          <CourseDetail
+            course={selectedCourse}
+            onLessonUpdate={handleLessonUpdate}
+          />
+        );
 
       default:
         return null;

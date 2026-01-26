@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { createCourse, createLesson } from "../services/api";
 import { useSidebar } from "../contexts/SidebarContext";
-import { toast, Toaster } from "react-hot-toast";
 
 const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
   const [course, setCourse] = useState(course_prop);
@@ -99,7 +98,6 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
 
   return (
     <div className="w-full">
-      <Toaster />
       <div className="text-black font-bold text-2xl mb-8">
         Edit Course Structure
       </div>
