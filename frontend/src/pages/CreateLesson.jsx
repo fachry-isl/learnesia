@@ -28,6 +28,11 @@ const CreateLesson = () => {
     setCourses(course_data);
   };
 
+  // Sort lessons by order column before finding
+  const sortedLessons = selectedCourse?.lessons
+    ? [...selectedCourse.lessons].sort((a, b) => a.order - b.order)
+    : [];
+
   const breadcrumbs = {
     choose_course_template: ["Choose Course Template"],
     create_course_lessons: ["Choose Course Template", "Create Lessons"],
@@ -167,7 +172,7 @@ const CreateLesson = () => {
 
                   {/* Scrollable Lessons List */}
                   <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                    {selectedCourse.lessons.map((lesson, idx) => (
+                    {sortedLessons.map((lesson, idx) => (
                       <div
                         key={lesson.id}
                         className="border-2 border-black overflow-hidden"
