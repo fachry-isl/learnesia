@@ -9,6 +9,7 @@ import {
   FileEdit,
   CheckCircle2,
 } from "lucide-react";
+import { changeCourseStatus } from "../services/api";
 
 const CourseCardItem = ({
   course,
@@ -18,23 +19,59 @@ const CourseCardItem = ({
   const [expandedCourseObjectives, setExpandedCourseObjectives] = useState({});
   const [expandedLessonObjectives, setExpandedLessonObjectives] = useState({});
 
+  const [isToggleOn, setIsToggleOn] = useState(course.status === "published");
+
   const onCourseCardClick = () => {
     onCourseCardClickCallback(course);
   };
 
-  const toggleCourseObjectives = (courseId) => {
+  const toggleCourseObjectives = (courseId, e) => {
+    e.stopPropagation(); // STOP the event from going up to parent
     setExpandedCourseObjectives((prev) => ({
       ...prev,
       [courseId]: !prev[courseId],
     }));
   };
 
-  const toggleLessonObjectives = (courseId, lessonIndex) => {
+  const changeCourseStatusAPI = async (course_id, updatedValue) => {
+    try {
+      const isDraftorPublished = updatedValue ? "published" : "draft";
+      // console.log("Is Draft: ", isDraftorPublished);
+
+      const response = await changeCourseStatus(course_id, isDraftorPublished);
+
+      // console.log("Change Course Status API: ", response);
+    } catch (e) {
+      throw error;
+    }
+  };
+
+  const toggleLessonObjectives = (courseId, lessonIndex, e) => {
+    e.stopPropagation(); // STOP the event from going up to parent
     const key = `${courseId}-${lessonIndex}`;
     setExpandedLessonObjectives((prev) => ({
       ...prev,
       [key]: !prev[key],
     }));
+  };
+
+  // Handler to get toggle value
+  const handleToggleChange = (e) => {
+    e.stopPropagation(); // Prevent card click
+    const newValue = e.target.checked;
+
+    // Frontend Change
+    setIsToggleOn(newValue);
+
+    // Backend
+    changeCourseStatusAPI(course.id, newValue);
+
+    // Do something with the value
+    // console.log("Toggle is now:", newValue ? "ON" : "OFF");
+    // console.log("Course ID:", course.id);
+
+    // You can call a callback here if needed
+    // onToggleChange(course.id, newValue);
   };
 
   // Sort lessons by order column before finding
@@ -71,33 +108,38 @@ const CourseCardItem = ({
       className={`bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-shadow ${isonClickActive ? "cursor-pointer" : ""}`}
       {...(isonClickActive && { onClick: onCourseCardClick })}
     >
-      <div className="flex items-start justify-between mb-3">
+      <div
+        className="flex items-start justify-between mb-3"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
           <BookOpen className="w-5 h-5 text-gray-900" />
         </div>
 
-        {/* Improved Status Badge */}
-        {currentStatus && (
-          <div
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${currentStatus.bgColor} ${currentStatus.textColor} ${currentStatus.borderColor}`}
+        {/* Fixed Toggle Section */}
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor={`switch-component-${course.id}`}
+            className="text-slate-600 text-sm cursor-pointer"
           >
-            {/* Animated status dot */}
-            <span className="relative flex h-2 w-2">
-              <span
-                className={`animate-ping absolute inline-flex h-full w-full rounded-full ${currentStatus.dotColor} opacity-75`}
-              ></span>
-              <span
-                className={`relative inline-flex rounded-full h-2 w-2 ${currentStatus.dotColor}`}
-              ></span>
-            </span>
+            Published
+          </label>
 
-            {/* Status icon */}
-            <StatusIcon className="w-3.5 h-3.5" />
-
-            {/* Status label */}
-            <span className="text-xs font-semibold">{currentStatus.label}</span>
+          <div className="relative inline-block w-11 h-5">
+            <input
+              id={`switch-component-${course.id}`}
+              checked={isToggleOn}
+              onChange={handleToggleChange}
+              onClick={(e) => e.stopPropagation()}
+              type="checkbox"
+              className="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300"
+            />
+            <label
+              htmlFor={`switch-component-${course.id}`}
+              className="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer"
+            />
           </div>
-        )}
+        </div>
       </div>
 
       <h3 className="text-base font-bold text-gray-900 mb-1">
@@ -108,7 +150,7 @@ const CourseCardItem = ({
       {/* Course Learning Objectives */}
       <div className="mb-3">
         <button
-          onClick={() => toggleCourseObjectives(course.id)}
+          onClick={(e) => toggleCourseObjectives(course.id, e)}
           className="w-full flex items-center justify-between p-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
         >
           <div className="flex items-center gap-1.5">
@@ -170,7 +212,7 @@ const CourseCardItem = ({
         {sortedLessons.map((lesson, idx) => (
           <div key={idx}>
             <button
-              onClick={() => toggleLessonObjectives(course.id, idx)}
+              onClick={(e) => toggleLessonObjectives(course.id, idx, e)}
               className="w-full flex items-start gap-2 text-xs text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded transition-colors"
             >
               <div className="w-4 h-4 rounded bg-gray-900 flex items-center justify-center shrink-0 mt-0.5">
