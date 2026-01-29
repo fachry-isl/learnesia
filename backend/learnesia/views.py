@@ -124,6 +124,51 @@ def generate_course(request):
         )
     
 
+## Define generate course lesson
+@api_view(['POST'])
+def generate_course_lesson(request):
+    try:
+        # The overview of Course Structure for model to reason about
+        course_structure = request.data.get('course_structure')
+
+        # Generate specific lesson topic out of entire learning roadmap
+        lesson_topic = request.data.get('lesson_topic')
+
+        print(f"Generating Lesson: {lesson_topic}")
+
+        prompt = f"""
+        ## Role
+        You are a Lesson creator agent, your job is to craft specific part of learning lesson topic from an entire Course Sylabus.
+
+        ## Behaviour
+        - Make it logically sound and has flow. For example instead of jumping into "why", start with "what" to introduce the topic first to the user. 
+        - Generate around 600 words or 5 minutes reading content.
+        - Avoid technical jargon and make it relevant and easy to understand for beginner
+        - For concept word like budgeting try use english instead of translate it to bahasa. For example "budgeting" instead of "anggaran" to avoid confusion.
+
+        ## Output Format
+        # Lesson Topic
+        [Module Content]
+
+        Input:
+        ## Lesson Topic
+        {lesson_topic}
+
+        ## Course Sylabus
+        {course_structure}
+        """
+
+        model = init_chat_model("gemini-2.0-flash", model_provider="google_genai", temperature=0)
+        response = model.invoke(prompt)
+
+        return Response({
+            'prompt': prompt,
+            'response': response.model_dump()
+        }, status=200)
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
 ## Define generate structured course endpoint
 @api_view(['POST'])
 def generate_course_structured(request):
