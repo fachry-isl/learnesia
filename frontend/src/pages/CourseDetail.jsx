@@ -124,7 +124,7 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full h-full min-h-[500px] border-none focus:ring-0 font-mono text-sm leading-relaxed resize-none"
+                className="w-full h-full min-h-125 border-none focus:ring-0 font-mono text-sm leading-relaxed resize-none"
                 placeholder="Start writing or let AI generate content..."
               />
             ) : (
@@ -138,7 +138,7 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
         </section>
 
         {/* 3. INTEL SIDEBAR (RIGHT) */}
-        <aside className="w-[380px] flex flex-col gap-6 overflow-y-auto pr-2 pb-6">
+        <aside className="w-95 flex flex-col gap-6 overflow-y-auto pr-2 pb-6">
           {/* Learning Objectives Section */}
           <div className="bg-yellow-100 border-4 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <h3 className="text-lg font-black uppercase mb-4 flex items-center gap-2">

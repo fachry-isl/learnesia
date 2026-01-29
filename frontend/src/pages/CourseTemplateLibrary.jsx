@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  BookOpen,
-  ChevronDown,
-  ChevronRight,
-  Target,
-  Layers,
-} from "lucide-react";
-import { getCourse } from "../services/api";
-import CourseTemplateStructureInfo from "../components/CourseTemplateStructureInfo";
 import CourseCardItem from "../components/CourseCardItem";
+import { getCourse } from "../services/api";
 
 const CourseTemplateLibrary = () => {
   const [courses, setCourses] = useState(null);
@@ -43,7 +35,7 @@ const CourseTemplateLibrary = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses?.map((course, idx) => (
-          <CourseCardItem key={idx} course={course} />
+          <CourseCardItem key={idx} course={course} mode="template" />
         ))}
       </div>
     </div>

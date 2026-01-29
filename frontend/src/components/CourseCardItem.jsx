@@ -15,6 +15,7 @@ const CourseCardItem = ({
   course,
   isonClickActive,
   onCourseCardClickCallback,
+  mode = "default",
 }) => {
   const [expandedCourseObjectives, setExpandedCourseObjectives] = useState({});
   const [expandedLessonObjectives, setExpandedLessonObjectives] = useState({});
@@ -117,29 +118,31 @@ const CourseCardItem = ({
         </div>
 
         {/* Fixed Toggle Section */}
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor={`switch-component-${course.id}`}
-            className="text-slate-600 text-sm cursor-pointer"
-          >
-            Published
-          </label>
-
-          <div className="relative inline-block w-11 h-5">
-            <input
-              id={`switch-component-${course.id}`}
-              checked={isToggleOn}
-              onChange={handleToggleChange}
-              onClick={(e) => e.stopPropagation()}
-              type="checkbox"
-              className="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300"
-            />
+        {mode == "default" && (
+          <div className="flex items-center gap-2">
             <label
               htmlFor={`switch-component-${course.id}`}
-              className="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer"
-            />
+              className="text-slate-600 text-sm cursor-pointer"
+            >
+              Published
+            </label>
+
+            <div className="relative inline-block w-11 h-5">
+              <input
+                id={`switch-component-${course.id}`}
+                checked={isToggleOn}
+                onChange={handleToggleChange}
+                onClick={(e) => e.stopPropagation()}
+                type="checkbox"
+                className="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300"
+              />
+              <label
+                htmlFor={`switch-component-${course.id}`}
+                className="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer"
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <h3 className="text-base font-bold text-gray-900 mb-1">
