@@ -3,6 +3,7 @@ import EditCourseFromGenerate from "./EditCourseFromGenerate";
 import { useState, useEffect } from "react";
 import { generateCourse } from "../services/api";
 import { toast } from "react-hot-toast";
+import language from "react-syntax-highlighter/dist/esm/languages/hljs/1c";
 
 const CreateCourseTemplate = () => {
   const [step, setStep] = useState("create_course_structure");
@@ -13,6 +14,7 @@ const CreateCourseTemplate = () => {
   const [courseLength, setCourseLength] = useState("short"); // Default to Microlearning Course
   const [audience, setAudience] = useState("");
   const [difficulty, setDifficulty] = useState("");
+  const [language, setLanguage] = useState("English");
 
   const fetchCourseGeneration = async (prompt) => {
     const loadingToast = toast.loading("Creating lesson...");
@@ -61,6 +63,7 @@ const CreateCourseTemplate = () => {
       const selectedCourse = moduleMapping[courseLength];
       const audienceText = audience || "general learners";
       const difficultyText = difficulty || "beginner";
+      const languageOption = language || "English";
 
       finalPrompt = `# Role
 You are a Syllabus Agent creating comprehensive learning roadmaps.
@@ -71,6 +74,7 @@ You are a Syllabus Agent creating comprehensive learning roadmaps.
 * Difficulty Level: ${difficultyText}
 * Number of Modules: ${selectedCourse.modules}
 * Course Duration: ${selectedCourse.duration}
+* Language (Main Language used in the Course): ${languageOption} 
 
 # Requirements
 1. Create ${selectedCourse.modules} sequential modules progressing from foundational to advanced
@@ -197,6 +201,21 @@ Return a valid JSON structure with the course outline.`;
                 Example: "Intermediate" for learners with 1-2 years experience
               </p>
 
+              <div className="text-black font-semibold text-2xl mt-5">
+                Language
+              </div>
+              <p className="text-gray-600 text-sm mb-2">
+                What is the Main Language used in the Course.
+              </p>
+              <select
+                className="border-2 border-black mb-1 p-2 bg-white text-black"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+              >
+                <option value="English">English</option>
+                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+              </select>
+
               <div className="flex items-center my-8">
                 <div className="grow border-t border-gray-400"></div>
                 <span className="px-4 text-gray-600 font-semibold">OR</span>
@@ -227,7 +246,7 @@ Return a valid JSON structure with the course outline.`;
 
               <button
                 type="submit"
-                className="border-black border-2 cursor-pointer p-5 pt-2 pb-2 text-black mt-10 font-bold hover:bg-white hover:text-black transition-colors"
+                className="border-black border-2 cursor-pointer p-5 pt-2 pb-2 text-black mt-10 font-bold hover:bg-black hover:text-white transition-colors"
               >
                 Generate
               </button>

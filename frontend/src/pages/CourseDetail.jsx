@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useSidebar } from "../contexts/SidebarContext";
 import { Save, RefreshCw, ExternalLink, Info, BookOpen } from "lucide-react";
-import { changeCourseStatus, editLesson } from "../services/api";
+import {
+  changeCourseStatus,
+  editLesson,
+  generatCourseLesson,
+} from "../services/api";
 import toast from "react-hot-toast";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const CourseDetail = ({ course, onLessonUpdate }) => {
-  console.log("Course: ", course);
+  // console.log("Course: ", course);
   const { activeLessonId } = useSidebar();
+  console.log("Active Lesson (ID): ", activeLessonId);
 
   // Sort lessons by order column before finding
   const sortedLessons = course?.lessons
@@ -14,9 +23,10 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
     : [];
 
   // Find the lesson in the sorted lessons
-  console.log("Sorted Lessons: ", sortedLessons);
+  // console.log("Sorted Lessons: ", sortedLessons);
   const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
   // console.log("Lesson Data: ", lessonData);
+  console.log("Active Lesson: ", lessonData.lesson_name);
 
   // Local state for editability
   const [content, setContent] = useState("");
@@ -42,7 +52,7 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
       // Update lesson on the frontend
       onLessonUpdate(lessonData.id, content);
 
-      toast.success("Lesson is Saved!");
+      toast.success("Lesson is Saved");
     } catch (error) {
       throw error;
     }
@@ -61,21 +71,146 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
 
   const changeCourseStatusApi = async (course_id, newStatus) => {
     try {
-      console.log("Body ChangeStatus: ", JSON.stringify({ status: newStatus }));
+      // console.log("Body ChangeStatus: ", JSON.stringify({ status: newStatus }));
       const response = await changeCourseStatus(course_id, newStatus);
 
-      console.log("On ChangeStatus Course API: ", response);
+      toast.success("Course is saved into Draft");
+      // console.log("On ChangeStatus Course API: ", response);
     } catch (error) {
       console.log("Error: ", error);
     }
   };
 
-  // By default each course start from a Template or Structure
-  // This function will turn it into Draft
-  // Draft then can be Turn into Pusblished
   const onClickTurntoDraft = () => {
-    // Pass course id and new course status (draft)
     changeCourseStatusApi(course.id, "draft");
+  };
+
+  const fetchGenerateLessonApi = async (course_structure, lesson_topic) => {
+    try {
+      const response = await generatCourseLesson(
+        course_structure,
+        lesson_topic,
+      );
+
+      return await response;
+    } catch (error) {
+      console.log("Error: ", error);
+      throw error;
+    }
+  };
+
+  const onGenerateLesson = async () => {
+    let course_summary = `
+    Course Name: ${course.course_name}
+    Course Description: ${course.course_description}
+
+    Lessons:
+    `;
+
+    for (let i = 0; i <= course.lessons.length - 1; i++) {
+      const current_lesson = course.lessons[i];
+
+      course_summary += `${i + 1}. ${current_lesson.lesson_name}: ${current_lesson.lesson_learning_objectives}`;
+      course_summary += "\n";
+    }
+
+    // console.log(
+    //   `Input onGenerateLesson: ${course_summary} and ${lessonData.lesson_name}`,
+    // );
+
+    console.log(course_summary);
+
+    // const response = await fetchGenerateLessonApi(
+    //   JSON.stringify(course),
+    //   lessonData.lesson_name,
+    // );
+
+    // setContent(response.response.content);
+
+    console.log("onGenerateLesson: ", JSON.stringify(await response));
+  };
+
+  // Custom markdown components for styling
+  const markdownComponents = {
+    // Custom code block with syntax highlighting
+    code({ node, inline, className, children, ...props }) {
+      const match = /language-(\w+)/.exec(className || "");
+      return !inline && match ? (
+        <SyntaxHighlighter
+          style={vscDarkPlus}
+          language={match[1]}
+          PreTag="div"
+          className="rounded-md my-4"
+          {...props}
+        >
+          {String(children).replace(/\n$/, "")}
+        </SyntaxHighlighter>
+      ) : (
+        <code
+          className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono border border-gray-300"
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    },
+    // Custom heading styles
+    h1: ({ children }) => (
+      <h1 className="text-3xl font-black uppercase mb-4 mt-6 border-b-4 border-black pb-2">
+        {children}
+      </h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="text-2xl font-bold uppercase mb-3 mt-5 border-b-2 border-gray-400 pb-1">
+        {children}
+      </h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="text-xl font-bold mb-2 mt-4">{children}</h3>
+    ),
+    // Custom paragraph styling
+    p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+    // Custom link styling
+    a: ({ href, children }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline font-semibold hover:text-blue-800 transition-colors"
+      >
+        {children}
+      </a>
+    ),
+    // Custom list styling
+    ul: ({ children }) => (
+      <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>
+    ),
+    // Custom blockquote styling
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-yellow-400 bg-yellow-50 pl-4 py-2 my-4 italic">
+        {children}
+      </blockquote>
+    ),
+    // Custom table styling
+    table: ({ children }) => (
+      <div className="overflow-x-auto my-4">
+        <table className="min-w-full border-2 border-black">{children}</table>
+      </div>
+    ),
+    thead: ({ children }) => (
+      <thead className="bg-black text-white">{children}</thead>
+    ),
+    th: ({ children }) => (
+      <th className="border-2 border-black px-4 py-2 text-left font-bold uppercase text-sm">
+        {children}
+      </th>
+    ),
+    td: ({ children }) => (
+      <td className="border-2 border-black px-4 py-2">{children}</td>
+    ),
   };
 
   return (
@@ -119,7 +254,7 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-8 prose prose-slate max-w-none">
+          <div className="flex-1 overflow-y-auto p-8">
             {isEditing ? (
               <textarea
                 value={content}
@@ -128,10 +263,14 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
                 placeholder="Start writing or let AI generate content..."
               />
             ) : (
-              // Simple markdown-to-text rendering (or use a library like react-markdown)
-              <div className="whitespace-pre-wrap font-serif text-lg leading-relaxed text-gray-800">
-                {content ||
-                  "No content generated yet. Click 'Regenerate' to start."}
+              <div className="prose prose-slate max-w-none">
+                <Markdown
+                  remarkPlugins={[remarkGfm]}
+                  components={markdownComponents}
+                >
+                  {content ||
+                    "No content generated yet. Click 'Generate Lesson' to start."}
+                </Markdown>
               </div>
             )}
           </div>
@@ -199,8 +338,11 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
               <RefreshCw className="w-5 h-5" /> AI Engine
             </h3>
             <div className="space-y-3">
-              <button className="w-full py-2 bg-white border-2 border-black font-bold text-sm hover:translate-x-1 transition-transform">
-                Regenerate Content
+              <button
+                onClick={onGenerateLesson}
+                className="w-full py-2 bg-white border-2 border-black font-bold text-sm hover:translate-x-1 transition-transform"
+              >
+                Generate Lesson
               </button>
               <button className="w-full py-2 bg-white border-2 border-black font-bold text-sm hover:translate-x-1 transition-transform">
                 Clarify References

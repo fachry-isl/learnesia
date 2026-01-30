@@ -154,7 +154,7 @@ const CourseCardItem = ({
       <div className="mb-3">
         <button
           onClick={(e) => toggleCourseObjectives(course.id, e)}
-          className="w-full flex items-center justify-between p-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+          className="cursor-pointer w-full flex items-center justify-between p-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
         >
           <div className="flex items-center gap-1.5">
             <Target className="w-3.5 h-3.5 text-gray-900" />
@@ -216,7 +216,7 @@ const CourseCardItem = ({
           <div key={idx}>
             <button
               onClick={(e) => toggleLessonObjectives(course.id, idx, e)}
-              className="w-full flex items-start gap-2 text-xs text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded transition-colors"
+              className="cursor-pointer w-full flex items-start gap-2 text-xs text-gray-700 bg-gray-50 hover:bg-gray-100 p-2 rounded transition-colors"
             >
               <div className="w-4 h-4 rounded bg-gray-900 flex items-center justify-center shrink-0 mt-0.5">
                 <span className="text-xs font-semibold text-white">

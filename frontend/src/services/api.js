@@ -66,6 +66,35 @@ export async function generateCourse(prompt) {
   }
 }
 
+export async function generatCourseLesson(course_structure_, lesson_topic_) {
+  try {
+    const response = await fetch(
+      "http://localhost:8000/api/generate_course_lesson/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          course_structure: course_structure_,
+          lesson_topic: lesson_topic_,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Error onGenerateCourseLesson API: ${JSON.stringify(response.data)}` ||
+          `HTTP error! status ${response.status}`,
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function changeCourseStatus(course_id, newStatus) {
   try {
     const response = await fetch(
