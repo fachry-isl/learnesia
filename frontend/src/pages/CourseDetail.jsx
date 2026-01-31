@@ -101,16 +101,20 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
 
   const onGenerateLesson = async () => {
     let course_summary = `
-    Course Name: ${course.course_name}
-    Course Description: ${course.course_description}
+Course Name: ${course.course_name}
+Course Description: ${course.course_description}
 
-    Lessons:
-    `;
+Lessons:
+`;
 
-    for (let i = 0; i <= course.lessons.length - 1; i++) {
-      const current_lesson = course.lessons[i];
+    // Sort Lesson First
+    const sortedLessons_ = course?.lessons
+      ? [...course.lessons].sort((a, b) => a.order - b.order)
+      : [];
+    for (let i = 0; i <= sortedLessons_.length - 1; i++) {
+      const current_lesson = sortedLessons_[i];
 
-      course_summary += `${i + 1}. ${current_lesson.lesson_name}: ${current_lesson.lesson_learning_objectives}`;
+      course_summary += `${current_lesson.lesson_name}: ${current_lesson.lesson_learning_objectives}`;
       course_summary += "\n";
     }
 
@@ -120,12 +124,12 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
 
     console.log(course_summary);
 
-    // const response = await fetchGenerateLessonApi(
-    //   JSON.stringify(course),
-    //   lessonData.lesson_name,
-    // );
+    const response = await fetchGenerateLessonApi(
+      course_summary,
+      lessonData.lesson_name,
+    );
 
-    // setContent(response.response.content);
+    setContent(response.response.content);
 
     console.log("onGenerateLesson: ", JSON.stringify(await response));
   };

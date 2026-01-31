@@ -1,7 +1,7 @@
 # Django Essential
 from rest_framework import viewsets
-from .models import Course, Lesson
-from .serializers import CourseSerializer, LessonSerializer
+from .models import Course, Lesson, Quiz
+from .serializers import CourseSerializer, LessonSerializer, QuizSerializer
 
 # Gemini API
 from rest_framework.decorators import api_view
@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # Langchain and Structured Output
 from pydantic import BaseModel, Field
 from langchain.chat_models import init_chat_model
-from typing import List
+from typing import List, Optional
 
 # Load environment variable
 load_dotenv()
@@ -21,10 +21,13 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
-
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+
+class QuizViewSet(viewsets.ModelViewSet):
+    queryset = Quiz.objects.all()
+    serializer_class = QuizSerializer
 
     
 
@@ -234,3 +237,112 @@ def generate_course_structured(request):
         
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+
+# Quiz Generation
+class QuestionOptionStructure(BaseModel):
+    """
+    Represents a single answer option for a quiz question
+    """
+    option_text: str = Field(..., description="The text of the answer option")
+    is_correct: bool = Field(..., description="Whether this option is the correct answer")
+    order: int = Field(default=0, description="Display order of the option")
+
+class QuizQuestionStructure(BaseModel):
+    """
+    Represents a single question in the quiz
+    """
+    question_text: str = Field(..., description="The text of the question")
+    explanation: Optional[str] = Field(
+        None, 
+        description="Explanation shown when answer is wrong or after completion"
+    )
+    options: List[QuestionOptionStructure] = Field(
+        ..., 
+        min_length=2,
+        description="List of answer options (minimum 2, typically 4 for multiple choice)"
+    )
+    order: int = Field(default=0, description="Display order of the question in the quiz")
+
+class QuizStructure(BaseModel):
+    """
+    Represents a complete quiz for a lesson
+    """
+    quiz_title: str = Field(..., description="The title of the quiz")
+    quiz_description: Optional[str] = Field(
+        None, 
+        description="A brief description of what the quiz covers"
+    )
+    questions: List[QuizQuestionStructure] = Field(
+        ..., 
+        min_length=1,
+        description="List of questions in the quiz"
+    )
+@api_view(['POST'])
+def generate_quiz(request):
+    """
+    Generate a quiz for a specific lesson using AI
+    
+    Request body:
+    {   
+        "lesson_summary": Lesson Name and Learning Objectives
+        "prompt": "Create a quiz about Python basics with 5 questions",
+        "num_questions": 3,  # optional
+        "num_options": 4     # optional, default 4 for multiple choice
+    }
+    """
+    try:
+        lesson_summary = request.data.get('lesson_summary')
+        prompt = request.data.get('prompt')
+        num_questions = request.data.get('num_questions', 3)
+        num_options = request.data.get('num_options', 4)
+        
+        # Validation        
+        if not prompt:
+            return Response(
+                {'error': 'Prompt is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Enhanced prompt with context
+        enhanced_prompt = f"""
+        {prompt}
+        
+        Generate a quiz with exactly {num_questions} questions.
+        Each question should have {num_options} answer options.
+        Ensure only ONE option per question is marked as correct (is_correct=True).
+        Provide clear explanations for why the correct answer is right.
+        
+        Context: This quiz is for the lesson "{lesson_summary}".
+        """
+        
+        # Initialize model and get structured output
+        model = init_chat_model(
+            "gemini-2.0-flash", 
+            model_provider="google_genai", 
+            temperature=0.7  # Slightly higher for creative question generation
+        )
+        structured_llm = model.with_structured_output(schema=QuizStructure)
+        result = structured_llm.invoke(enhanced_prompt)
+        
+        # Convert Pydantic model to dict
+        quiz_data = result.model_dump()
+        
+        # Add order fields based on list positions
+        for q_index, question in enumerate(quiz_data['questions'], start=1):
+            question['order'] = q_index
+            for o_index, option in enumerate(question['options'], start=1):
+                option['order'] = o_index
+        
+        return Response({
+            'lesson_summary': lesson_summary,
+            'query': prompt,
+            'response': quiz_data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
