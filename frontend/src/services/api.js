@@ -242,3 +242,153 @@ export async function queryPerplexica(query) {
     throw error;
   }
 }
+
+export function dummyQuizApi() {
+  const quizzes = [
+    {
+      id: 1,
+      lesson_id: 0,
+      quiz_title: "Lesson Knowledge Check",
+      quiz_description: "Test your understanding of the key concepts",
+      created_at: "2026-02-02T14:51:00Z",
+      questions: [
+        {
+          id: 1,
+          quiz_id: 1,
+          question_text:
+            "What is the main purpose of the concept discussed in this lesson?",
+          explanation:
+            "Review the introduction section to understand the primary purpose and motivation behind this concept.",
+          order: 1,
+          created_at: "2026-02-02T14:51:00Z",
+          options: [
+            {
+              id: 1,
+              question_id: 1,
+              option_text: "To solve a specific technical problem efficiently",
+              is_correct: true,
+              order: 1,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 2,
+              question_id: 1,
+              option_text: "To make code more complex",
+              is_correct: false,
+              order: 2,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 3,
+              question_id: 1,
+              option_text: "To replace all existing solutions",
+              is_correct: false,
+              order: 3,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 4,
+              question_id: 1,
+              option_text: "To increase memory usage",
+              is_correct: false,
+              order: 4,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+          ],
+        },
+        {
+          id: 2,
+          quiz_id: 1,
+          question_text:
+            "Which scenario is best suited for applying this technique?",
+          explanation:
+            "The lesson covers specific use cases where this approach provides the most benefit.",
+          order: 2,
+          created_at: "2026-02-02T14:51:00Z",
+          options: [
+            {
+              id: 5,
+              question_id: 2,
+              option_text:
+                "When performance and scalability are critical requirements",
+              is_correct: true,
+              order: 1,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 6,
+              question_id: 2,
+              option_text: "Only in legacy systems",
+              is_correct: false,
+              order: 2,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 7,
+              question_id: 2,
+              option_text: "When you want to avoid best practices",
+              is_correct: false,
+              order: 3,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 8,
+              question_id: 2,
+              option_text: "Never in production environments",
+              is_correct: false,
+              order: 4,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+          ],
+        },
+        {
+          id: 3,
+          quiz_id: 1,
+          question_text:
+            "What is a key consideration when implementing this approach?",
+          explanation:
+            "Understanding trade-offs and limitations is essential for proper implementation.",
+          order: 3,
+          created_at: "2026-02-02T14:51:00Z",
+          options: [
+            {
+              id: 9,
+              question_id: 3,
+              option_text:
+                "Understanding the trade-offs and potential limitations",
+              is_correct: true,
+              order: 1,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 10,
+              question_id: 3,
+              option_text: "Ignoring documentation and best practices",
+              is_correct: false,
+              order: 2,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 11,
+              question_id: 3,
+              option_text: "Using the most complex solution available",
+              is_correct: false,
+              order: 3,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+            {
+              id: 12,
+              question_id: 3,
+              option_text: "Avoiding testing entirely",
+              is_correct: false,
+              order: 4,
+              created_at: "2026-02-02T14:51:00Z",
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  return quizzes;
+}

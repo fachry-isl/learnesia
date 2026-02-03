@@ -3,7 +3,6 @@ import EditCourseFromGenerate from "./EditCourseFromGenerate";
 import { useState, useEffect } from "react";
 import { generateCourse } from "../services/api";
 import { toast } from "react-hot-toast";
-import language from "react-syntax-highlighter/dist/esm/languages/hljs/1c";
 
 const CreateCourseTemplate = () => {
   const [step, setStep] = useState("create_course_structure");

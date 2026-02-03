@@ -104,7 +104,7 @@ def generate_course(request):
                 {'error': 'Prompt is required'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        model = init_chat_model("gemini-2.0-flash", model_provider="google_genai", temperature=0)
+        model = init_chat_model("gemini-2.5-flash", model_provider="google_genai", temperature=0)
         structured_llm = model.with_structured_output(schema=CourseStructure)
         result = structured_llm.invoke(prompt)
         
@@ -161,7 +161,7 @@ def generate_course_lesson(request):
         {course_structure}
         """
 
-        model = init_chat_model("gemini-2.0-flash", model_provider="google_genai", temperature=0)
+        model = init_chat_model("gemini-2.5-flash", model_provider="google_genai", temperature=0)
         response = model.invoke(prompt)
 
         return Response({
@@ -319,7 +319,7 @@ def generate_quiz(request):
         
         # Initialize model and get structured output
         model = init_chat_model(
-            "gemini-2.0-flash", 
+            "gemini-2.5-flash", 
             model_provider="google_genai", 
             temperature=0.7  # Slightly higher for creative question generation
         )
