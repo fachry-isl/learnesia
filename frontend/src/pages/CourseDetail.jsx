@@ -28,7 +28,8 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
 
   const { activeLessonId } = useSidebar();
-  const quizzes = dummyQuizApi();
+
+  const [quizzes, setQuizzes] = useState(() => dummyQuizApi()[0]);
 
   const sortedLessons = getSortedLessons(course?.lessons);
   const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
@@ -81,6 +82,15 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
       toast.error("Failed to update course status");
     }
   };
+  const onAddQuestionHandler = () => {
+    setQuizzes({
+      ...quizzes,
+      questions: [
+        ...quizzes.questions,
+        { id: 4, quiz_id: 4, question_text: "What is the purpose of life?" },
+      ],
+    });
+  };
 
   return (
     <div className="flex flex-col h-full overflow-hidden font-sans">
@@ -131,6 +141,7 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
             isModalOpen={isQuizModalOpen}
             onCloseModal={() => setIsQuizModalOpen(false)}
             onQuizEdit={(question) => setIsQuizModalOpen(true)}
+            onAddQuestionCallback={onAddQuestionHandler}
             onGenerateQuiz={() => console.log("Generate Quiz")}
           />
 

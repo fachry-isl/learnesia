@@ -10,7 +10,11 @@ const LessonQuiz = ({
   onCloseModal,
   lessonName,
   onGenerateQuiz,
+  onAddQuestionCallback,
 }) => {
+  const onAddQuestion = () => {
+    onAddQuestionCallback();
+  };
   return (
     <>
       <div className="bg-white border-4 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -18,7 +22,10 @@ const LessonQuiz = ({
           <Info className="w-5 h-5" /> Quiz
         </h3>
 
-        <button className="bg-white text-black w-full py-2 border-2 border-black font-bold text-sm cursor-pointer hover:text-white hover:bg-yellow-500 mb-5">
+        <button
+          onClick={onAddQuestion}
+          className="bg-white text-black w-full py-2 border-2 border-black font-bold text-sm cursor-pointer hover:text-white hover:bg-yellow-500 mb-5"
+        >
           ➕ Add Question
         </button>
 
@@ -26,7 +33,7 @@ const LessonQuiz = ({
           ✨ Generate Quiz
         </button>
 
-        {quizzes[0]?.questions?.map((question, idx) => (
+        {quizzes?.questions?.map((question, idx) => (
           <QuizQuestionItem
             key={idx}
             question={question}
