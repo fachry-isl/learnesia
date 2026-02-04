@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from .models import Course, Lesson, Quiz
 from .serializers import CourseSerializer, LessonSerializer, QuizSerializer
 
+
 # Gemini API
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -13,6 +14,8 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from langchain.chat_models import init_chat_model
 from typing import List, Optional
+
+
 
 # Load environment variable
 load_dotenv()
@@ -28,6 +31,19 @@ class LessonViewSet(viewsets.ModelViewSet):
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
+
+    def get_queryset(self):
+        """
+        Optionally filter quizzes by lesson ID via query parameter
+        Usage: /api/quiz/?lesson=202
+        """
+        queryset = Quiz.objects.all()
+        lesson_id = self.request.query_params.get('lesson', None)
+        
+        if lesson_id is not None:
+            queryset = queryset.filter(lesson_id=lesson_id)
+        
+        return queryset
 
     
 
