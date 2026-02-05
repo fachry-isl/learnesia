@@ -1,7 +1,8 @@
 # Django Essential
 from rest_framework import viewsets
 from .models import Course, Lesson, Quiz
-from .serializers import CourseSerializer, LessonSerializer, QuizSerializer
+from .serializers import CourseSerializer, LessonSerializer, QuizSerializer, QuizDetailSerializer, QuizQuestion
+from django.db.models import Prefetch
 
 
 # Gemini API
@@ -29,8 +30,25 @@ class LessonViewSet(viewsets.ModelViewSet):
     serializer_class = LessonSerializer
 
 class QuizViewSet(viewsets.ModelViewSet):
+    """
+    Usage: 
+    Get All Quiz - /api/quiz/
+    Get Specific Quiz by Lesson ID - /api/quiz/?lesson={id}
+    Get Specific Quiz by Lesson ID (Detailed) - /api/quiz/?lesson={id}&?detail=full
+    """
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
+
+    def get_serializer_class(self):
+        detail_level = self.request.query_params.get('detail', 'simple')
+
+        # Use detailed serializer for POST/PUT
+        if self.action in ['create', 'update', 'partial_update']:
+            return QuizDetailSerializer
+
+        if detail_level == "full":
+            return QuizDetailSerializer
+        return QuizSerializer
 
     def get_queryset(self):
         """
@@ -39,11 +57,30 @@ class QuizViewSet(viewsets.ModelViewSet):
         """
         queryset = Quiz.objects.all()
         lesson_id = self.request.query_params.get('lesson', None)
+
+
+        detail_level = self.request.query_params.get('detail', 'simple')
         
         if lesson_id is not None:
             queryset = queryset.filter(lesson_id=lesson_id)
-        
+
+
+        if detail_level == 'full':
+            # Fetch all related data in optimized queries
+            queryset = queryset.prefetch_related(
+                Prefetch(
+                    'questions',
+                    queryset=QuizQuestion.objects.order_by('order').prefetch_related('options')
+                )
+            )
+        elif detail_level == 'questions':
+            # Just questions, no options
+            queryset = queryset.prefetch_related('questions')
+
+
         return queryset
+
+
 
     
 

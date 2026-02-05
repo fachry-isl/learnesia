@@ -52,6 +52,11 @@ class Quiz(admin.ModelAdmin):
     inlines = [QuizQuestionInline]
 
 
+@admin.register(QuizQuestion)
+class QuizQuestion(admin.ModelAdmin):
+    list_display = ['id','quiz', 'question_text', 'explanation', 'order', 'created_at']    
+
+
 @admin.register(QuestionOption)
 class QuestionOption(admin.ModelAdmin):
     list_display = ['question', 'option_text', 'is_correct']
