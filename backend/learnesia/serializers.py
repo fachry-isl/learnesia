@@ -88,6 +88,37 @@ class QuizDetailSerializer(serializers.ModelSerializer):
                     **option_data  # option_text, is_correct, order
                 )
         
+    def update(self, instance, validated_data):
+        """
+        Updates a Quiz with nested Questions and Options.
         
+        Key differences from create():
+        1. You receive an existing 'instance' parameter (the Quiz object being updated)
+        2. You need to handle DELETING old nested objects
+        3. You need to handle UPDATING existing nested objects vs CREATING new ones
+        """
+        # Extract nested data
+        questions_data = validated_data.pop('questions', None)
+        
+        # Update parent fields (quiz_title, quiz_description, etc.)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Handle nested questions (this is the complex part)
+        if questions_data is not None:
+            # Decision: Do you DELETE all old questions and recreate?
+            # Or do you UPDATE existing ones?
+            # This is your business logic choice
+            
+            # Option 1: Delete all old questions and recreate (simpler but loses data)
+            instance.questions.all().delete()
+            for question_data in questions_data:
+                options_data = question_data.pop('options')
+                question = QuizQuestion.objects.create(quiz=instance, **question_data)
+                for option_data in options_data:
+                    QuestionOption.objects.create(question=question, **option_data)
+        
+        return instance    
         
         return quiz
