@@ -59,4 +59,4 @@ class QuizQuestion(admin.ModelAdmin):
 
 @admin.register(QuestionOption)
 class QuestionOption(admin.ModelAdmin):
-    list_display = ['question', 'option_text', 'is_correct']
+    list_display = ['id','question', 'option_text', 'is_correct']

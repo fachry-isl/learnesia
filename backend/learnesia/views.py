@@ -1,7 +1,7 @@
 # Django Essential
 from rest_framework import viewsets
 from .models import Course, Lesson, Quiz
-from .serializers import CourseSerializer, LessonSerializer, QuizSerializer, QuizDetailSerializer, QuizQuestion
+from .serializers import CourseSerializer, LessonSerializer, QuizSerializer, QuizDetailSerializer, QuizQuestion, QuizQuestionSerializer,QuestionOption, QuestionOptionSerializer
 from django.db.models import Prefetch
 
 
@@ -28,6 +28,50 @@ class CourseViewSet(viewsets.ModelViewSet):
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+
+class QuizQuestionViewset(viewsets.ModelViewSet):
+    queryset = QuizQuestion.objects.all()
+    serializer_class=QuizQuestionSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        """Custom delete response for quiz questions"""
+        instance = self.get_object()  # Get the object before deleting
+        question_id = instance.id
+        question_text = instance.question_text[:50]  # First 50 chars
+        
+        # Perform the deletion
+        self.perform_destroy(instance)
+        
+        # Return custom response
+        return Response(
+            {
+                'message': f'Successfully deleted Question with ID {question_id}',
+                'deleted_question': question_text
+            },
+            status=status.HTTP_200_OK
+        )
+
+class QuestionOptionViewset(viewsets.ModelViewSet):
+    queryset = QuestionOption.objects.all()
+    serializer_class=QuestionOptionSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        """Custom delete response for quiz questions"""
+        instance = self.get_object()  # Get the object before deleting
+        option_id = instance.id
+        option_text = instance.option_text[:50]  # First 50 chars
+        
+        # Perform the deletion
+        self.perform_destroy(instance)
+        
+        # Return custom response
+        return Response(
+            {
+                'message': f'Successfully deleted Option with ID {option_id}',
+                'deleted_question': option_text
+            },
+            status=status.HTTP_200_OK
+        )
 
 class QuizViewSet(viewsets.ModelViewSet):
     """

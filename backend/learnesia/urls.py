@@ -1,11 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CourseViewSet, LessonViewSet, QuizViewSet, generate_course, generate_dummy_course, generate_course_structured, generate_course_lesson, generate_quiz
+from .views import CourseViewSet, LessonViewSet, QuizViewSet, QuizQuestionViewset, QuestionOptionViewset, generate_course, generate_dummy_course, generate_course_structured, generate_course_lesson, generate_quiz
 
 router = DefaultRouter()
 router.register('courses', CourseViewSet)
 router.register('lessons', LessonViewSet)
 router.register('quiz', QuizViewSet)
+router.register('quiz_question', QuizQuestionViewset)
+router.register('quiz_option', QuestionOptionViewset)
 
 urlpatterns = [
     path('', include(router.urls)),
