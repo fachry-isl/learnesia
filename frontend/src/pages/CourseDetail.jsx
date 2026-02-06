@@ -6,6 +6,7 @@ import {
   dummyQuizApi,
   editLesson,
   generatCourseLesson,
+  getQuizDetailbyLessonId,
 } from "../services/api";
 import toast from "react-hot-toast";
 
@@ -29,14 +30,36 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
 
   const { activeLessonId } = useSidebar();
 
-  const [quizzes, setQuizzes] = useState(() => dummyQuizApi()[0]);
+  const [quizzes, setQuizzes] = useState(null);
 
   const sortedLessons = getSortedLessons(course?.lessons);
   const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
 
+  const fetchQuizbyLessonId = async (lesson_id) => {
+    try {
+      const response = await getQuizDetailbyLessonId(lesson_id);
+      console.log("QuizbyLessonID: ", response[0]);
+      setQuizzes(response[0]);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // This would get triggered every time user change
   useEffect(() => {
     if (lessonData) {
+      console.log("Course: ", course);
+      console.log("LessonData: ", lessonData);
+
+      // Get Lesson Content
       setContent(lessonData.lesson_content || "");
+
+      // Get Quiz
+      fetchQuizbyLessonId(activeLessonId);
+
+      // Improvement Note: Instead of fetching every quiz using GetQuizByLessonIdApi, access quiz from Course.Lessons.Quiz
+      // Turns out its bad because we get All the Course Nested Data on Course Library
+      // Eventough we might not even use it.
     }
   }, [lessonData, activeLessonId]);
 
@@ -82,14 +105,40 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
       toast.error("Failed to update course status");
     }
   };
-  const onAddQuestionHandler = () => {
+  const onAddQuestionButtonHandler = () => {
+    setIsQuizModalOpen(true);
+  };
+
+  const onAddQuestionFormHandler = (question_data) => {
+    console.log("Question Data: ", question_data);
+    window.alert(JSON.stringify(question_data));
+
+    const newQuestion = {
+      quiz_id: quizzes.id,
+      question_text: question_data.question_text,
+      options:
+        question_data?.options?.map((opt, index) => ({
+          id: index + 1,
+          option_text: opt.option_text,
+          is_correct: opt.is_correct || false,
+        })) || [],
+    };
+
+    // Update Frontend
     setQuizzes({
       ...quizzes,
-      questions: [
-        ...quizzes.questions,
-        { id: 4, quiz_id: 4, question_text: "What is the purpose of life?" },
-      ],
+      questions: [...quizzes.questions, newQuestion],
     });
+
+    // Update Backend
+  };
+
+  const onDeleteQuestionHandler = (questionId) => {
+    setQuizzes({
+      ...quizzes,
+      questions: quizzes.questions.filter((q) => q.id !== questionId),
+    });
+    toast.success("Question deleted");
   };
 
   return (
@@ -134,17 +183,20 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
           <LearningObjectives
             objectives={lessonData.lesson_learning_objectives}
           />
-
           <LessonQuiz
             quizzes={quizzes}
             lessonName={lessonData.lesson_name}
             isModalOpen={isQuizModalOpen}
             onCloseModal={() => setIsQuizModalOpen(false)}
-            onQuizEdit={(question) => setIsQuizModalOpen(true)}
-            onAddQuestionCallback={onAddQuestionHandler}
+            onQuizEdit={(question) => {
+              // Store question being edited if needed
+              setIsQuizModalOpen(true);
+            }}
+            onQuizDelete={onDeleteQuestionHandler}
+            onAddQuestionButton={onAddQuestionButtonHandler}
+            onAddQuestionForm={onAddQuestionFormHandler}
             onGenerateQuiz={() => console.log("Generate Quiz")}
           />
-
           <LessonActions
             onGenerateLesson={handleGenerateLesson}
             onClickTurnToDraft={handleTurnToDraft}

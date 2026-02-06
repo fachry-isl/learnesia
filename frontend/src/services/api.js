@@ -17,6 +17,28 @@ export async function getCourse() {
   }
 }
 
+export async function getQuizDetailbyLessonId(lesson_id) {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/api/quiz/?lesson=${lesson_id}&detail=full`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function editLesson(lessonId, lesson_content) {
   try {
     const response = await fetch(
@@ -68,6 +90,7 @@ export async function generateCourse(prompt) {
 
 export async function generatCourseLesson(course_structure_, lesson_topic_) {
   try {
+    frontend / dist;
     const response = await fetch(
       "http://localhost:8000/api/generate_course_lesson/",
       {
