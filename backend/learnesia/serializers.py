@@ -28,6 +28,8 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
         }
     
 class QuizQuestionSerializer(serializers.ModelSerializer):
+    # To rename the column
+    # quiz_id = serializers.IntegerField(source='quiz.id', read_only=True)
     class Meta:
         model=QuizQuestion
         fields='__all__'
@@ -39,7 +41,7 @@ class QuizQuestionDetailSerializer(serializers.ModelSerializer):
         model=QuizQuestion
         fields='__all__'
         extra_kwargs = {
-            'quiz': {'read_only': True}  # ✅ Tell DRF to ignore 'quiz' during write
+            'quiz': {'read_only': True}  # Tell DRF to ignore 'quiz' during write
         }
 
 class QuizDetailSerializer(serializers.ModelSerializer):
@@ -87,7 +89,10 @@ class QuizDetailSerializer(serializers.ModelSerializer):
                     question=question,
                     **option_data  # option_text, is_correct, order
                 )
-        
+
+        return quiz       
+
+
     def update(self, instance, validated_data):
         """
         Updates a Quiz with nested Questions and Options.
@@ -120,5 +125,3 @@ class QuizDetailSerializer(serializers.ModelSerializer):
                     QuestionOption.objects.create(question=question, **option_data)
         
         return instance    
-        
-        return quiz

@@ -1,19 +1,20 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CourseViewSet, LessonViewSet, QuizViewSet, QuizQuestionViewset, QuestionOptionViewset, generate_course, generate_dummy_course, generate_course_structured, generate_course_lesson, generate_quiz
+from .views import (
+    CourseViewSet, 
+    LessonViewSet, 
+    QuizViewSet, 
+    QuizQuestionViewset, 
+    QuestionOptionViewset
+)
 
 router = DefaultRouter()
-router.register('courses', CourseViewSet)
-router.register('lessons', LessonViewSet)
-router.register('quiz', QuizViewSet)
-router.register('quiz_question', QuizQuestionViewset)
-router.register('quiz_option', QuestionOptionViewset)
+router.register(r'courses', CourseViewSet, basename='course')
+router.register(r'lessons', LessonViewSet, basename='lesson')
+router.register(r'quizzes', QuizViewSet, basename='quiz')
+router.register(r'quiz-questions', QuizQuestionViewset, basename='quiz-question')
+router.register(r'question-options', QuestionOptionViewset, basename='question-option')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('generate_course/', generate_course, name='generate_course'),
-    path('generate_course_structured/', generate_course_structured, name='generate_course_structured'),
-    path('generate_dummy_course/', generate_dummy_course, name='generate_dummy_course'),
-    path('generate_course_lesson/', generate_course_lesson, name='generate_course_lesson'),
-    path('generate_quiz/', generate_quiz, name="generate_quiz")
 ]
