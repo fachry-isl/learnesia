@@ -30,9 +30,32 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
 class QuizQuestionSerializer(serializers.ModelSerializer):
     # To rename the column
     # quiz_id = serializers.IntegerField(source='quiz.id', read_only=True)
+    # Declare the nested serializer for options
+    options = QuestionOptionSerializer(many=True)
+
     class Meta:
         model=QuizQuestion
         fields='__all__'
+
+    def create(self, validated_data):
+        """
+        1. Extract nested data (options)
+        2. Create parent Instance (Question)
+        3. Put options into parent Instance
+        """
+
+        print(validated_data)
+
+        option_data = validated_data.pop('options')
+
+        question = QuizQuestion.objects.create(**validated_data)
+
+        for option_data in option_data:
+            # This is for linking each option to specific Quiz Question.
+            QuestionOption.objects.create(question=question, **option_data)
+        
+        return question
+
 
 class QuizQuestionDetailSerializer(serializers.ModelSerializer):
     options = QuestionOptionSerializer(many=True)

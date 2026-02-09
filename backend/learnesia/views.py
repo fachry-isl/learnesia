@@ -600,6 +600,9 @@ class QuizQuestionViewset(viewsets.ModelViewSet):
         """
         queryset = super().get_queryset()
         quiz_id = self.request.query_params.get('quiz')
+        
+
+        queryset = queryset.prefetch_related('options')
 
         if quiz_id:
             queryset = queryset.filter(quiz=quiz_id)
