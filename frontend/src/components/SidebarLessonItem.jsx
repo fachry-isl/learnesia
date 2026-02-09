@@ -10,7 +10,7 @@ const SidebarLessonItem = ({ lesson_name, isActive, onClick }) => {
          ${isActive ? "bg-gray-800 text-white" : "text-gray-400 hover:bg-gray-800/50 hover:text-white"}`}
     >
       <FileText className="w-4 h-4 shrink-0" />
-      <span className="truncate">{lesson_name}</span>
+      <span>{lesson_name}</span>
     </button>
   );
 };

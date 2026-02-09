@@ -6,8 +6,6 @@ import {
   ChevronRight,
   Target,
   Layers,
-  FileEdit,
-  CheckCircle2,
 } from "lucide-react";
 import { changeCourseStatus } from "../services/api";
 
@@ -70,38 +68,12 @@ const CourseCardItem = ({
     // Do something with the value
     // console.log("Toggle is now:", newValue ? "ON" : "OFF");
     // console.log("Course ID:", course.id);
-
-    // You can call a callback here if needed
-    // onToggleChange(course.id, newValue);
   };
 
   // Sort lessons by order column before finding
   const sortedLessons = course?.lessons
     ? [...course.lessons].sort((a, b) => a.order - b.order)
     : [];
-
-  // Status badge configuration
-  const statusConfig = {
-    draft: {
-      bgColor: "bg-amber-50",
-      textColor: "text-amber-700",
-      borderColor: "border-amber-200",
-      dotColor: "bg-amber-400",
-      icon: FileEdit,
-      label: "Draft",
-    },
-    published: {
-      bgColor: "bg-emerald-50",
-      textColor: "text-emerald-700",
-      borderColor: "border-emerald-200",
-      dotColor: "bg-emerald-400",
-      icon: CheckCircle2,
-      label: "Published",
-    },
-  };
-
-  const currentStatus = statusConfig[course.status];
-  const StatusIcon = currentStatus?.icon;
 
   return (
     <div

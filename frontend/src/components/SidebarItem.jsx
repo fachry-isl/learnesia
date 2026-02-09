@@ -1,4 +1,4 @@
-const SidebarItem = ({ label, item_name, icon, isActive, onClick }) => {
+const SidebarItem = ({ item_name, icon, isActive, onClick }) => {
   return (
     <button
       onClick={onClick}

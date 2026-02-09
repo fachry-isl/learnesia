@@ -3,11 +3,14 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import { SidebarProvider } from "./contexts/SidebarContext.jsx";
+import { QuizQuestionModalProvider } from "./contexts/QuizQuestionModalContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <SidebarProvider>
-      <App />
+      <QuizQuestionModalProvider>
+        <App />
+      </QuizQuestionModalProvider>
     </SidebarProvider>
   </StrictMode>,
 );

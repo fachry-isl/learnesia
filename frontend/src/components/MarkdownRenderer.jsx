@@ -27,6 +27,7 @@ const markdownComponents = {
       </code>
     );
   },
+
   // Custom heading styles
   h1: ({ children }) => (
     <h1 className="text-3xl font-black uppercase mb-4 mt-6 border-b-4 border-black pb-2">
@@ -41,8 +42,16 @@ const markdownComponents = {
   h3: ({ children }) => (
     <h3 className="text-xl font-bold mb-2 mt-4">{children}</h3>
   ),
-  // Custom paragraph styling
-  p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+
+  // Custom paragraph styling - avoid extra margin in list items
+  p: ({ children, node }) => {
+    const parent = node?.position?.start?.column;
+    if (parent && parent > 1) {
+      return <span className="block">{children}</span>;
+    }
+    return <p className="mb-4 leading-relaxed">{children}</p>;
+  },
+
   // Custom link styling
   a: ({ href, children }) => (
     <a
@@ -54,19 +63,30 @@ const markdownComponents = {
       {children}
     </a>
   ),
-  // Custom list styling
+
+  // Custom horizontal rule with proper spacing
+  hr: () => <hr className="my-8 border-t-2 border-gray-300" />,
+
+  // Custom list styling with proper nested list support
   ul: ({ children }) => (
-    <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>
+    <ul className="list-disc ml-6 mb-4 space-y-2 [&>li]:ml-0 [&_ul]:mt-2 [&_ul]:mb-2">
+      {children}
+    </ul>
   ),
   ol: ({ children }) => (
-    <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>
+    <ol className="list-decimal ml-6 mb-4 space-y-2 [&>li]:ml-0 [&_ol]:mt-2 [&_ol]:mb-2">
+      {children}
+    </ol>
   ),
+  li: ({ children }) => <li className="ml-0 pl-2">{children}</li>,
+
   // Custom blockquote styling
   blockquote: ({ children }) => (
     <blockquote className="border-l-4 border-yellow-400 bg-yellow-50 pl-4 py-2 my-4 italic">
       {children}
     </blockquote>
   ),
+
   // Custom table styling
   table: ({ children }) => (
     <div className="overflow-x-auto my-4">
@@ -84,6 +104,8 @@ const markdownComponents = {
   td: ({ children }) => (
     <td className="border-2 border-black px-4 py-2">{children}</td>
   ),
+  tr: ({ children }) => <tr>{children}</tr>,
+  tbody: ({ children }) => <tbody>{children}</tbody>,
 };
 
 const MarkdownRenderer = ({ content }) => {

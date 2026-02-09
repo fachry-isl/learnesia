@@ -3,10 +3,12 @@ import { useSidebar } from "../contexts/SidebarContext";
 import { Info } from "lucide-react";
 import {
   changeCourseStatus,
-  dummyQuizApi,
+  createQuiz,
+  createQuizQuestion,
+  deleteQuizQuestion,
   editLesson,
-  generatCourseLesson,
   getQuizDetailbyLessonId,
+  generateCourseLesson,
 } from "../services/api";
 import toast from "react-hot-toast";
 
@@ -22,11 +24,12 @@ import {
   getSortedLessons,
   generateCourseSummary,
 } from "../utils/courseHelpers";
+import { useQuizQuestionModal } from "../contexts/QuizQuestionModalContext";
 
 const CourseDetail = ({ course, onLessonUpdate }) => {
   const [content, setContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+  const [isLoadQuiz, setIsLoadQuiz] = useState(false);
 
   const { activeLessonId } = useSidebar();
 
@@ -38,29 +41,39 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
   const fetchQuizbyLessonId = async (lesson_id) => {
     try {
       const response = await getQuizDetailbyLessonId(lesson_id);
-      console.log("QuizbyLessonID: ", response[0]);
+      // console.log("QuizbyLessonID: ", response[0]);
       setQuizzes(response[0]);
     } catch (error) {
       throw error;
     }
   };
 
-  // This would get triggered every time user change
+  // useEffect(() => {
+  //   console.log("isLoadQuiz changed:", isLoadQuiz);
+  // }, [isLoadQuiz]);
+
+  // This would get triggered every time user change lesson
   useEffect(() => {
     if (lessonData) {
-      console.log("Course: ", course);
-      console.log("LessonData: ", lessonData);
-
+      // console.log("Course: ", course);
+      // console.log("LessonData: ", lessonData);
       // Get Lesson Content
       setContent(lessonData.lesson_content || "");
-
-      // Get Quiz
-      fetchQuizbyLessonId(activeLessonId);
-
-      // Improvement Note: Instead of fetching every quiz using GetQuizByLessonIdApi, access quiz from Course.Lessons.Quiz
-      // Turns out its bad because we get All the Course Nested Data on Course Library
-      // Eventough we might not even use it.
     }
+    const loadQuiz = async () => {
+      setIsLoadQuiz(true);
+      try {
+        await fetchQuizbyLessonId(activeLessonId);
+      } catch (error) {
+        console.error("fetchQuiz error:", error);
+      }
+      setIsLoadQuiz(false);
+    };
+
+    loadQuiz();
+    // Improvement Note: Instead of fetching every quiz using GetQuizByLessonIdApi, access quiz from Course.Lessons.Quiz
+    // Turns out its bad because we get All the Course Nested Data on Course Library
+    // Eventough we might not even use it.
   }, [lessonData, activeLessonId]);
 
   if (!lessonData) {
@@ -85,15 +98,19 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
   };
 
   const handleGenerateLesson = async () => {
+    const loadingToast = toast.loading("Generating Lesson...");
     try {
       const summary = generateCourseSummary(course);
-      const response = await generatCourseLesson(
+      const response = await generateCourseLesson(
         summary,
         lessonData.lesson_name,
       );
       setContent(response.response.content);
+      toast.success("Lesson Created Successfully", { id: loadingToast });
     } catch (error) {
-      toast.error("Failed to generate lesson");
+      toast.error(`Failed to generate lesson`, {
+        id: loadingToast,
+      });
     }
   };
 
@@ -105,17 +122,24 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
       toast.error("Failed to update course status");
     }
   };
+
+  const { setIsQuizModalOpen, setQuestionData, questionData } =
+    useQuizQuestionModal();
+
   const onAddQuestionButtonHandler = () => {
+    //setIsQuizModalOpen(true);
+    setQuestionData(null);
+    // console.log("Question Data on Context:", questionData);
     setIsQuizModalOpen(true);
   };
 
-  const onAddQuestionFormHandler = (question_data) => {
-    console.log("Question Data: ", question_data);
+  const onAddQuestionFormHandler = async (question_data) => {
+    //console.log("Question Data: ", question_data);
     window.alert(JSON.stringify(question_data));
 
     const newQuestion = {
-      quiz_id: quizzes.id,
       question_text: question_data.question_text,
+      explanation: "Under Development",
       options:
         question_data?.options?.map((opt, index) => ({
           id: index + 1,
@@ -124,21 +148,92 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
         })) || [],
     };
 
-    // Update Frontend
-    setQuizzes({
-      ...quizzes,
-      questions: [...quizzes.questions, newQuestion],
-    });
+    console.log("Quizzes Initial Value: ", quizzes);
+    // Depending on the existence of the quiz,
+    // We would use different API endpoint to store the question
+    if (quizzes) {
+      // Update Backend
+      const addQuizApi = async (quiz_id, new_question) => {
+        try {
+          const response = await createQuizQuestion({
+            quiz: quiz_id,
+            ...new_question,
+          });
 
-    // Update Backend
+          return response;
+        } catch (error) {
+          throw error;
+        }
+      };
+
+      const response = await addQuizApi(quizzes.id, newQuestion);
+
+      console.log("On Add QuizApi", response);
+
+      // After getting question id we have to update questiondata on React State
+      // So every subsequent action is working as intended
+
+      const newQuestionwithId = {
+        ...newQuestion,
+        id: response.id,
+      };
+
+      console.log("newQuestionwithId: ", newQuestionwithId);
+
+      const updatedQuiz = {
+        ...quizzes,
+        questions: [...quizzes.questions, newQuestionwithId],
+      };
+
+      // Update Frontend
+      setQuizzes(updatedQuiz);
+    } else {
+      // If quizzes doesnt exist yet Create Quiz and get Quiz ID, pass that id to create new question.
+      // Check postman for how to create new quiz given lesson id.
+      // I think it have been implemented with the unique constraint.
+      // Just have to integrate it in api.js
+      // Required Note: Make sure to have atleast on question for this to work as intended
+
+      const quiz_data = {
+        lesson: activeLessonId,
+        quiz_title: lessonData.lesson_name,
+        quiz_description: `Quiz for ${lessonData.lesson_name}`,
+        questions: [newQuestion],
+      };
+
+      console.log("Quiz_Data: ", quiz_data);
+
+      // Update Backend
+      const createQuizApi = async () => {
+        try {
+          const response = await createQuiz(quiz_data);
+
+          return response;
+        } catch (error) {
+          console.log("Error when PostQuizApi: ", error);
+          throw error;
+        }
+      };
+
+      // Update Backend FIRST
+      const response = await createQuizApi(quiz_data);
+
+      // Update Frontend with actual backend response
+      setQuizzes(response);
+
+      console.log("Quiz created successfully: ", response);
+    }
   };
 
-  const onDeleteQuestionHandler = (questionId) => {
+  const onDeleteQuestionHandler = async (questionId) => {
     setQuizzes({
       ...quizzes,
       questions: quizzes.questions.filter((q) => q.id !== questionId),
     });
-    toast.success("Question deleted");
+
+    const response = await deleteQuizQuestion(questionId);
+
+    toast.success("Question deleted: ", response);
   };
 
   return (
@@ -186,12 +281,7 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
           <LessonQuiz
             quizzes={quizzes}
             lessonName={lessonData.lesson_name}
-            isModalOpen={isQuizModalOpen}
-            onCloseModal={() => setIsQuizModalOpen(false)}
-            onQuizEdit={(question) => {
-              // Store question being edited if needed
-              setIsQuizModalOpen(true);
-            }}
+            isLoadQuiz={isLoadQuiz}
             onQuizDelete={onDeleteQuestionHandler}
             onAddQuestionButton={onAddQuestionButtonHandler}
             onAddQuestionForm={onAddQuestionFormHandler}
