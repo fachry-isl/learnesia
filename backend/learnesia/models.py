@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.db.models import Max
 
 class Course(models.Model):
     STATUS_CHOICES = [
@@ -101,9 +102,23 @@ class QuizQuestion(models.Model):
             models.Index(fields=['order'], name='idx_question_order'),
         ]
         ordering = ['order']
+        unique_together = ['quiz', 'order']
+
+    def save(self, *args, **kwargs):
+        """Auto-compute order if not provided"""
+        if self.order is None or self.order == 0:
+            # Get max order for this quiz
+            max_order = self.quiz.questions.aggregate(
+                Max('order')
+            )['order__max'] or 0
+            
+            self.order = max_order + 1
+        
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.quiz.quiz_title} - Q{self.order}"
+
 
 
 class QuestionOption(models.Model):
@@ -123,6 +138,18 @@ class QuestionOption(models.Model):
         indexes = [
             models.Index(fields=['question'], name='idx_option_question'),
         ]
+
+    def save(self, *args, **kwargs):
+        """Auto-compute order if not provided"""
+        if self.order is None or self.order == 0:
+            # Get max order for this quiz
+            max_order = self.question.options.aggregate(
+                Max('order')
+            )['order__max'] or 0
+            
+            self.order = max_order + 1
+        
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.question.question_text[:50]} - Option {self.order}"
