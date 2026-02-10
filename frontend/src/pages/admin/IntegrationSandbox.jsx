@@ -1,4 +1,4 @@
-import { geminiApiRequest } from "../services/api";
+import { geminiApiRequest } from "../../services/api";
 import { useState } from "react";
 import { SpinnerDotted } from "spinners-react";
 

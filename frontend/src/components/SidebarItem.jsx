@@ -1,8 +1,10 @@
-const SidebarItem = ({ item_name, icon, isActive, onClick }) => {
+import { NavLink } from "react-router-dom";
+
+const SidebarItem = ({ item_name, icon, to }) => {
   return (
-    <button
-      onClick={onClick}
-      className={`
+    <NavLink
+      to={to}
+      className={({ isActive }) => `
         w-full flex items-center gap-3 px-4 py-3 rounded-lg
         transition-all duration-200 ease-in-out
         text-left font-medium text-sm
@@ -13,19 +15,9 @@ const SidebarItem = ({ item_name, icon, isActive, onClick }) => {
         }
       `}
     >
-      {/* Icon */}
-      <span className={`${isActive ? "text-gray-900" : "text-gray-300"}`}>
-        {icon}
-      </span>
-
-      {/* Label */}
+      <span className="shrink-0">{icon}</span>
       <span>{item_name}</span>
-
-      {/* Active Indicator */}
-      {isActive && (
-        <span className="ml-auto w-1.5 h-1.5 bg-gray-900 rounded-full"></span>
-      )}
-    </button>
+    </NavLink>
   );
 };
 

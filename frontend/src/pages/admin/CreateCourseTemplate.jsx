@@ -1,7 +1,7 @@
 import React from "react";
 import EditCourseFromGenerate from "./EditCourseFromGenerate";
 import { useState, useEffect } from "react";
-import { generateCourse } from "../services/api";
+import { generateCourse } from "../../services/api";
 import { toast } from "react-hot-toast";
 
 const CreateCourseTemplate = () => {

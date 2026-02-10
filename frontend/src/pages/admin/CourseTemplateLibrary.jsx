@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import CourseCardItem from "../components/CourseCardItem";
-import { getCourse } from "../services/api";
+import CourseCardItem from "../../components/CourseCardItem";
+import { getCourse } from "../../services/api";
 
 const CourseTemplateLibrary = () => {
   const [courses, setCourses] = useState(null);

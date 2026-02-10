@@ -1,14 +1,16 @@
 import SidebarItem from "./components/SidebarItem";
-import CreateCourseTemplate from "./pages/CreateCourseTemplate";
-import IntegrationSandbox from "./pages/IntegrationSandbox";
-import ContentContainer from "./pages/ContentContainer";
-import CourseTemplateLibrary from "./pages/CourseTemplateLibrary";
+import CreateCourseTemplate from "./pages/admin/CreateCourseTemplate";
+import IntegrationSandbox from "./pages/admin/IntegrationSandbox";
+import ContentContainer from "./pages/admin/ContentContainer";
+import CourseTemplateLibrary from "./pages/admin/CourseTemplateLibrary";
 import { BookOpen, PlusCircle, Code2 } from "lucide-react";
-import CreateLesson from "./pages/CreateLesson";
+import CreateLesson from "./pages/admin/CreateLesson";
 import { useSidebar } from "./contexts/SidebarContext";
 import SidebarLessonItem from "./components/SidebarLessonItem";
-import CourseLibrary from "./pages/CourseLibrary";
+import CourseLibrary from "./pages/admin/CourseLibrary";
 import { Toaster } from "react-hot-toast";
+import CourseEditor from "./pages/admin/CourseEditor";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 function App() {
   // Use Context
@@ -27,29 +29,10 @@ function App() {
     setActiveSidebar(item);
   };
 
-  const renderSidebarContent = () => {
-    switch (activeSidebar) {
-      case "course_library":
-        return <CourseLibrary />;
-      case "course_template_library":
-        return <CourseTemplateLibrary />;
-      case "create_course_template":
-        return (
-          <CreateCourseTemplate onSubmit={() => handleCreateCourseSubmit} />
-        );
-      case "create_course_lessons":
-        return <CreateLesson />;
-      case "integration_sandbox":
-        return <IntegrationSandbox />;
-    }
-  };
+  const navigate = useNavigate();
 
   const onBackButtonClicked = () => {
-    // Reset Sidebar to Default instead of content specific
-    setSidebarMode("default");
-
-    // Reset Container
-    setActiveSidebar("course_library");
+    navigate(-1);
   };
 
   return (
@@ -70,7 +53,7 @@ function App() {
           {sidebarMode === "default" ? (
             <>
               <SidebarItem
-                label="course_library"
+                to="/courses"
                 item_name="Course Library"
                 icon={<BookOpen className="w-5 h-5" />}
                 isActive={activeSidebar === "course_library"}
@@ -78,7 +61,7 @@ function App() {
               />
 
               <SidebarItem
-                label="course_template_library"
+                to="/templates"
                 item_name="Course Template"
                 icon={<BookOpen className="w-5 h-5" />}
                 isActive={activeSidebar === "course_template_library"}
@@ -88,14 +71,14 @@ function App() {
               />
 
               <SidebarItem
-                label="create_course_template"
+                to="/create-template"
                 item_name="Create Course Template"
                 icon={<PlusCircle className="w-5 h-5" />}
                 isActive={activeSidebar === "create_course_template"}
                 onClick={() => handleSidebarItemClick("create_course_template")}
               />
               <SidebarItem
-                label="create_course_lessons"
+                to="/create-lesson"
                 item_name="Create Course Lessons"
                 icon={<PlusCircle className="w-5 h-5" />}
                 isActive={activeSidebar === "create_course_lessons"}
@@ -103,7 +86,7 @@ function App() {
               />
 
               <SidebarItem
-                label="integration_sandbox"
+                to="/integration-sandbox"
                 item_name="Integration Sandbox"
                 icon={<Code2 className="w-5 h-5" />}
                 isActive={activeSidebar === "integration_sandbox"}
@@ -144,7 +127,22 @@ function App() {
 
       {/* Main Content - with left margin to account for fixed sidebar */}
       <main className="flex-1 ml-64 overflow-auto">
-        <ContentContainer>{renderSidebarContent()}</ContentContainer>
+        <ContentContainer>
+          {/* THE ROUTER MAP */}
+          <Routes>
+            <Route path="/" element={<CourseLibrary />} />
+            <Route path="/courses" element={<CourseLibrary />} />
+            <Route path="/courses/:id" element={<CourseEditor />} />{" "}
+            {/* Dynamic Route */}
+            <Route path="/templates" element={<CourseTemplateLibrary />} />
+            <Route path="/create-template" element={<CreateCourseTemplate />} />
+            <Route path="/create-lesson" element={<CreateLesson />} />
+            <Route
+              path="/integration-sandbox"
+              element={<IntegrationSandbox />}
+            />
+          </Routes>
+        </ContentContainer>
       </main>
     </div>
   );

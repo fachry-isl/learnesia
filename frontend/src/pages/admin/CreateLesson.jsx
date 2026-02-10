@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getCourse } from "../services/api";
-import CourseDetail from "./CourseDetail";
-import { useSidebar } from "../contexts/SidebarContext";
+import { getCourse } from "../../services/api";
+import CourseDetail from "./CourseEditor";
+import { useSidebar } from "../../contexts/SidebarContext";
 
 const CreateLesson = () => {
   const [step, setStep] = useState("choose_course_template");

@@ -9,20 +9,11 @@ import {
 } from "lucide-react";
 import { changeCourseStatus } from "../services/api";
 
-const CourseCardItem = ({
-  course,
-  isonClickActive,
-  onCourseCardClickCallback,
-  mode = "default",
-}) => {
+const CourseCardItem = ({ course, isonClickActive, mode = "default" }) => {
   const [expandedCourseObjectives, setExpandedCourseObjectives] = useState({});
   const [expandedLessonObjectives, setExpandedLessonObjectives] = useState({});
 
   const [isToggleOn, setIsToggleOn] = useState(course.status === "published");
-
-  const onCourseCardClick = () => {
-    onCourseCardClickCallback(course);
-  };
 
   const toggleCourseObjectives = (courseId, e) => {
     e.stopPropagation(); // STOP the event from going up to parent

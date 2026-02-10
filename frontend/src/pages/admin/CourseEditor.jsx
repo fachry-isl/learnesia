@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useSidebar } from "../contexts/SidebarContext";
+import { useParams } from "react-router-dom";
+import { useSidebar } from "../../contexts/SidebarContext";
 import { Info } from "lucide-react";
 import {
+  getCourseById,
   changeCourseStatus,
   createQuiz,
   createQuizQuestion,
@@ -9,34 +11,71 @@ import {
   editLesson,
   getQuizDetailbyLessonId,
   generateCourseLesson,
-} from "../services/api";
+} from "../../services/api";
 import toast from "react-hot-toast";
 
 // Extracted Components
-import MarkdownRenderer from "../components/MarkdownRenderer";
-import LearningObjectives from "../components/LearningObjectives";
-import LessonQuiz from "../components/LessonQuiz";
-import LessonActions from "../components/LessonActions";
-import CourseDetailHeader from "../components/CourseDetailHeader";
+import MarkdownRenderer from "../../components/MarkdownRenderer";
+import LearningObjectives from "../../components/LearningObjectives";
+import LessonQuiz from "../../components/LessonQuiz";
+import LessonActions from "../../components/LessonActions";
+import CourseDetailHeader from "../../components/CourseDetailHeader";
 
 // Helpers
 import {
   getSortedLessons,
   generateCourseSummary,
-} from "../utils/courseHelpers";
-import { useQuizQuestionModal } from "../contexts/QuizQuestionModalContext";
+} from "../../utils/courseHelpers";
+import { useQuizQuestionModal } from "../../contexts/QuizQuestionModalContext";
 
-const CourseDetail = ({ course, onLessonUpdate }) => {
+const CourseEditor = () => {
+  const { id } = useParams();
+  const [course, setCourse] = useState(null);
   const [content, setContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isLoadQuiz, setIsLoadQuiz] = useState(false);
 
-  const { activeLessonId } = useSidebar();
+  const { activeLessonId, setSidebarMode, setSidebarData, setActiveLessonId } =
+    useSidebar();
 
   const [quizzes, setQuizzes] = useState(null);
+  const { setIsQuizModalOpen, setQuestionData, questionData } =
+    useQuizQuestionModal();
 
-  const sortedLessons = getSortedLessons(course?.lessons);
+  const sortedLessons = course ? getSortedLessons(course?.lessons) : [];
   const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
+
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      // 1. Fetch Data
+      try {
+        const foundCourse = await getCourseById(id);
+
+        if (foundCourse) {
+          setCourse(foundCourse);
+
+          // 2. Configure Sidebar for "Detail Mode"
+          setSidebarMode("course_detail");
+
+          // Sort lessons for sidebar
+          const sortedLessons = foundCourse?.lessons
+            ? [...foundCourse.lessons].sort((a, b) => a.order - b.order)
+            : [];
+          setSidebarData(sortedLessons);
+
+          // Default to first lesson if none selected
+          if (sortedLessons.length > 0) {
+            setActiveLessonId(sortedLessons[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch course:", error);
+        toast.error("Failed to load course");
+      }
+    };
+
+    fetchCourseData();
+  }, [id]);
 
   const fetchQuizbyLessonId = async (lesson_id) => {
     try {
@@ -61,6 +100,7 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
       setContent(lessonData.lesson_content || "");
     }
     const loadQuiz = async () => {
+      if (!activeLessonId) return;
       setIsLoadQuiz(true);
       try {
         await fetchQuizbyLessonId(activeLessonId);
@@ -76,13 +116,11 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
     // Eventough we might not even use it.
   }, [lessonData, activeLessonId]);
 
-  if (!lessonData) {
+  if (!course) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-pulse">
-        <Info className="w-12 h-12 mb-4 opacity-20" />
-        <p className="italic font-medium text-lg">
-          Select a lesson to begin refinement
-        </p>
+      <div className="flex flex-col items-center justify-center h-full space-y-4 animate-pulse">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+        <p className="text-gray-500 font-medium">Loading course editor...</p>
       </div>
     );
   }
@@ -90,7 +128,15 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
   const handleSaveChanges = async () => {
     try {
       await editLesson(lessonData.id, content);
-      onLessonUpdate(lessonData.id, content);
+
+      // Local state update to reflect changes immediately
+      setCourse((prev) => ({
+        ...prev,
+        lessons: prev.lessons.map((l) =>
+          l.id === lessonData.id ? { ...l, lesson_content: content } : l,
+        ),
+      }));
+
       toast.success("Lesson is Saved");
     } catch (error) {
       toast.error("Failed to save lesson");
@@ -122,9 +168,6 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
       toast.error("Failed to update course status");
     }
   };
-
-  const { setIsQuizModalOpen, setQuestionData, questionData } =
-    useQuizQuestionModal();
 
   const onAddQuestionButtonHandler = () => {
     //setIsQuizModalOpen(true);
@@ -297,4 +340,4 @@ const CourseDetail = ({ course, onLessonUpdate }) => {
   );
 };
 
-export default CourseDetail;
+export default CourseEditor;

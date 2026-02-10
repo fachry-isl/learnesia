@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { createCourse, createLesson } from "../services/api";
-import { useSidebar } from "../contexts/SidebarContext";
+import { createCourse, createLesson } from "../../services/api";
+import { useSidebar } from "../../contexts/SidebarContext";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
   const [course, setCourse] = useState(course_prop);
 
+  const navigate = useNavigate();
   // Change Active Sidebar
   const { setActiveSidebar } = useSidebar();
 
@@ -73,27 +76,50 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
         lesson_data[i]["course"] = course_id;
         const response = await createLesson(lesson_data[i]);
 
-        if (response) {
-          console.log("Lesson Submitted: ", lesson_data[i]);
-          console.log(JSON.stringify(response));
-        }
+        // if (response) {
+        //   console.log("Lesson Submitted: ", lesson_data[i]);
+        //   console.log(JSON.stringify(response));
+        // }
       }
     } catch (error) {
       console.error("Error fetchCreateLessonFromCourse: ", error);
     }
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleCourseStructureSubmit = async () => {
-    // Store Course and Return Course ID for storing the lesson.
+    if (isSubmitting) return;
 
-    // 1. Store Course
-    const course_id = await fetchCreateCourse();
+    // Validation
+    if (!course.course_name.trim()) {
+      toast.error("Course name is required");
+      return;
+    }
 
-    // 2. Store Lessons
-    await fetchCreateLessonsFromCourse(course_id, course.lessons);
+    setIsSubmitting(true);
+    const loadingToast = toast.loading("Creating course structure...");
 
-    // 3. Navigate to Course Template Library
-    setActiveSidebar("course_library");
+    try {
+      // 1. Store Course
+      const course_id = await fetchCreateCourse();
+
+      if (!course_id) throw new Error("Failed to create course");
+
+      // 2. Store Lessons
+      await fetchCreateLessonsFromCourse(course_id, course.lessons);
+
+      toast.success("Course created successfully!", { id: loadingToast });
+
+      // 3. Navigate to Course Library
+      navigate("/courses");
+      setActiveSidebar("course_library");
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast.error("Failed to submit course structure", { id: loadingToast });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -230,10 +256,20 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
       {/* Action Buttons */}
       <div className="flex gap-3">
         <button
-          className="border-2 border-black bg-black text-white cursor-pointer px-5 py-2 font-semibold hover:bg-gray-800"
+          className={`border-2 border-black bg-black text-white px-5 py-2 font-semibold hover:bg-gray-800 flex items-center gap-2 ${
+            isSubmitting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          }`}
           onClick={handleCourseStructureSubmit}
+          disabled={isSubmitting}
         >
-          Submit Course Structure
+          {isSubmitting ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit Course Structure"
+          )}
         </button>
         <button
           onClick={onBackButtonClick}
