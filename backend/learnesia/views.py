@@ -10,6 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Course, Lesson, Quiz, QuizQuestion, QuestionOption
 from .serializers import (
     CourseSerializer, 
+    CourseListSerializer,
     LessonSerializer, 
     QuizSerializer, 
     QuizDetailSerializer,
@@ -104,6 +105,11 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CourseListSerializer
+        return CourseSerializer
 
     @action(detail=False, methods=['post'], url_path='generate')
     def generate(self, request):

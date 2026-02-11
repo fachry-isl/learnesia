@@ -6,12 +6,24 @@ class LessonSerializer(serializers.ModelSerializer):
         model = Lesson
         fields = '__all__'
 
+
+class LessonCompactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        fields = ['id', 'course', 'lesson_name', 'lesson_learning_objectives', 'order', 'created_at']
+
+
 class CourseSerializer(serializers.ModelSerializer):
+    lessons = LessonSerializer(many=True, read_only=True)
     class Meta:
         model = Course
         fields = '__all__'
 
-    lessons = LessonSerializer(many=True, read_only=True)
+class CourseListSerializer(serializers.ModelSerializer):
+    lessons = LessonCompactSerializer(many=True, read_only=True)
+    class Meta:
+        model = Course
+        fields = '__all__'
 
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
