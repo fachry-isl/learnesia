@@ -112,7 +112,7 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
       toast.success("Course created successfully!", { id: loadingToast });
 
       // 3. Navigate to Course Library
-      navigate("/courses");
+      navigate("/admin/templates");
       setActiveSidebar("course_library");
     } catch (error) {
       console.error("Submission error:", error);

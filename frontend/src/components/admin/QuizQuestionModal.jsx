@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { X, RefreshCw, Plus, Trash2 } from "lucide-react";
-import { useQuizQuestionModal } from "../contexts/QuizQuestionModalContext";
+import { useQuizQuestionModal } from "../../contexts/QuizQuestionModalContext";
 
 const QuizQuestionModal = ({ lessonName, onAddQuestionForm }) => {
   const { isQuizModalOpen, setIsQuizModalOpen, questionData } =

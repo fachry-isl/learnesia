@@ -1,5 +1,5 @@
 import { GripVertical, Check, X } from "lucide-react";
-import { useQuizQuestionModal } from "../contexts/QuizQuestionModalContext";
+import { useQuizQuestionModal } from "../../contexts/QuizQuestionModalContext";
 
 const QuizQuestionItem = ({
   question,

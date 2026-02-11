@@ -1,5 +1,5 @@
 import { useState } from "react";
-import CourseTemplateStructureInfo from "../components/CourseTemplateStructureInfo";
+import CourseTemplateStructureInfo from "./CourseTemplateStructureInfo";
 import {
   BookOpen,
   ChevronDown,
@@ -7,7 +7,7 @@ import {
   Target,
   Layers,
 } from "lucide-react";
-import { changeCourseStatus } from "../services/api";
+import { changeCourseStatus } from "../../services/api";
 
 const CourseCardItem = ({ course, isonClickActive, mode = "default" }) => {
   const [expandedCourseObjectives, setExpandedCourseObjectives] = useState({});

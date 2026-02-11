@@ -5,19 +5,19 @@ import CourseTemplateLibrary from "./pages/admin/CourseTemplateLibrary";
 
 import CreateLesson from "./pages/admin/CreateLesson";
 
-import SidebarLessonItem from "./components/SidebarLessonItem";
+import SidebarLessonItem from "./components/admin/SidebarLessonItem";
 import CourseLibrary from "./pages/admin/CourseLibrary";
 import { Toaster } from "react-hot-toast";
 import CourseEditor from "./pages/admin/CourseEditor";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Home from "./pages/public/Home";
-import SidebarContainer from "./components/SidebarContainer";
+import SidebarContainer from "./components/admin/SidebarContainer";
 import PublicLayout from "./layouts/PublicLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50">
       <Toaster />
       {/* Main Content - with left margin to account for fixed sidebar */}
       {/* THE ROUTER MAP */}

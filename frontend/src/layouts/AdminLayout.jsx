@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useSidebar } from "../contexts/SidebarContext";
 
-import SidebarItem from "../components/SidebarItem";
-import SidebarLessonItem from "../components/SidebarLessonItem";
+import SidebarItem from "../components/admin/SidebarItem";
+import SidebarLessonItem from "../components/admin/SidebarLessonItem";
 
 import { BookOpen, PlusCircle, Code2 } from "lucide-react";
 

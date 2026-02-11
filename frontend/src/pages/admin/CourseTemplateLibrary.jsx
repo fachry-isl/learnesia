@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import CourseCardItem from "../../components/CourseCardItem";
+import CourseCardItem from "../../components/admin/CourseCardItem";
 import { getCourse } from "../../services/api";
 
 const CourseTemplateLibrary = () => {

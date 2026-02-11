@@ -15,11 +15,11 @@ import {
 import toast from "react-hot-toast";
 
 // Extracted Components
-import MarkdownRenderer from "../../components/MarkdownRenderer";
-import LearningObjectives from "../../components/LearningObjectives";
-import LessonQuiz from "../../components/LessonQuiz";
-import LessonActions from "../../components/LessonActions";
-import CourseDetailHeader from "../../components/CourseDetailHeader";
+import MarkdownRenderer from "../../components/admin/MarkdownRenderer";
+import LearningObjectives from "../../components/admin/LearningObjectives";
+import LessonQuiz from "../../components/admin/LessonQuiz";
+import LessonActions from "../../components/admin/LessonActions";
+import CourseDetailHeader from "../../components/admin/CourseDetailHeader";
 
 // Helpers
 import {

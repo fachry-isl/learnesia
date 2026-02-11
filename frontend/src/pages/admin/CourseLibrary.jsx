@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom"; // Use Link
 import { getCourse } from "../../services/api";
-import CourseCardItem from "../../components/CourseCardItem";
+import CourseCardItem from "../../components/admin/CourseCardItem";
 import { useSidebar } from "../../contexts/SidebarContext";
 
 const CourseLibrary = () => {

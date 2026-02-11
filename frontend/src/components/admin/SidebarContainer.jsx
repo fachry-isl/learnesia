@@ -1,6 +1,29 @@
 import React from "react";
+import { useSidebar } from "../../contexts/SidebarContext";
+import SidebarItem from "./SidebarItem";
+import SidebarLessonItem from "./SidebarLessonItem";
+import { BookOpen, PlusCircle, Code2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const SidebarContainer = () => {
+  const {
+    sidebarMode,
+    sidebarData,
+    activeSidebar,
+    setActiveSidebar,
+    activeLessonId,
+    setActiveLessonId,
+  } = useSidebar();
+  const navigate = useNavigate();
+
+  const handleSidebarItemClick = (item) => {
+    setActiveSidebar(item);
+  };
+
+  const onBackButtonClicked = () => {
+    navigate(-1);
+  };
+
   return (
     <>
       {/* Sidebar */}
