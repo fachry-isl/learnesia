@@ -1,12 +1,13 @@
 import { Outlet } from "react-router-dom";
 import learnesiaLogo from "../assets/li_logo_full.png";
+import Navbar from "../components/public/Navbar";
 
 const PublicLayout = () => {
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden py-12 px-4">
-      {/* Grid background */}
+    <div className="min-h-screen relative flex flex-col pt-20 z-0">
+      {/* Grid background - Spans the whole screen including under the Navbar */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none -z-10"
         style={{
           backgroundImage: `
             linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
@@ -16,15 +17,16 @@ const PublicLayout = () => {
         }}
       ></div>
 
-      {/* Main content */}
-      <div className="relative flex flex-col z-10 w-full max-w-2xl">
-        {/* Child content (Home page content) */}
-        <main className="flex justify-center">
-          <Outlet />
-        </main>
+      <Navbar />
 
-        {/* Bottom accent */}
-        <div className="h-1 bg-black mt-12"></div>
+      <div className="flex-1 flex items-center justify-center overflow-hidden py-12 px-4 relative z-10">
+        {/* Main content */}
+        <div className="relative flex flex-col w-full max-w-2xl">
+          {/* Child content (Home page content) */}
+          <main className="flex justify-center">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   );

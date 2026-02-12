@@ -6,7 +6,7 @@ import CourseTemplateLibrary from "./pages/admin/CourseTemplateLibrary";
 import CreateLesson from "./pages/admin/CreateLesson";
 
 import SidebarLessonItem from "./components/admin/SidebarLessonItem";
-import CourseLibrary from "./pages/admin/CourseLibrary";
+import AdminCourseLibrary from "./pages/admin/AdminCourseLibrary";
 import { Toaster } from "react-hot-toast";
 import CourseEditor from "./pages/admin/CourseEditor";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
@@ -14,6 +14,7 @@ import Home from "./pages/public/Home";
 import SidebarContainer from "./components/admin/SidebarContainer";
 import PublicLayout from "./layouts/PublicLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import CourseLibrary from "./pages/public/CourseLibrary";
 
 function App() {
   return (
@@ -24,11 +25,12 @@ function App() {
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/courses" element={<CourseLibrary />} />
         </Route>
         {/* Will be Admin Login, but Live it Like this for now*/}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<CourseLibrary />} />
-          <Route path="courses" element={<CourseLibrary />} />
+          <Route index element={<AdminCourseLibrary />} />
+          <Route path="courses" element={<AdminCourseLibrary />} />
           <Route path="courses/:id" element={<CourseEditor />} />{" "}
           {/* Dynamic Route */}
           <Route path="templates" element={<CourseTemplateLibrary />} />

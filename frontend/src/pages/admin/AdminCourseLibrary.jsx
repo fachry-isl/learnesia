@@ -4,7 +4,7 @@ import { getCourse } from "../../services/api";
 import CourseCardItem from "../../components/admin/CourseCardItem";
 import { useSidebar } from "../../contexts/SidebarContext";
 
-const CourseLibrary = () => {
+const AdminCourseLibrary = () => {
   const [courses, setCourses] = useState(null);
   const { setSidebarMode } = useSidebar();
 
@@ -43,4 +43,4 @@ const CourseLibrary = () => {
   );
 };
 
-export default CourseLibrary;
+export default AdminCourseLibrary;

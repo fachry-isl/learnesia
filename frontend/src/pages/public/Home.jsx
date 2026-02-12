@@ -8,11 +8,11 @@ const Home = () => {
       {/* Main Centered Content */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-7xl mx-auto">
         {/* Badge/Tag */}
-        <div className="border-4 border-black bg-black text-white px-6 py-2 mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        {/* <div className="border-4 border-black bg-black text-white px-6 py-2 mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <p className="text-sm font-black uppercase tracking-wider">
             Self Improvement min. 1% sehari
           </p>
-        </div>
+        </div> */}
 
         <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-1 text-center">
           Microlearning dari Apapun,
@@ -23,8 +23,7 @@ const Home = () => {
 
         {/* Description Box */}
         <p className="mt-4 text-lg text-gray-800 font-medium max-w-xl mx-auto">
-          Kami mengumpulkan dan mengemas konten terbaik <br />
-          dari seluruh sudut internet, biar kamu bisa fokus belajar!
+          We made learning more accesible with AI curated content. <br />
         </p>
 
         {/* CTA Buttons */}
@@ -42,6 +41,9 @@ const Home = () => {
             <Sparkles className="w-7 h-7" strokeWidth={3} />
           </button>
         </div>
+
+        {/* Bottom accent */}
+        <div className="h-1 bg-black mt-12 w-full"></div>
       </main>
     </>
   );
