@@ -16,10 +16,10 @@ const AdminCourseLibrary = () => {
 
   const fetchCourses = async () => {
     const course_data = await getCourse();
-    const filtered_course = course_data.filter(
-      (course) => course.status === "draft" || course.status === "published",
-    );
-    setCourses(filtered_course);
+    // const filtered_course = course_data.filter(
+    //   (course) => course.status === "draft" || course.status === "published",
+    //);
+    setCourses(course_data);
   };
 
   return (

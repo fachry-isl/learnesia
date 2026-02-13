@@ -13,6 +13,12 @@ const Navbar = () => {
         {/* Navigation Links */}
         <div className="flex items-center gap-8">
           <a
+            href="/"
+            className="font-bold text-sm uppercase tracking-widest hover:text-blue-600 transition-colors"
+          >
+            Home
+          </a>
+          <a
             href="/courses"
             className="font-bold text-sm uppercase tracking-widest hover:text-blue-600 transition-colors"
           >
