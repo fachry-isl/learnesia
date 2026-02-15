@@ -19,11 +19,10 @@ const PublicLayout = () => {
 
       <Navbar />
 
-      <div className="flex-1 flex items-center justify-center overflow-hidden py-12 px-4 relative z-10">
+      <div className="flex-1 relative z-10 w-full overflow-x-hidden">
         {/* Main content */}
-        <div className="relative flex flex-col w-full max-w-2xl">
-          {/* Child content (Home page content) */}
-          <main className="flex justify-center">
+        <div className="w-full">
+          <main>
             <Outlet />
           </main>
         </div>

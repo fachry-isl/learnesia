@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { getCourse } from "../../services/api";
 import PublicCourseCard from "../../components/public/PublicCourseCard";
+import { useNavigate } from "react-router-dom";
 
 const CourseLibrary = () => {
   const [courses, setCourses] = useState([]);
@@ -11,6 +12,8 @@ const CourseLibrary = () => {
   const [selectedSecondaryCategory, setSelectedSecondaryCategory] =
     useState("All");
   const [isLoading, setIsLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   // Category definitions
   const primaryCategories = [
@@ -85,6 +88,11 @@ const CourseLibrary = () => {
     // In a real implementation, you'd filter based on course.category field
 
     setFilteredCourses(filtered);
+  };
+
+  const onCourseClickHandle = (course) => {
+    navigate(`/course/${course.course_slug}`);
+    console.log("course: ", course);
   };
 
   const handleSearchChange = (e) => {
@@ -170,7 +178,11 @@ const CourseLibrary = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredCourses.map((course) => (
-              <PublicCourseCard key={course.id} course={course} />
+              <PublicCourseCard
+                key={course.id}
+                course={course}
+                onCourseClick={onCourseClickHandle}
+              />
             ))}
           </div>
         )}

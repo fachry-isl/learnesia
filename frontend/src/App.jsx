@@ -15,6 +15,7 @@ import SidebarContainer from "./components/admin/SidebarContainer";
 import PublicLayout from "./layouts/PublicLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import CourseLibrary from "./pages/public/CourseLibrary";
+import CourseDetail from "./pages/public/CourseDetail";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<CourseLibrary />} />
+          <Route path="/course/:course_slug" element={<CourseDetail />} />
         </Route>
         {/* Will be Admin Login, but Live it Like this for now*/}
         <Route path="/admin" element={<AdminLayout />}>

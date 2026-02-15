@@ -33,7 +33,7 @@ export async function getCourse() {
 
 /**
  * Get a specific course by ID
- * @param {number} courseId - Course ID
+ * @param {number} courseId - Course ID or Course Slug
  * @returns {Promise<Object>} Course data
  */
 export async function getCourseById(courseId) {
