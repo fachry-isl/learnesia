@@ -29,6 +29,7 @@ local_settings.py
 # Environment variables
 .env
 .env.local
+.env.*
 
 # IDE
 .vscode/
@@ -46,3 +47,5 @@ Thumbs.db
 htmlcov/
 .pytest_cache/
 .tox/
+
+db_migrate_docs/

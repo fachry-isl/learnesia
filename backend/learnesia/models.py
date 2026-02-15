@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import Max
 
+import re
+
 class Course(models.Model):
     STATUS_CHOICES = [
         ('template', 'Template'),
@@ -10,6 +12,7 @@ class Course(models.Model):
     ]
 
     course_name = models.CharField(max_length=255)
+    course_slug = models.CharField(max_length=255, blank=True, null=True)
     course_description = models.TextField(blank=True)
     course_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,7 +27,22 @@ class Course(models.Model):
 
     def __str__(self):
         return self.course_name
+    
+    def save(self, *args, **kwargs):
+        # Generate Course Slug Name
+        if self.course_slug is None:
+            # The pattern '[^a-zA-Z0-9\s]' matches any character NOT (^) a letter (a-z, A-Z), 
+            # a digit (0-9), or a whitespace character (\s).
+            # It replaces the matched characters with an empty string ('').
+            cleaned_course_name = re.sub(r'[^a-zA-Z0-9\s]', '', self.course_name)
 
+            # Split and make it lower
+            list_name = cleaned_course_name.lower().split(" ")
+
+            # Join with underscore to create final course_slug
+            self.course_slug = "_".join(list_name) if list_name else "untitled-course"
+
+        super().save(*args, **kwargs)
 
 class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')

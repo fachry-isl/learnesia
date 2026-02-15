@@ -42,7 +42,7 @@ class CourseStructure(BaseModel):
     """Represents roadmap for specific subject"""
     course_name: str = Field(..., description="The name of the main subject")
     course_learning_objectives: List[str] = Field(..., description="A list of learning objectives of the course") 
-    course_description: str = Field(..., description="A short description of the course")
+    course_description: str = Field(..., description="Write a very short course description (1–2 sentences, max 35 words) for the following course. Focus on target learner, level, key Excel skills, and work benefit. Use active voice, no fluff.")
     lessons: List[LessonStructure] = Field(..., description="List of lessons in the course")
 
 
@@ -105,6 +105,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    lookup_field='course_slug'
 
     def get_serializer_class(self):
         if self.action == 'list':

@@ -68,22 +68,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # PostgreSQL Database Configuration
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('DB_NAME'),
-#         'USER': config('DB_USER'),
-#         'PASSWORD': config('DB_PASSWORD'),
-#         'HOST': config('DB_HOST', default='localhost'),
-#         'PORT': config('DB_PORT', default='5432'),
-#     }
-# }
-
-# Supabase Database Configuration
-# Add after imports
-DB_SCHEMA = config('DB_SCHEMA', default='public')
-
-# Update DATABASES configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -92,16 +76,32 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-            'connect_timeout': 10,
-            'options': f'-c search_path={DB_SCHEMA},public',
-        },
-        # Pooler connections should not be persistent
-        'CONN_MAX_AGE': 0,
-        'DISABLE_SERVER_SIDE_CURSORS': True,
     }
 }
+
+# Supabase Database Configuration
+# Add after imports
+# DB_SCHEMA = config('DB_SCHEMA', default='public')
+
+# Update DATABASES configuration
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': config('DB_NAME'),
+#         'USER': config('DB_USER'),
+#         'PASSWORD': config('DB_PASSWORD'),
+#         'HOST': config('DB_HOST', default='localhost'),
+#         'PORT': config('DB_PORT', default='5432'),
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#             'connect_timeout': 10,
+#             'options': f'-c search_path={DB_SCHEMA},public',
+#         },
+#         # Pooler connections should not be persistent
+#         'CONN_MAX_AGE': 0,
+#         'DISABLE_SERVER_SIDE_CURSORS': True,
+#     }
+# }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
