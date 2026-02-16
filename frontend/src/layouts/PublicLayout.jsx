@@ -19,7 +19,7 @@ const PublicLayout = () => {
 
       <Navbar />
 
-      <div className="flex-1 relative z-10 w-full overflow-x-hidden">
+      <div className="flex-1 relative z-10 w-full">
         {/* Main content */}
         <div className="w-full">
           <main>

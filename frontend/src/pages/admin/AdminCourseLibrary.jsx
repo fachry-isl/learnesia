@@ -34,7 +34,7 @@ const AdminCourseLibrary = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses?.map((course, idx) => (
           // Improve: Wrap Card in Link
-          <Link to={`/admin/courses/${course.id}`} key={idx}>
+          <Link to={`/admin/courses/${course.course_slug}`} key={idx}>
             <CourseCardItem course={course} />
           </Link>
         ))}
