@@ -19,13 +19,9 @@ const PublicLayout = () => {
 
       <Navbar />
 
-      <div className="flex-1 relative z-10 w-full">
+      <div className="flex-1 relative z-10 w-full flex flex-col">
         {/* Main content */}
-        <div className="w-full">
-          <main>
-            <Outlet />
-          </main>
-        </div>
+        <Outlet />
       </div>
     </div>
   );
