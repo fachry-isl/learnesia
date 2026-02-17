@@ -604,7 +604,7 @@ export async function generateQuiz(params) {
       },
       body: JSON.stringify({
         lesson_summary: params.lesson_summary || "",
-        prompt: params.prompt,
+        prompt: params.prompt || "",
         num_questions: params.num_questions || 3,
         num_options: params.num_options || 4,
       }),
@@ -666,6 +666,31 @@ export async function getQuestionsByQuizId(quizId) {
         },
       },
     );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+/**
+ * Create/Replace a complete Multiple Quiz with Question, Options, Explanations
+ * @param {object} Quizzes - Quizzes Data with lesson_id (lesson)
+ * @returns {Promise<Object>} Created Quiz
+ */
+export async function createQuizzes(quizzes) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/quizzes/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(quizzes),
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

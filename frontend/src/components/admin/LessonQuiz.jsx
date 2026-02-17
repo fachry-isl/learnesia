@@ -17,6 +17,10 @@ const LessonQuiz = ({
     onAddQuestionButton();
   };
 
+  const onGenerateQuizButtonClick = () => {
+    onGenerateQuiz();
+  };
+
   // if (quizzes) {
   //   console.log("Quizzes on LessonQuiz:", quizzes);
   //   console.log("Quizzes Question on LessonQuiz:", quizzes[0].questions);
@@ -81,7 +85,7 @@ const LessonQuiz = ({
           </button>
 
           <button
-            onClick={onGenerateQuiz}
+            onClick={onGenerateQuizButtonClick}
             className="bg-black text-white w-full py-2.5 border-2 border-black font-bold text-sm cursor-pointer hover:bg-yellow-500 transition-colors flex items-center justify-center gap-2"
           >
             <Sparkles className="w-4 h-4" />

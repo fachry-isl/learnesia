@@ -110,7 +110,7 @@ const CourseLibrary = () => {
             big time impact
           </h1>
           <p className="text-lg md:text-xl text-gray-700 font-medium mb-8 max-w-2xl mx-auto">
-            Expert-led. Accredited. Built for the real world.
+            Smartly Curated Content. Available at your Fingertips.
           </p>
 
           {/* Search Bar */}

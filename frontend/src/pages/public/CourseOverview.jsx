@@ -199,7 +199,7 @@ const CourseOverview = () => {
               <p className="text-lg leading-relaxed mb-8">
                 {course.course_description}
               </p>
-              <div className="space-y-6">
+              {/* <div className="space-y-6">
                 <h2 className="text-3xl font-black text-gray-900 tracking-tight">
                   Skills you'll gain
                 </h2>
@@ -213,7 +213,7 @@ const CourseOverview = () => {
                     </span>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               <div className="prose prose-lg max-w-none prose-headings:font-black prose-p:text-gray-600">
                 <h3 className="text-2xl font-black text-gray-900 mt-12 mb-6">

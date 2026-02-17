@@ -11,6 +11,8 @@ import {
   editLesson,
   getQuizDetailbyLessonId,
   generateCourseLesson,
+  generateQuiz,
+  createQuizzes,
 } from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -87,10 +89,6 @@ const CourseEditor = () => {
     }
   };
 
-  // useEffect(() => {
-  //   console.log("isLoadQuiz changed:", isLoadQuiz);
-  // }, [isLoadQuiz]);
-
   // This would get triggered every time user change lesson
   useEffect(() => {
     if (lessonData) {
@@ -110,11 +108,9 @@ const CourseEditor = () => {
       setIsLoadQuiz(false);
     };
 
+    // Get Quiz for this specific lesson id
     loadQuiz();
-    // Improvement Note: Instead of fetching every quiz using GetQuizByLessonIdApi, access quiz from Course.Lessons.Quiz
-    // Turns out its bad because we get All the Course Nested Data on Course Library
-    // Eventough we might not even use it.
-  }, [lessonData, activeLessonId]);
+  }, [activeLessonId]);
 
   if (!course) {
     return (
@@ -127,8 +123,10 @@ const CourseEditor = () => {
 
   const handleSaveChanges = async () => {
     try {
+      // Save Lesson to Backend
       await editLesson(lessonData.id, content);
 
+      // Save Lesson to Frontend
       // Local state update to reflect changes immediately
       setCourse((prev) => ({
         ...prev,
@@ -137,9 +135,20 @@ const CourseEditor = () => {
         ),
       }));
 
-      toast.success("Lesson is Saved");
+      if (!quizzes) {
+        // Append Lesson ID on quizzes react state on payload
+        const quizzesWithLesson = {
+          ...quizzes,
+          lesson: lessonData.id,
+        };
+
+        // console.log("Quizzes with Lesson ID: ", quizzesWithLesson);
+        await createQuizzes(quizzesWithLesson);
+      }
+
+      toast.success("Changes is Saved");
     } catch (error) {
-      toast.error("Failed to save lesson");
+      toast.error("Failed to save Changes");
     }
   };
 
@@ -178,7 +187,7 @@ const CourseEditor = () => {
 
   const onAddQuestionFormHandler = async (question_data) => {
     //console.log("Question Data: ", question_data);
-    window.alert(JSON.stringify(question_data));
+    // window.alert(JSON.stringify(question_data));
 
     const newQuestion = {
       question_text: question_data.question_text,
@@ -279,6 +288,37 @@ const CourseEditor = () => {
     toast.success("Question deleted: ", response);
   };
 
+  const generateQuizwithAIApi = async () => {
+    try {
+      const lessonSummary = `
+      Learning Objectives:
+      ${JSON.stringify(lessonData.lesson_learning_objectives)}
+
+      Lesson Content:
+      ${lessonData.lesson_content}
+      `;
+      // console.log(lessonData);
+      // window.alert(lessonSummary);
+
+      const quizParams = {
+        lesson_summary: lessonSummary,
+        prompt: `Create questions about ${lessonData.lessonName}`,
+        num_questions: 3,
+        num_options: 4,
+      };
+      const response = await generateQuiz(quizParams);
+
+      console.log("Quizzes Generated: ", response);
+      setQuizzes(response.response);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const onGenerateQuizHandler = () => {
+    generateQuizwithAIApi();
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden font-sans">
       <CourseDetailHeader
@@ -328,7 +368,7 @@ const CourseEditor = () => {
             onQuizDelete={onDeleteQuestionHandler}
             onAddQuestionButton={onAddQuestionButtonHandler}
             onAddQuestionForm={onAddQuestionFormHandler}
-            onGenerateQuiz={() => console.log("Generate Quiz")}
+            onGenerateQuiz={onGenerateQuizHandler}
           />
           <LessonActions
             onGenerateLesson={handleGenerateLesson}

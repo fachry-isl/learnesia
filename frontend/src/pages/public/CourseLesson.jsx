@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import MarkdownRenderer from "../../components/admin/MarkdownRenderer";
+import { getSortedLessons } from "../../utils/courseHelpers";
 
 const CourseLesson = () => {
   const { course_slug, lesson_id } = useParams();
@@ -23,6 +24,9 @@ const CourseLesson = () => {
   const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // const sortedLessons = course ? getSortedLessons(course?.lesson) : [];
+  // const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
 
   useEffect(() => {
     const fetchData = async () => {
