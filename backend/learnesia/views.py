@@ -24,6 +24,8 @@ from langchain.chat_models import init_chat_model
 from typing import List, Optional
 from dotenv import load_dotenv
 
+from django.shortcuts import get_object_or_404
+
 # Load environment variable
 load_dotenv()
 
@@ -105,12 +107,27 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    lookup_field='course_slug'
+    lookup_field = 'course_slug'  # Router uses {course_slug}
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        lookup_value = self.kwargs.get(self.lookup_field)
+
+        # If it's all digits, treat it as ID, otherwise treat it as slug
+        if lookup_value.isdigit():
+            obj = get_object_or_404(queryset, pk=int(lookup_value))
+        else:
+            obj = get_object_or_404(queryset, course_slug=lookup_value)
+
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     def get_serializer_class(self):
         if self.action == 'list':
             return CourseListSerializer
         return CourseSerializer
+
+    
 
     @action(detail=False, methods=['post'], url_path='generate')
     def generate(self, request):
