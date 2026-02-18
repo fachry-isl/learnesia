@@ -539,14 +539,14 @@ class QuizViewSet(viewsets.ModelViewSet):
         """
         try:
             lesson_summary = request.data.get('lesson_summary')
-            prompt = request.data.get('prompt')
+            prompt = request.data.get('prompt', "")
             num_questions = request.data.get('num_questions', 3)
             num_options = request.data.get('num_options', 4)
             
             # Validation        
-            if not prompt:
+            if not lesson_summary:
                 return Response(
-                    {'error': 'Prompt is required'}, 
+                    {'error': 'lesson_summary is required'}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -557,7 +557,8 @@ class QuizViewSet(viewsets.ModelViewSet):
             Generate a quiz with exactly {num_questions} questions.
             Each question should have {num_options} answer options.
             Ensure only ONE option per question is marked as correct (is_correct=True).
-            Provide clear explanations for why the correct answer is right.
+            Provide clear explanations for why the correct answer is right. 
+            Make the key answers varied between options to prevent Pattern Recognition
             
             Context: This quiz is for the lesson "{lesson_summary}".
             """
