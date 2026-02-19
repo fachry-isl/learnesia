@@ -1,6 +1,7 @@
 import React from "react";
 import { BookOpen, Clock, Target, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
+import Logo from "../../assets/li_logo_full.png";
 
 const PublicCourseCard = ({ course, onCourseClick }) => {
   // Calculate total estimated time (10 min per lesson)
@@ -23,8 +24,20 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
       className="h-full flex flex-col bg-white rounded-lg border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 overflow-hidden"
     >
       {/* Course Image/Icon - Reduced height */}
-      <div className="h-32 bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-        <BookOpen className="w-12 h-12 text-white" strokeWidth={2.5} />
+      <div className="h-40 bg-white flex items-center justify-center border-b-4 border-black p-4">
+        {course.image ? (
+          <img
+            src={course.image}
+            alt={course.course_name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <img
+            src={Logo}
+            alt="Learnesia Logo"
+            className="max-w-full max-h-full object-contain"
+          />
+        )}
       </div>
 
       {/* Course Content - Reduced padding */}
