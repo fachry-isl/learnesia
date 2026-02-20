@@ -25,8 +25,11 @@ const CourseLesson = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // const sortedLessons = course ? getSortedLessons(course?.lesson) : [];
-  // const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
+  const sortedLessons = course ? getSortedLessons(course?.lessons) : [];
+  // const lessonData = sortedLessons.find((l) => l.id === 0);
+
+  console.log("Course", course?.lessons);
+  console.log("sortedLessons: ", sortedLessons);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +40,7 @@ const CourseLesson = () => {
           getLessonById(lesson_id),
           getCourseById(course_slug),
         ]);
+
         setLesson(lessonData);
         setCourse(courseData);
       } catch (error) {
@@ -81,14 +85,14 @@ const CourseLesson = () => {
   }
 
   // Find current lesson index to determine prev/next
-  const currentLessonIndex = course.lessons?.findIndex(
+  const currentLessonIndex = sortedLessons?.findIndex(
     (l) => l.id === parseInt(lesson_id) || l.id === lesson.id,
   );
 
   const prevLesson =
     currentLessonIndex > 0 ? course.lessons[currentLessonIndex - 1] : null;
   const nextLesson =
-    currentLessonIndex < (course.lessons?.length || 0) - 1
+    currentLessonIndex < (sortedLessons?.length || 0) - 1
       ? course.lessons[currentLessonIndex + 1]
       : null;
 
@@ -143,7 +147,7 @@ const CourseLesson = () => {
                 className="bg-black h-1.5 rounded-full"
                 style={{
                   width: `${
-                    ((currentLessonIndex + 1) / (course.lessons?.length || 1)) *
+                    ((currentLessonIndex + 1) / (sortedLessons?.length || 1)) *
                     100
                   }%`,
                 }}
@@ -151,8 +155,7 @@ const CourseLesson = () => {
             </div>
             <span>
               {Math.round(
-                ((currentLessonIndex + 1) / (course.lessons?.length || 1)) *
-                  100,
+                ((currentLessonIndex + 1) / (sortedLessons?.length || 1)) * 100,
               )}
               %
             </span>
@@ -164,7 +167,7 @@ const CourseLesson = () => {
             Lessons
           </div>
           <nav className="space-y-1">
-            {course.lessons?.map((l, index) => {
+            {sortedLessons?.map((l, index) => {
               const isActive = l.id === lesson.id;
               const isCompleted = index < currentLessonIndex;
 
@@ -229,7 +232,7 @@ const CourseLesson = () => {
                 Lesson {currentLessonIndex + 1}
               </span>
               <span className="text-gray-300">/</span>
-              <span>{course.lessons?.length || 0}</span>
+              <span>{sortedLessons?.length || 0}</span>
             </div>
 
             <div className="flex items-center gap-2">
