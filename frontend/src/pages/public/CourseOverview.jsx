@@ -45,6 +45,13 @@ const CourseOverview = () => {
     try {
       setIsLoading(true);
       const response = await getCourseById(slug);
+
+      if (response.lessons) {
+        response.lessons = [...response.lessons].sort(
+          (a, b) => a.order - b.order,
+        );
+      }
+
       setCourse(response);
 
       // Initialize module expansion
