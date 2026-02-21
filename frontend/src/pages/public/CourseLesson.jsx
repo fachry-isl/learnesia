@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getLessonById, getCourseById } from "../../services/api";
+import {
+  getLessonById,
+  getCourseById,
+  getQuizByLessonId,
+} from "../../services/api";
+import LessonQuizWidget from "../../components/public/LessonQuizWidget";
 import {
   ArrowLeft,
   Clock,
@@ -24,25 +29,29 @@ const CourseLesson = () => {
   const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [quiz, setQuiz] = useState(null);
 
   const sortedLessons = course ? getSortedLessons(course?.lessons) : [];
   // const lessonData = sortedLessons.find((l) => l.id === 0);
 
-  console.log("Course", course?.lessons);
-  console.log("sortedLessons: ", sortedLessons);
+  // console.log("Course", course?.lessons);
+  // console.log("sortedLessons: ", sortedLessons);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        // Fetch both lesson and course data in parallel
-        const [lessonData, courseData] = await Promise.all([
+        // Fetch lesson, course, and quiz data in parallel
+        const [lessonData, courseData, quizData] = await Promise.all([
           getLessonById(lesson_id),
           getCourseById(course_slug),
+          getQuizByLessonId(lesson_id, "full"),
         ]);
 
         setLesson(lessonData);
         setCourse(courseData);
+        // Quiz is usually an array, get the first one if it exists
+        setQuiz(Array.isArray(quizData) ? quizData[0] : quizData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -90,10 +99,10 @@ const CourseLesson = () => {
   );
 
   const prevLesson =
-    currentLessonIndex > 0 ? course.lessons[currentLessonIndex - 1] : null;
+    currentLessonIndex > 0 ? sortedLessons[currentLessonIndex - 1] : null;
   const nextLesson =
     currentLessonIndex < (sortedLessons?.length || 0) - 1
-      ? course.lessons[currentLessonIndex + 1]
+      ? sortedLessons[currentLessonIndex + 1]
       : null;
 
   return (
@@ -295,6 +304,9 @@ const CourseLesson = () => {
                 }
               />
             </section>
+
+            {/* Quiz Section */}
+            {quiz && <LessonQuizWidget quiz={quiz} />}
 
             {/* Footer Controls */}
             <footer className="pt-12 border-t border-gray-100">
