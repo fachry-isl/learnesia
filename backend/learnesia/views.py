@@ -342,6 +342,7 @@ class LessonViewSet(viewsets.ModelViewSet):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    lookup_field = 'lesson_slug'
 
     @action(detail=False, methods=['post'], url_path='generate')
     def generate(self, request):
