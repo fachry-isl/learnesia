@@ -36,7 +36,7 @@ function App() {
               path="/course/:course_slug/overview"
               element={<CourseOverview />}
             />
-            <Route path="lesson/:lesson_id" element={<CourseLesson />} />
+            <Route path="lesson/:lesson_slug" element={<CourseLesson />} />
           </Route>
         </Route>
         {/* Will be Admin Login, but Live it Like this for now*/}

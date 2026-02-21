@@ -23,7 +23,7 @@ import MarkdownRenderer from "../../components/admin/MarkdownRenderer";
 import { getSortedLessons } from "../../utils/courseHelpers";
 
 const CourseLesson = () => {
-  const { course_slug, lesson_id } = useParams();
+  const { course_slug, lesson_slug } = useParams();
   const navigate = useNavigate();
   const [lesson, setLesson] = useState(null);
   const [course, setCourse] = useState(null);
@@ -32,8 +32,8 @@ const CourseLesson = () => {
   const [quiz, setQuiz] = useState(null);
 
   const sortedLessons = course ? getSortedLessons(course?.lessons) : [];
-  // const lessonData = sortedLessons.find((l) => l.id === 0);
 
+  // console.log("Lesson Slug", lesson_slug);
   // console.log("Course", course?.lessons);
   // console.log("sortedLessons: ", sortedLessons);
 
@@ -42,15 +42,18 @@ const CourseLesson = () => {
       try {
         setIsLoading(true);
         // Fetch lesson, course, and quiz data in parallel
-        const [lessonData, courseData, quizData] = await Promise.all([
-          getLessonById(lesson_id),
+        const [lessonData, courseData] = await Promise.all([
+          getLessonById(lesson_slug),
           getCourseById(course_slug),
-          getQuizByLessonId(lesson_id, "full"),
         ]);
 
         setLesson(lessonData);
         setCourse(courseData);
-        // Quiz is usually an array, get the first one if it exists
+
+        // console.log("LessonData: ", lessonData);
+
+        const quizData = await getQuizByLessonId(lessonData.id, "full");
+        //Quiz is usually an array, get the first one if it exists
         setQuiz(Array.isArray(quizData) ? quizData[0] : quizData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -62,7 +65,7 @@ const CourseLesson = () => {
     fetchData();
     // Close sidebar on navigation change on mobile
     setIsSidebarOpen(false);
-  }, [lesson_id, course_slug]);
+  }, [lesson_slug, course_slug]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -95,7 +98,7 @@ const CourseLesson = () => {
 
   // Find current lesson index to determine prev/next
   const currentLessonIndex = sortedLessons?.findIndex(
-    (l) => l.id === parseInt(lesson_id) || l.id === lesson.id,
+    (l) => l.lesson_slug === lesson.lesson_slug,
   );
 
   const prevLesson =
@@ -177,13 +180,13 @@ const CourseLesson = () => {
           </div>
           <nav className="space-y-1">
             {sortedLessons?.map((l, index) => {
-              const isActive = l.id === lesson.id;
+              const isActive = l.lesson_slug === lesson.lesson_slug;
               const isCompleted = index < currentLessonIndex;
 
               return (
                 <Link
-                  key={l.id}
-                  to={`/course/${course_slug}/lesson/${l.id}`}
+                  key={l.lesson_slug}
+                  to={`/course/${course_slug}/lesson/${l.lesson_slug}`}
                   className={`
                     w-full flex items-start gap-3 px-6 py-3 transition-colors border-l-4
                     ${
@@ -314,7 +317,9 @@ const CourseLesson = () => {
                 {prevLesson ? (
                   <button
                     onClick={() =>
-                      navigate(`/course/${course_slug}/lesson/${prevLesson.id}`)
+                      navigate(
+                        `/course/${course_slug}/lesson/${prevLesson.lesson_slug}`,
+                      )
                     }
                     className="flex flex-col items-start p-4 rounded-xl border-2 border-gray-100 hover:border-black transition-all group text-left"
                   >
@@ -332,7 +337,9 @@ const CourseLesson = () => {
                 {nextLesson ? (
                   <button
                     onClick={() =>
-                      navigate(`/course/${course_slug}/lesson/${nextLesson.id}`)
+                      navigate(
+                        `/course/${course_slug}/lesson/${nextLesson.lesson_slug}`,
+                      )
                     }
                     className="flex flex-col items-end p-4 rounded-xl bg-black text-white hover:bg-gray-800 transition-all text-right shadow-lg shadow-gray-200"
                   >

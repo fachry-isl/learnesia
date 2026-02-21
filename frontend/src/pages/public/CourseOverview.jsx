@@ -180,7 +180,7 @@ const CourseOverview = () => {
                 <button
                   onClick={() =>
                     navigate(
-                      `/course/${course_slug}/lesson/${course.lessons[0]?.id}`,
+                      `/course/${course_slug}/lesson/${course.lessons[0]?.lesson_slug}`,
                     )
                   }
                   className="w-full py-4 bg-black text-white font-black rounded-xl shadow-xl shadow-gray-200 hover:bg-gray-900 hover:-translate-y-0.5 transition-all active:translate-y-0 uppercase text-xs tracking-widest flex items-center justify-center gap-2"
