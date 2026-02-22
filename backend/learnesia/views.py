@@ -344,6 +344,19 @@ class LessonViewSet(viewsets.ModelViewSet):
     serializer_class = LessonSerializer
     lookup_field = 'lesson_slug'
 
+    def get_object(self):
+        queryset = self.get_queryset()
+        lookup_value = self.kwargs.get(self.lookup_field)
+
+        # If it's all digits, treat it as ID, otherwise treat it as slug
+        if lookup_value.isdigit():
+            obj = get_object_or_404(queryset, pk=int(lookup_value))
+        else:
+            obj = get_object_or_404(queryset, lesson_slug=lookup_value)
+
+        self.check_object_permissions(self.request, obj)
+        return obj
+
     @action(detail=False, methods=['post'], url_path='generate')
     def generate(self, request):
         """
@@ -553,8 +566,6 @@ class QuizViewSet(viewsets.ModelViewSet):
             
             # Enhanced prompt with context
             enhanced_prompt = f"""
-            {prompt}
-            
             Generate a quiz with exactly {num_questions} questions.
             Each question should have {num_options} answer options.
             Ensure only ONE option per question is marked as correct (is_correct=True).
