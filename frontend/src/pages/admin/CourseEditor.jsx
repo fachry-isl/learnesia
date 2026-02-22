@@ -13,6 +13,7 @@ import {
   generateCourseLesson,
   generateQuiz,
   createQuizzes,
+  updateQuiz,
 } from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -135,15 +136,19 @@ const CourseEditor = () => {
         ),
       }));
 
-      if (!quizzes) {
+      if (quizzes) {
         // Append Lesson ID on quizzes react state on payload
+        console.log("Quizzes: ", quizzes);
         const quizzesWithLesson = {
           ...quizzes,
           lesson: lessonData.id,
         };
 
-        // console.log("Quizzes with Lesson ID: ", quizzesWithLesson);
-        await createQuizzes(quizzesWithLesson);
+        if (quizzes.id) {
+          await updateQuiz(quizzes.id, quizzesWithLesson);
+        } else {
+          await createQuizzes(quizzesWithLesson);
+        }
       }
 
       toast.success("Changes is Saved");
@@ -290,6 +295,12 @@ const CourseEditor = () => {
 
   const generateQuizwithAIApi = async () => {
     try {
+      // If quizzes already exist, in this case it got regenerated. We store the ID
+      let quiz_id = null;
+      if (quizzes) {
+        quiz_id = quizzes.id;
+      }
+
       const lessonSummary = `
       Learning Objectives:
       ${JSON.stringify(lessonData.lesson_learning_objectives)}
@@ -309,7 +320,12 @@ const CourseEditor = () => {
       const response = await generateQuiz(quizParams);
 
       console.log("Quizzes Generated: ", response);
-      setQuizzes(response.response);
+
+      if (quiz_id) {
+        setQuizzes({ ...response.response, id: quiz_id });
+      } else {
+        setQuizzes(response.response);
+      }
     } catch (error) {
       throw error;
     }
