@@ -294,6 +294,7 @@ const CourseEditor = () => {
   };
 
   const generateQuizwithAIApi = async () => {
+    const loadingToast = toast.loading("Generating Quiz...");
     try {
       // If quizzes already exist, in this case it got regenerated. We store the ID
       let quiz_id = null;
@@ -320,6 +321,7 @@ const CourseEditor = () => {
       const response = await generateQuiz(quizParams);
 
       console.log("Quizzes Generated: ", response);
+      toast.success("Quiz Generated Succesfully!", { id: loadingToast });
 
       if (quiz_id) {
         setQuizzes({ ...response.response, id: quiz_id });
@@ -327,6 +329,7 @@ const CourseEditor = () => {
         setQuizzes(response.response);
       }
     } catch (error) {
+      toast.error("Failed to generate quiz", { id: loadingToast });
       throw error;
     }
   };
