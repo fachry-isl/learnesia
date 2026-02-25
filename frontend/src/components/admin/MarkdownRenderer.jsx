@@ -3,6 +3,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import YoutubeEmbed from "./YoutubeEmbed";
 
 const markdownComponents = {
   // Custom code block with syntax highlighting
@@ -25,6 +26,17 @@ const markdownComponents = {
       >
         {children}
       </code>
+    );
+  },
+  // Youtube Renderer
+  a: ({ href, children, ...props }) => {
+    if (YoutubeEmbed.isYoutubeUrl(href)) {
+      return <YoutubeEmbed url={href} />;
+    }
+    return (
+      <a href={href} target="_blank" rel="noreferrer" {...props}>
+        {children}
+      </a>
     );
   },
 
@@ -62,16 +74,16 @@ const markdownComponents = {
   },
 
   // Custom link styling
-  a: ({ href, children }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 underline font-semibold hover:text-blue-800 transition-colors"
-    >
-      {children}
-    </a>
-  ),
+  // a: ({ href, children }) => (
+  //   <a
+  //     href={href}
+  //     target="_blank"
+  //     rel="noopener noreferrer"
+  //     className="text-blue-600 underline font-semibold hover:text-blue-800 transition-colors"
+  //   >
+  //     {children}
+  //   </a>
+  // ),
 
   // Custom horizontal rule with proper spacing
   hr: () => <hr className="my-8 border-t-2 border-gray-300" />,
@@ -89,9 +101,9 @@ const markdownComponents = {
   ),
   li: ({ children }) => <li className="ml-0 pl-2">{children}</li>,
 
-  // Custom blockquote styling
+  // Custom blockquote styling - black UI match
   blockquote: ({ children }) => (
-    <blockquote className="border-l-4 border-yellow-400 bg-yellow-50 pl-4 py-2 my-4 italic">
+    <blockquote className="border-l-4 border-black bg-gray-50 pl-4 py-2 my-4 italic text-gray-800">
       {children}
     </blockquote>
   ),
