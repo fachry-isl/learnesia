@@ -148,7 +148,11 @@ const CourseEditor = () => {
         if (quizzes.id) {
           await updateQuiz(quizzes.id, quizzesWithLesson);
         } else {
-          await createQuizzes(quizzesWithLesson);
+          const response = await createQuizzes(quizzesWithLesson);
+          console.log("Create Quizzes:", response);
+
+          // If first time create quiz, append Quiz ID for subsequent Update
+          setQuizzes(response);
         }
       }
 
