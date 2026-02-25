@@ -83,7 +83,7 @@ const CourseEditor = () => {
   const fetchQuizbyLessonId = async (lesson_id) => {
     try {
       const response = await getQuizDetailbyLessonId(lesson_id);
-      // console.log("QuizbyLessonID: ", response[0]);
+      console.log("QuizbyLessonID: ", response[0]);
       setQuizzes(response[0]);
     } catch (error) {
       throw error;
@@ -123,6 +123,7 @@ const CourseEditor = () => {
   }
 
   const handleSaveChanges = async () => {
+    const loadingToast = toast.loading("Saving Changes...");
     try {
       // Save Lesson to Backend
       await editLesson(lessonData.id, content);
@@ -151,9 +152,9 @@ const CourseEditor = () => {
         }
       }
 
-      toast.success("Changes is Saved");
+      toast.success("Changes is Saved", { id: loadingToast });
     } catch (error) {
-      toast.error("Failed to save Changes");
+      toast.error("Failed to save Changes", { id: loadingToast });
     }
   };
 
