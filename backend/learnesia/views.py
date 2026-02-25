@@ -402,7 +402,8 @@ class LessonViewSet(viewsets.ModelViewSet):
             - Generate around 600 words or 5 minutes reading content.
             - Avoid technical jargon and make it relevant and easy to understand for beginner
             - For concept word like budgeting try use english instead of translate it to bahasa. For example "budgeting" instead of "anggaran" to avoid confusion.
-
+            - Explore from best quality source from the internet, from Article, Video, Books, Paper. Found the effective, best practice methods, and expert opinion based on the topic.
+           
             ## Output Format
             # Lesson Topic
             [Module Content]
