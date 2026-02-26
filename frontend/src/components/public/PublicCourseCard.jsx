@@ -41,22 +41,22 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
       </div>
 
       {/* Course Content - Reduced padding */}
-      <div className="p-4">
-        {/* Course Title - Smaller font */}
-        <h3 className="text-base font-black text-gray-900 mb-1.5 line-clamp-2 group-hover:text-emerald-600 transition-colors">
+      <div className="flex flex-col flex-1 p-4">
+        {/* Course Title */}
+        <h3 className="text-base font-black text-gray-900 mb-1.5 line-clamp-2 group-hover:text-black transition-colors">
           {course.course_name}
         </h3>
 
-        {/* Course Description - Reduced margin */}
-        <p className="text-xs text-gray-600 mb-3">
+        {/* Course Description - grows to push stats down */}
+        <p className="text-xs text-gray-600 mb-3 flex-1">
           {course.course_description}
         </p>
 
         {/* Stats - Inline compact layout */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="grid grid-cols-2 gap-2 mt-auto">
           {/* Lessons Count */}
           <div className="flex items-center gap-1.5 bg-gray-50 border-2 border-black px-2 py-1.5 rounded">
-            <BookOpen className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
+            <BookOpen className="w-4 h-4 text-black-600" strokeWidth={2.5} />
             <div className="flex-1">
               <p className="text-[10px] font-bold text-gray-500 uppercase leading-tight">
                 Lessons
@@ -69,20 +69,20 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
 
           {/* Estimated Time */}
           <div className="flex items-center gap-1.5 bg-gray-50 border-2 border-black px-2 py-1.5 rounded">
-            <Clock className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
+            <Clock className="w-4 h-4 text-black" strokeWidth={2.5} />
             <div className="flex-1">
               <p className="text-[10px] font-bold text-gray-500 uppercase leading-tight">
                 Duration
               </p>
               <p className="text-sm font-black text-gray-900">
-                {estimatedTime}m
+                {course.estimated_time}m
               </p>
             </div>
           </div>
 
           {/* Total Objectives */}
           <div className="flex items-center gap-1.5 bg-gray-50 border-2 border-black px-2 py-1.5 rounded">
-            <Target className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
+            <Target className="w-4 h-4 text-black" strokeWidth={2.5} />
             <div className="flex-1">
               <p className="text-[10px] font-bold text-gray-500 uppercase leading-tight">
                 Objectives
@@ -95,7 +95,7 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
 
           {/* Course Goals */}
           <div className="flex items-center gap-1.5 bg-gray-50 border-2 border-black px-2 py-1.5 rounded">
-            <Layers className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
+            <Layers className="w-4 h-4 text-black" strokeWidth={2.5} />
             <div className="flex-1">
               <p className="text-[10px] font-bold text-gray-500 uppercase leading-tight">
                 Goals
