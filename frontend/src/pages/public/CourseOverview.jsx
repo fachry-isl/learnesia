@@ -2,26 +2,13 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCourseById } from "../../services/api";
 import {
-  BookOpen,
   Clock,
   CheckCircle,
-  ArrowLeft,
   PlayCircle,
-  Award,
   ChevronRight,
-  Target,
-  Sparkles,
-  Layers,
-  Calendar,
-  User,
   ChevronDown,
   ChevronUp,
-  FileText,
-  HelpCircle,
-  ShieldCheck,
-  Globe,
 } from "lucide-react";
-import MarkdownRenderer from "../../components/admin/MarkdownRenderer";
 
 const CourseOverview = () => {
   const [course, setCourse] = useState(null);
@@ -113,7 +100,7 @@ const CourseOverview = () => {
       <div className="flex flex-col items-center justify-center min-h-[60vh] w-full">
         <div className="w-12 h-12 border-4 border-black border-t-black-500 rounded-full animate-spin"></div>
         <p className="mt-4 font-bold text-gray-500 uppercase tracking-widest text-sm">
-          Preparing Your Intelligence...
+          Preparing Your Course...
         </p>
       </div>
     );
@@ -164,7 +151,6 @@ const CourseOverview = () => {
                 {navItems.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => scrollToSection(item.id)}
                     className={`w-full text-left px-4 py-3 text-sm font-bold border-l-4 transition-all ${
                       activeSection === item.id
                         ? "border-black-500 text-gray-900 bg-black-50/50"
@@ -232,7 +218,7 @@ const CourseOverview = () => {
                       key={i}
                       className="flex items-start gap-4 list-none text-gray-700 font-medium italic text-sm"
                     >
-                      <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-1" />
+                      <CheckCircle className="w-5 h-5 text-black shrink-0 mt-1" />
                       <span>{obj}</span>
                     </li>
                   ))}
@@ -275,15 +261,12 @@ const CourseOverview = () => {
                           <div className="flex items-center gap-4 text-xs font-bold text-gray-400">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              {lesson.lesson_learning_objectives
-                                ?.find((o) => o.toLowerCase().includes("time"))
-                                ?.replace(/estimate time to complete: /i, "") ||
-                                "15m"}
+                              {`${lesson.estimated_time} min`}
                             </span>
-                            <span className="flex items-center gap-1">
+                            {/* <span className="flex items-center gap-1">
                               <FileText className="w-3 h-3" />1 Intelligence
                               Unit
-                            </span>
+                            </span> */}
                           </div>
                         </div>
                         {isExpanded ? (

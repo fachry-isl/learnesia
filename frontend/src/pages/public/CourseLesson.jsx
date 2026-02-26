@@ -215,7 +215,7 @@ const CourseLesson = () => {
                     </p>
                     <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {l.duration || "15 min"}
+                      {`${l.estimated_time} min` || "15 min"}
                     </p>
                   </div>
                 </Link>
@@ -266,7 +266,9 @@ const CourseLesson = () => {
                 </span>
                 <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>{lesson.duration || "15 min read"}</span>
+                  <span>
+                    {`${lesson.estimated_time} min read` || "15 min read"}
+                  </span>
                 </div>
               </div>
 
@@ -276,8 +278,8 @@ const CourseLesson = () => {
 
               {lesson.lesson_learning_objectives &&
                 lesson.lesson_learning_objectives.length > 0 && (
-                  <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                    <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
+                  <div className="border-2 border-black rounded-2xl p-6">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-black-400 mb-4 flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-black" />
                       Learning Objectives
                     </h2>
