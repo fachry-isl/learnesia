@@ -10,7 +10,7 @@ class LessonSerializer(serializers.ModelSerializer):
 class LessonCompactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = ['id', 'course', 'lesson_name', 'lesson_learning_objectives', 'order', 'created_at']
+        fields = ['id', 'course', 'lesson_name', 'lesson_learning_objectives', 'order', 'estimated_time', 'created_at']
 
 
 class CourseSerializer(serializers.ModelSerializer):

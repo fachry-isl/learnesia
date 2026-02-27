@@ -15,8 +15,8 @@ class Course(models.Model):
     course_slug = models.CharField(max_length=255, blank=True, null=True)
     course_description = models.TextField(blank=True)
     course_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
+    course_tags = ArrayField(models.CharField(max_length=255, blank=True, default=list))
     created_at = models.DateTimeField(auto_now_add=True)
-
 
     status = models.CharField(
         max_length=20,
@@ -24,9 +24,17 @@ class Course(models.Model):
         default='template',
         db_index=True
     )
+    estimated_time = models.PositiveIntegerField(default=0, help_text="Estimated time to complete in minutes")
 
     def __str__(self):
         return self.course_name
+    
+    def update_estimated_time(self):
+        """Recalculate total estimated time from lessons"""
+        total_time = self.lessons.aggregate(models.Sum('estimated_time'))['estimated_time__sum'] or 0
+        if self.estimated_time != total_time:
+            self.estimated_time = total_time
+            self.save(update_fields=['estimated_time'])
     
     def save(self, *args, **kwargs):
         # Generate Course Slug Name
@@ -51,8 +59,8 @@ class Lesson(models.Model):
     lesson_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
     lesson_content = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
     order = models.PositiveIntegerField(default=0, db_index=True)
+    estimated_time = models.PositiveIntegerField(default=0, help_text="Estimated time to complete in minutes")
 
     def __str__(self):
         return self.lesson_name
@@ -71,7 +79,18 @@ class Lesson(models.Model):
             # Join with underscore to create final course_slug
             self.lesson_slug = "-".join(list_name) if list_name else "untitled-course"
 
+        # Calculate estimated reading time
+        if self.lesson_content:
+            words = re.findall(r'\w+', self.lesson_content)
+            self.estimated_time = max(1, round(len(words) / 200))
+        else:
+            self.estimated_time = 0
+
         super().save(*args, **kwargs)
+
+        # Update parent course estimated time
+        if self.course:
+            self.course.update_estimated_time()
 
 class LessonReference(models.Model):
     REFERENCE_TYPE_CHOICES = [

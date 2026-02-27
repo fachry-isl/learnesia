@@ -130,7 +130,7 @@ const CourseLibrary = () => {
       </section>
 
       {/* Primary Category Filters */}
-      <section className="border-b-2 border-gray-200">
+      <section>
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {primaryCategories.map((category) => (

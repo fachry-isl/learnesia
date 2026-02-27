@@ -224,7 +224,7 @@ class CourseViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            model = init_chat_model("gemini-2.0-flash", model_provider="google_genai", temperature=0)
+            model = init_chat_model("gemini-2.5-flash", model_provider="google_genai", temperature=0)
             structured_llm = model.with_structured_output(schema=CourseStructure)
 
             prompt = f"""
