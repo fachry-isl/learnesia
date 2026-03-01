@@ -1,8 +1,73 @@
+import axios from "axios";
+
 // ============================================================================
 // Base Configuration
 // ============================================================================
 
-const API_BASE_URL = "http://localhost:8000/api";
+const PUBLIC_API_BASE_URL =
+  import.meta.env.VITE_API_PUBLIC_URL || "http://localhost:8000/api";
+const PRIVATE_API_BASE_URL =
+  import.meta.env.VITE_API_PRIVATE_URL || "http://localhost:8000/api";
+const PERPLEXICA_API_URL = "http://100.122.67.1:3000";
+
+const publicApi = axios.create({
+  baseURL: PUBLIC_API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+const privateApi = axios.create({
+  baseURL: PRIVATE_API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+privateApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// 401 → auto refresh logic only on privateApi
+privateApi.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const original = error.config;
+    if (error.response?.status === 401 && !original._retry) {
+      original._retry = true;
+      try {
+        const refresh = localStorage.getItem("refreshToken");
+        const { data } = await publicApi.post("/auth/refresh/", { refresh });
+        localStorage.setItem("accessToken", data.access);
+        original.headers.Authorization = `Bearer ${data.access}`;
+        return privateApi(original);
+      } catch {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
+const perplexicaApi = axios.create({
+  baseURL: PERPLEXICA_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Authentication (new)
+export async function loginToGetAuthToken(username_, password_) {
+  const response = await publicApi.post("/token/", {
+    username: username_,
+    password: password_,
+  });
+
+  return response.data;
+}
 
 // ============================================================================
 // Course API Functions
@@ -13,46 +78,18 @@ const API_BASE_URL = "http://localhost:8000/api";
  * @returns {Promise<Array>} List of courses
  */
 export async function getCourse() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/courses/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get("/courses/");
+  return response.data;
 }
 
 /**
  * Get a specific course by ID
- * @param {number} courseId - Course ID or Course Slug
+ * @param {number|string} courseId - Course ID or Course Slug
  * @returns {Promise<Object>} Course data
  */
 export async function getCourseById(courseId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get(`/courses/${courseId}/`);
+  return response.data;
 }
 
 /**
@@ -62,78 +99,44 @@ export async function getCourseById(courseId) {
  */
 export async function createCourse(courseData) {
   try {
-    const response = await fetch(`${API_BASE_URL}/courses/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(courseData),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        JSON.stringify(response.data) ||
-          `HTTP error! status ${response.status}`,
-      );
-    }
-
-    return await response.json();
+    const response = await privateApi.post("/courses/", courseData);
+    return response.data;
   } catch (error) {
+    if (error.response) {
+      throw new Error(JSON.stringify(error.response.data));
+    }
     throw error;
   }
 }
 
 /**
  * Update course status
- * @param {number} courseId - Course ID
+ * @param {number|string} courseId - Course ID
  * @param {string} newStatus - New status value
  * @returns {Promise<Object>} Updated course
  */
 export async function changeCourseStatus(courseId, newStatus) {
   try {
-    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: newStatus }),
+    const response = await privateApi.patch(`/courses/${courseId}/`, {
+      status: newStatus,
     });
-
-    if (!response.ok) {
-      throw new Error(
-        JSON.stringify(response.data) ||
-          `HTTP error! status ${response.status}`,
-      );
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
+    if (error.response) {
+      throw new Error(JSON.stringify(error.response.data));
+    }
     throw error;
   }
 }
 
 /**
  * Delete a course
- * @param {number} courseId - Course ID
+ * @param {number|string} courseId - Course ID
  * @returns {Promise<void>}
  */
 export async function deleteCourse(courseId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.delete(`/courses/${courseId}/`);
+  return response.data;
 }
 
 /**
@@ -143,23 +146,12 @@ export async function deleteCourse(courseId) {
  */
 export async function generateCourse(prompt) {
   try {
-    const response = await fetch(`${API_BASE_URL}/courses/generate/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt }),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        JSON.stringify(response.data) ||
-          `HTTP error! status ${response.status}`,
-      );
-    }
-
-    return await response.json();
+    const response = await privateApi.post("/courses/generate/", { prompt });
+    return response.data;
   } catch (error) {
+    if (error.response) {
+      throw new Error(JSON.stringify(error.response.data));
+    }
     throw error;
   }
 }
@@ -167,38 +159,19 @@ export async function generateCourse(prompt) {
 /**
  * Generate course structure with detailed parameters
  * @param {Object} params - Course generation parameters
- * @param {string} params.topic - Main topic (required)
- * @param {string} params.num_modules - Number of modules (optional)
- * @param {string} params.target_audience - Target audience (optional)
- * @param {string} params.difficulty_level - Difficulty level (optional)
- * @param {string} params.learning_objectives - Learning objectives (optional)
- * @param {string} params.course_duration - Course duration (optional)
- * @param {string} params.prerequisites - Prerequisites (optional)
- * @param {string} params.language - Output language (optional)
  * @returns {Promise<Object>} Generated course structure
  */
 export async function generateCourseStructured(params) {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/courses/generate-structured/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      },
+    const response = await privateApi.post(
+      "/courses/generate-structured/",
+      params,
     );
-
-    if (!response.ok) {
-      throw new Error(
-        JSON.stringify(response.data) ||
-          `HTTP error! status ${response.status}`,
-      );
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
+    if (error.response) {
+      throw new Error(JSON.stringify(error.response.data));
+    }
     throw error;
   }
 }
@@ -208,23 +181,8 @@ export async function generateCourseStructured(params) {
  * @returns {Promise<Object>} Dummy course structure
  */
 export async function generateDummyCourse() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/courses/generate-dummy/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.post("/courses/generate-dummy/", {});
+  return response.data;
 }
 
 // ============================================================================
@@ -236,46 +194,18 @@ export async function generateDummyCourse() {
  * @returns {Promise<Array>} List of lessons
  */
 export async function getLessons() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/lessons/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get("/lessons/");
+  return response.data;
 }
 
 /**
  * Get a specific lesson by ID
- * @param {number} lessonId - Lesson ID
+ * @param {number|string} lessonId - Lesson ID
  * @returns {Promise<Object>} Lesson data
  */
 export async function getLessonById(lessonId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/lessons/${lessonId}/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get(`/lessons/${lessonId}/`);
+  return response.data;
 }
 
 /**
@@ -285,28 +215,18 @@ export async function getLessonById(lessonId) {
  */
 export async function createLesson(lessonData) {
   try {
-    const response = await fetch(`${API_BASE_URL}/lessons/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(lessonData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-
+    const response = await privateApi.post("/lessons/", lessonData);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const errorData = error.response.data;
       throw new Error(
         errorData.message ||
           errorData.detail ||
-          `HTTP error! status ${response.status}`,
+          `HTTP error! status ${error.response.status}`,
       );
     }
-
-    return await response.json();
-  } catch (error) {
-    // Check if it's a network error (backend not responding)
-    if (error.message === "Failed to fetch" || error.name === "TypeError") {
+    if (error.request) {
       throw new Error(
         "Cannot connect to server. Please check your internet connection or try again later.",
       );
@@ -317,55 +237,32 @@ export async function createLesson(lessonData) {
 
 /**
  * Edit lesson content (partial update)
- * @param {number} lessonId - Lesson ID
+ * @param {number|string} lessonId - Lesson ID
  * @param {string} lessonContent - New lesson content
  * @returns {Promise<Object>} Updated lesson
  */
 export async function editLesson(lessonId, lessonContent) {
   try {
-    const response = await fetch(`${API_BASE_URL}/lessons/${lessonId}/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ lesson_content: lessonContent }),
+    const response = await privateApi.patch(`/lessons/${lessonId}/`, {
+      lesson_content: lessonContent,
     });
-
-    if (!response.ok) {
-      throw new Error(
-        JSON.stringify(response.data) ||
-          `HTTP error! status ${response.status}`,
-      );
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
+    if (error.response) {
+      throw new Error(JSON.stringify(error.response.data));
+    }
     throw error;
   }
 }
 
 /**
  * Delete a lesson
- * @param {number} lessonId - Lesson ID
+ * @param {number|string} lessonId - Lesson ID
  * @returns {Promise<void>}
  */
 export async function deleteLesson(lessonId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/lessons/${lessonId}/`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.delete(`/lessons/${lessonId}/`);
+  return response.data;
 }
 
 /**
@@ -376,26 +273,17 @@ export async function deleteLesson(lessonId) {
  */
 export async function generateCourseLesson(courseStructure, lessonTopic) {
   try {
-    const response = await fetch(`${API_BASE_URL}/lessons/generate/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        course_structure: courseStructure,
-        lesson_topic: lessonTopic,
-      }),
+    const response = await privateApi.post("/lessons/generate/", {
+      course_structure: courseStructure,
+      lesson_topic: lessonTopic,
     });
-
-    if (!response.ok) {
+    return response.data;
+  } catch (error) {
+    if (error.response) {
       throw new Error(
-        `Error on GenerateCourseLesson API: ${JSON.stringify(response.data)}` ||
-          `HTTP error! status ${response.status}`,
+        `Error on GenerateCourseLesson API: ${JSON.stringify(error.response.data)}`,
       );
     }
-
-    return await response.json();
-  } catch (error) {
     throw error;
   }
 }
@@ -409,216 +297,109 @@ export async function generateCourseLesson(courseStructure, lessonTopic) {
  * @returns {Promise<Array>} List of quizzes
  */
 export async function getQuizzes() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/quizzes/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get("/quizzes/");
+  return response.data;
 }
 
 /**
  * Get quiz by ID
- * @param {number} quizId - Quiz ID
+ * @param {number|string} quizId - Quiz ID
  * @returns {Promise<Object>} Quiz data
  */
 export async function getQuizById(quizId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get(`/quizzes/${quizId}/`);
+  return response.data;
 }
 
 /**
  * Get quizzes by lesson ID with optional detail level
- * @param {number} lessonId - Lesson ID
+ * @param {number|string} lessonId - Lesson ID
  * @param {string} detail - Detail level: 'simple', 'full', or 'questions' (default: 'simple')
  * @returns {Promise<Array>} List of quizzes for the lesson
  */
 export async function getQuizByLessonId(lessonId, detail = "simple") {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/quizzes/?lesson=${lessonId}&detail=${detail}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get("/quizzes/", {
+    params: { lesson: lessonId, detail },
+  });
+  return response.data;
 }
 
 /**
  * Get quiz detail by lesson ID (with full questions and options)
- * @param {number} lessonId - Lesson ID
+ * @param {number|string} lessonId - Lesson ID
  * @returns {Promise<Array>} Quiz with complete details
  */
 export async function getQuizDetailbyLessonId(lessonId) {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/quizzes/?lesson=${lessonId}&detail=full`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get("/quizzes/", {
+    params: { lesson: lessonId, detail: "full" },
+  });
+  return response.data;
 }
 
 /**
  * Create a new quiz with questions and options
- * @param {Object} quizData - Quiz data including lesson, title, description, and questions
+ * @param {Object} quizData - Quiz data
  * @returns {Promise<Object>} Created quiz
  */
 export async function createQuiz(quizData) {
   try {
-    const response = await fetch(`${API_BASE_URL}/quizzes/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(quizData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    const response = await privateApi.post("/quizzes/", quizData);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const errorData = error.response.data;
       throw new Error(
         errorData.message ||
           errorData.detail ||
-          `HTTP error! status: ${response.status}`,
+          `HTTP error! status: ${error.response.status}`,
       );
     }
-
-    return await response.json();
-  } catch (error) {
     throw error;
   }
 }
 
 /**
  * Update a quiz
- * @param {number} quizId - Quiz ID
+ * @param {number|string} quizId - Quiz ID
  * @param {Object} quizData - Updated quiz data
  * @returns {Promise<Object>} Updated quiz
  */
 export async function updateQuiz(quizId, quizData) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(quizData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.patch(`/quizzes/${quizId}/`, quizData);
+  return response.data;
 }
 
 /**
  * Delete a quiz
- * @param {number} quizId - Quiz ID
+ * @param {number|string} quizId - Quiz ID
  * @returns {Promise<void>}
  */
 export async function deleteQuiz(quizId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}/`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.delete(`/quizzes/${quizId}/`);
+  return response.data;
 }
 
 /**
  * Generate quiz using AI
  * @param {Object} params - Quiz generation parameters
- * @param {string} params.lesson_summary - Lesson summary for context
- * @param {string} params.prompt - Quiz generation prompt
- * @param {number} params.num_questions - Number of questions (default: 3)
- * @param {number} params.num_options - Number of options per question (default: 4)
  * @returns {Promise<Object>} Generated quiz structure
  */
 export async function generateQuiz(params) {
   try {
-    const response = await fetch(`${API_BASE_URL}/quizzes/generate/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        lesson_summary: params.lesson_summary || "",
-        prompt: params.prompt || "",
-        num_questions: params.num_questions || 3,
-        num_options: params.num_options || 4,
-      }),
+    const response = await privateApi.post("/quizzes/generate/", {
+      lesson_summary: params.lesson_summary || "",
+      prompt: params.prompt || "",
+      num_questions: params.num_questions || 3,
+      num_options: params.num_options || 4,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const errorData = error.response.data;
       throw new Error(
-        errorData.error || `HTTP error! status: ${response.status}`,
+        errorData.error || `HTTP error! status: ${error.response.status}`,
       );
     }
-
-    return await response.json();
-  } catch (error) {
     throw error;
   }
 }
@@ -632,49 +413,20 @@ export async function generateQuiz(params) {
  * @returns {Promise<Array>} List of quiz questions
  */
 export async function getQuizQuestions() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/quiz-questions/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get("/quiz-questions/");
+  return response.data;
 }
 
 /**
  * Get questions by quiz ID
- * @param {number} quizId - Quiz ID
+ * @param {number|string} quizId - Quiz ID
  * @returns {Promise<Array>} List of questions for the quiz
  */
 export async function getQuestionsByQuizId(quizId) {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/quiz-questions/?quiz=${quizId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await publicApi.get("/quiz-questions/", {
+    params: { quiz: quizId },
+  });
+  return response.data;
 }
 
 /**
@@ -683,23 +435,8 @@ export async function getQuestionsByQuizId(quizId) {
  * @returns {Promise<Object>} Created Quiz
  */
 export async function createQuizzes(quizzes) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/quizzes/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(quizzes),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.post("/quizzes/", quizzes);
+  return response.data;
 }
 
 /**
@@ -708,79 +445,32 @@ export async function createQuizzes(quizzes) {
  * @returns {Promise<Object>} Created question
  */
 export async function createQuizQuestion(questionData) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/quiz-questions/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(questionData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.post("/quiz-questions/", questionData);
+  return response.data;
 }
 
 /**
  * Update a quiz question
- * @param {number} questionId - Question ID
+ * @param {number|string} questionId - Question ID
  * @param {Object} questionData - Updated question data
  * @returns {Promise<Object>} Updated question
  */
 export async function updateQuizQuestion(questionId, questionData) {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/quiz-questions/${questionId}/`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(questionData),
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.patch(
+    `/quiz-questions/${questionId}/`,
+    questionData,
+  );
+  return response.data;
 }
 
 /**
  * Delete a quiz question
- * @param {number} questionId - Question ID
+ * @param {number|string} questionId - Question ID
  * @returns {Promise<Object>} Deletion confirmation
  */
 export async function deleteQuizQuestion(questionId) {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/quiz-questions/${questionId}/`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.delete(`/quiz-questions/${questionId}/`);
+  return response.data;
 }
 
 // ============================================================================
@@ -792,22 +482,20 @@ export async function deleteQuizQuestion(questionId) {
  * @returns {Promise<Array>} List of question options
  */
 export async function getQuestionOptions() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/question-options/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  const response = await publicApi.get("/question-options/");
+  return response.data;
+}
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+/**
+ * Get options by question ID
+ * @param {number|string} questionId - Question ID
+ * @returns {Promise<Array>} List of options for the question
+ */
+export async function getOptionsByQuestionId(questionId) {
+  const response = await publicApi.get("/question-options/", {
+    params: { question: questionId },
+  });
+  return response.data;
 }
 
 /**
@@ -816,77 +504,109 @@ export async function getQuestionOptions() {
  * @returns {Promise<Object>} Created option
  */
 export async function createQuestionOption(optionData) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/question-options/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(optionData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.post("/question-options/", optionData);
+  return response.data;
 }
 
 /**
  * Update a question option
- * @param {number} optionId - Option ID
+ * @param {number|string} optionId - Option ID
  * @param {Object} optionData - Updated option data
  * @returns {Promise<Object>} Updated option
  */
 export async function updateQuestionOption(optionId, optionData) {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/question-options/${optionId}/`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(optionData),
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
-  }
+  const response = await privateApi.patch(
+    `/question-options/${optionId}/`,
+    optionData,
+  );
+  return response.data;
 }
 
 /**
  * Delete a question option
- * @param {number} optionId - Option ID
+ * @param {number|string} optionId - Option ID
  * @returns {Promise<Object>} Deletion confirmation
  */
 export async function deleteQuestionOption(optionId) {
+  const response = await privateApi.delete(`/question-options/${optionId}/`);
+  return response.data;
+}
+
+// ============================================================================
+// Reference API Functions
+// ============================================================================
+
+/**
+ * Get all references
+ * @returns {Promise<Array>} List of references
+ */
+export async function getReferences() {
+  const response = await publicApi.get("/references/");
+  return response.data;
+}
+
+/**
+ * Get references by lesson ID
+ * @param {number|string} lessonId - Lesson ID
+ * @returns {Promise<Array>} List of references for the lesson
+ */
+export async function getReferencesByLessonId(lessonId) {
+  const response = await publicApi.get("/references/", {
+    params: { lesson: lessonId },
+  });
+  return response.data;
+}
+
+/**
+ * Create a new reference
+ * @param {Object} referenceData - Reference data
+ * @returns {Promise<Object>} Created reference
+ */
+export async function createReference(referenceData) {
+  const response = await privateApi.post("/references/", referenceData);
+  return response.data;
+}
+
+/**
+ * Update a reference
+ * @param {number|string} referenceId - Reference ID
+ * @param {Object} referenceData - Updated reference data
+ * @returns {Promise<Object>} Updated reference
+ */
+export async function updateReference(referenceId, referenceData) {
+  const response = await privateApi.patch(
+    `/references/${referenceId}/`,
+    referenceData,
+  );
+  return response.data;
+}
+
+/**
+ * Delete a reference
+ * @param {number|string} referenceId - Reference ID
+ * @returns {Promise<Object>} Deletion confirmation
+ */
+export async function deleteReference(referenceId) {
+  const response = await privateApi.delete(`/references/${referenceId}/`);
+  return response.data;
+}
+
+/**
+ * Generate references using AI
+ * @param {Object} params - Reference generation parameters
+ * @returns {Promise<Object>} Generated references
+ */
+export async function generateReferences(params) {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/question-options/${optionId}/`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
+    const response = await privateApi.post("/references/generate/", params);
+    return response.data;
   } catch (error) {
+    if (error.response) {
+      throw new Error(
+        JSON.stringify(error.response.data) ||
+          `HTTP error! status ${error.response.status}`,
+      );
+    }
     throw error;
   }
 }
@@ -902,31 +622,15 @@ export async function deleteQuestionOption(optionId) {
  */
 export async function geminiApiRequest(query) {
   try {
-    const response = await fetch(`${API_BASE_URL}/gemini/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: query,
-      }),
+    const response = await privateApi.post("/gemini/", {
+      message: query,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        JSON.stringify(errorData) || `HTTP error! status ${response.status}`,
-      );
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error("Gemini API error: ", error);
     throw error;
   }
 }
-
-const PERPLEXICA_API_URL = "http://100.122.67.1:3000";
 
 const perplexicaConfig = {
   chatModel: {
@@ -950,22 +654,11 @@ const perplexicaConfig = {
  */
 export async function queryPerplexica(query) {
   try {
-    const response = await fetch(`${PERPLEXICA_API_URL}/search`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...perplexicaConfig,
-        query,
-      }),
+    const response = await perplexicaApi.post("/search", {
+      ...perplexicaConfig,
+      query,
     });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error("Perplexica API error:", error);
     throw error;

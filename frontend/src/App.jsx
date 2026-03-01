@@ -18,6 +18,8 @@ import CourseLibrary from "./pages/public/CourseLibrary";
 import CourseOverview from "./pages/public/CourseOverview";
 import CourseLesson from "./pages/public/CourseLesson";
 import PublicCourseLayout from "./layouts/PublicCourseLayout";
+import AdminLogin from "./pages/admin/AdminLogin";
+import ProtectedRoute from "./pages/admin/ProtectedRoute";
 
 function App() {
   return (
@@ -29,6 +31,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<CourseLibrary />} />
+          <Route path="/admin/login" element={<AdminLogin />}></Route>
 
           <Route path="/course/:course_slug" element={<PublicCourseLayout />}>
             <Route index element={<CourseOverview />} />
@@ -39,16 +42,22 @@ function App() {
             <Route path="lesson/:lesson_slug" element={<CourseLesson />} />
           </Route>
         </Route>
-        {/* Will be Admin Login, but Live it Like this for now*/}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminCourseLibrary />} />
-          <Route path="courses" element={<AdminCourseLibrary />} />
-          <Route path="courses/:id" element={<CourseEditor />} />{" "}
-          {/* Dynamic Route */}
-          <Route path="templates" element={<CourseTemplateLibrary />} />
-          <Route path="create-template" element={<CreateCourseTemplate />} />
-          <Route path="create-lesson" element={<CreateLesson />} />
-          <Route path="integration-sandbox" element={<IntegrationSandbox />} />
+
+        {/* Protected Admin Page */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminCourseLibrary />} />
+            <Route path="courses" element={<AdminCourseLibrary />} />
+            <Route path="courses/:id" element={<CourseEditor />} />{" "}
+            {/* Dynamic Route */}
+            <Route path="templates" element={<CourseTemplateLibrary />} />
+            <Route path="create-template" element={<CreateCourseTemplate />} />
+            <Route path="create-lesson" element={<CreateLesson />} />
+            <Route
+              path="integration-sandbox"
+              element={<IntegrationSandbox />}
+            />
+          </Route>
         </Route>
       </Routes>
     </div>

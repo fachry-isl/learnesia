@@ -6,6 +6,9 @@ from rest_framework import status
 from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 
+# Django Route Permission
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+
 # Models and Serializers
 from .models import Course, Lesson, Quiz, QuizQuestion, QuestionOption
 from .serializers import (
@@ -127,6 +130,14 @@ class CourseViewSet(viewsets.ModelViewSet):
             return CourseListSerializer
         return CourseSerializer
 
+    def get_permissions(self):
+        """
+        Public:  list, retrieve → anyone can browse courses
+        Protected: create, update, destroy, generate → admin only
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]  # overrides global default
     
 
     @action(detail=False, methods=['post'], url_path='generate')
@@ -357,6 +368,15 @@ class LessonViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
+    def get_permissions(self):
+        """
+        Public:  list, retrieve → anyone can browse courses
+        Protected: create, update, destroy, generate → admin only
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]  # overrides global default
+
     @action(detail=False, methods=['post'], url_path='generate')
     def generate(self, request):
         """
@@ -480,6 +500,15 @@ class QuizViewSet(viewsets.ModelViewSet):
         if detail_level == "full":
             return QuizDetailSerializer
         return QuizSerializer
+
+    def get_permissions(self):
+        """
+        Public:  list, retrieve → anyone can browse courses
+        Protected: create, update, destroy, generate → admin only
+        """
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]  # overrides global default
 
     def get_queryset(self):
         """
