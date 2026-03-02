@@ -52,7 +52,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost",
     "http://127.0.0.1",
-    "http://43.163.89.152"
+    "http://43.163.89.152",
     "https://learnesia.co.id"
 ]
 
