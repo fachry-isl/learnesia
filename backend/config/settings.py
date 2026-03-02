@@ -53,6 +53,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost",
     "http://127.0.0.1",
     "http://43.163.89.152"
+    "https://learnesia.co.id"
 ]
 
 # Development Only
