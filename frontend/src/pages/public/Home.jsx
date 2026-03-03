@@ -37,10 +37,10 @@ const Home = () => {
           <ArrowRight className="w-7 h-7" strokeWidth={3} />
         </button>
 
-        <button className="flex-1 px-4 py-4 bg-white text-black font-black text-md uppercase border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-2 hover:translate-y-2 hover:shadow-none active:translate-x-2 active:translate-y-2 active:shadow-none transition-all duration-150 flex items-center justify-center gap-3">
+        {/* <button className="flex-1 px-4 py-4 bg-white text-black font-black text-md uppercase border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-2 hover:translate-y-2 hover:shadow-none active:translate-x-2 active:translate-y-2 active:shadow-none transition-all duration-150 flex items-center justify-center gap-3">
           Learn More
           <Sparkles className="w-7 h-7" strokeWidth={3} />
-        </button>
+        </button> */}
       </div>
     </div>
   );

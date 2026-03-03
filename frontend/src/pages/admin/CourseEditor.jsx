@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useSidebar } from "../../contexts/SidebarContext";
-import { Info } from "lucide-react";
+import { Info, Layers } from "lucide-react";
 import {
   getCourseById,
   changeCourseStatus,
@@ -14,6 +14,7 @@ import {
   generateQuiz,
   createQuizzes,
   updateQuiz,
+  updateCourse,
 } from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -37,6 +38,7 @@ const CourseEditor = () => {
   const [content, setContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isLoadQuiz, setIsLoadQuiz] = useState(false);
+  const [thumbnail, setThumbnail] = useState("");
 
   const { activeLessonId, setSidebarMode, setSidebarData, setActiveLessonId } =
     useSidebar();
@@ -56,6 +58,7 @@ const CourseEditor = () => {
 
         if (foundCourse) {
           setCourse(foundCourse);
+          setThumbnail(foundCourse.course_thumbnail || "");
 
           // 2. Configure Sidebar for "Detail Mode"
           setSidebarMode("course_detail");
@@ -128,10 +131,15 @@ const CourseEditor = () => {
       // Save Lesson to Backend
       await editLesson(lessonData.id, content);
 
-      // Save Lesson to Frontend
-      // Local state update to reflect changes immediately
+      // Save Course Level Changes (Thumbnail)
+      if (thumbnail !== course.course_thumbnail) {
+        await updateCourse(course.id, { course_thumbnail: thumbnail });
+      }
+
+      // Save Lesson and Course to Frontend
       setCourse((prev) => ({
         ...prev,
+        course_thumbnail: thumbnail,
         lessons: prev.lessons.map((l) =>
           l.id === lessonData.id ? { ...l, lesson_content: content } : l,
         ),
@@ -385,6 +393,35 @@ const CourseEditor = () => {
           <LearningObjectives
             objectives={lessonData.lesson_learning_objectives}
           />
+
+          {/* Course Thumbnail Editor */}
+          <div className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <h4 className="text-xs font-black uppercase tracking-widest mb-3 flex items-center gap-2">
+              <Layers className="w-4 h-4" /> Course Thumbnail
+            </h4>
+            <div className="space-y-3">
+              {thumbnail && (
+                <div className="aspect-video border-2 border-black overflow-hidden bg-gray-100">
+                  <img
+                    src={thumbnail}
+                    alt="Course Thumbnail Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <input
+                type="text"
+                value={thumbnail}
+                onChange={(e) => setThumbnail(e.target.value)}
+                placeholder="Paste Image Public URL..."
+                className="w-full px-3 py-2 text-xs border-2 border-black focus:outline-none focus:bg-gray-50 font-bold"
+              />
+              <p className="text-[10px] text-gray-500 font-bold">
+                * Paste a direct image URL (jpg, png, etc.)
+              </p>
+            </div>
+          </div>
+
           <LessonQuiz
             quizzes={quizzes}
             lessonName={lessonData.lesson_name}

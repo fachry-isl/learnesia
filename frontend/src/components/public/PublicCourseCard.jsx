@@ -24,10 +24,10 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
       className="h-full flex flex-col bg-white rounded-lg border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 overflow-hidden"
     >
       {/* Course Image/Icon - Reduced height */}
-      <div className="h-40 bg-white flex items-center justify-center border-b-4 border-black p-4">
-        {course.image ? (
+      <div className="h-40 bg-white flex items-center justify-center border-b-4 border-black">
+        {course.course_thumbnail ? (
           <img
-            src={course.image}
+            src={course.course_thumbnail}
             alt={course.course_name}
             className="w-full h-full object-cover"
           />

@@ -4,8 +4,10 @@ import {
   getLessonById,
   getCourseById,
   getQuizByLessonId,
+  submitLessonFeedback,
 } from "../../services/api";
 import LessonQuizWidget from "../../components/public/LessonQuizWidget";
+import LessonFeedbackModal from "../../components/public/LessonFeedbackModal";
 import {
   ArrowLeft,
   Clock,
@@ -30,6 +32,8 @@ const CourseLesson = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [quiz, setQuiz] = useState(null);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
 
   const sortedLessons = course ? getSortedLessons(course?.lessons) : [];
 
@@ -65,9 +69,54 @@ const CourseLesson = () => {
     fetchData();
     // Close sidebar on navigation change on mobile
     setIsSidebarOpen(false);
+
+    // Scroll to top when lesson changes
+    const mainElement = document.querySelector("main");
+    if (mainElement) {
+      mainElement.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [lesson_slug, course_slug]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const handleLessonNavigation = (targetLesson) => {
+    if (targetLesson) {
+      setPendingNavigation({
+        type: "lesson",
+        path: `/course/${course_slug}/lesson/${targetLesson.lesson_slug}`,
+      });
+      setIsFeedbackModalOpen(true);
+    }
+  };
+
+  const handleCompleteCourse = () => {
+    setPendingNavigation({
+      type: "overview",
+      path: `/course/${course_slug}/overview`,
+    });
+    setIsFeedbackModalOpen(true);
+  };
+
+  const onFeedbackSubmit = async (feedbackData) => {
+    try {
+      await submitLessonFeedback({
+        lesson: lesson.id,
+        ...feedbackData,
+      });
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
+      // We still navigate even if feedback fails
+    }
+  };
+
+  const onFeedbackModalClose = (wasSubmitted) => {
+    setIsFeedbackModalOpen(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation.path);
+      setPendingNavigation(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -110,8 +159,14 @@ const CourseLesson = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
+      <LessonFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={onFeedbackModalClose}
+        onSubmit={onFeedbackSubmit}
+        lessonName={lesson.lesson_name}
+      />
       {/* Mobile Header */}
-      <div className="md:hidden border-b border-gray-100 p-4 sticky top-0 z-50 flex items-center justify-between">
+      <div className="md:hidden border-b border-gray-100 p-4 sticky top-0 z-50 flex items-center justify-between bg-white/95 backdrop-blur-sm h-16">
         <button
           onClick={toggleSidebar}
           className="p-2 -ml-2 text-gray-600 hover:bg-gray-50 rounded-lg"
@@ -131,8 +186,8 @@ const CourseLesson = () => {
       {/* Sidebar Navigation */}
       <aside
         className={`
-          fixed md:sticky md:top-0 h-[calc(100vh-65px)] md:h-screen w-full md:w-80 border-r border-gray-100 
-          overflow-y-auto z-40 transition-transform duration-300 ease-in-out
+          fixed md:sticky md:top-0 h-[calc(100vh-64px)] md:h-screen w-full md:w-80 border-r border-gray-100 
+          overflow-y-auto z-40 transition-transform duration-300 ease-in-out bg-white lg:bg-transparent lg:backdrop-blur-none lg:border-none
           ${
             isSidebarOpen
               ? "translate-x-0"
@@ -140,7 +195,7 @@ const CourseLesson = () => {
           }
           flex flex-col
         `}
-        style={{ top: isSidebarOpen ? "65px" : "0" }}
+        style={{ top: isSidebarOpen ? "64px" : "0" }}
       >
         <div className="p-6 border-b border-gray-100">
           <Link
@@ -318,11 +373,7 @@ const CourseLesson = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {prevLesson ? (
                   <button
-                    onClick={() =>
-                      navigate(
-                        `/course/${course_slug}/lesson/${prevLesson.lesson_slug}`,
-                      )
-                    }
+                    onClick={() => handleLessonNavigation(prevLesson)}
                     className="flex flex-col items-start p-4 rounded-xl border-2 border-gray-100 hover:border-black transition-all group text-left"
                   >
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
@@ -338,11 +389,7 @@ const CourseLesson = () => {
 
                 {nextLesson ? (
                   <button
-                    onClick={() =>
-                      navigate(
-                        `/course/${course_slug}/lesson/${nextLesson.lesson_slug}`,
-                      )
-                    }
+                    onClick={() => handleLessonNavigation(nextLesson)}
                     className="flex flex-col items-end p-4 rounded-xl bg-black text-white hover:bg-gray-800 transition-all text-right shadow-lg shadow-gray-200"
                   >
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
@@ -354,7 +401,7 @@ const CourseLesson = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={() => navigate(`/course/${course_slug}/overview`)}
+                    onClick={handleCompleteCourse}
                     className="flex flex-col items-center justify-center p-4 rounded-xl bg-green-600 text-white hover:bg-green-700 transition-all text-center shadow-lg shadow-green-200 col-span-1 sm:col-start-2"
                   >
                     <span className="font-bold text-white flex items-center gap-2">

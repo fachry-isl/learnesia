@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
 # Models and Serializers
-from .models import Course, Lesson, Quiz, QuizQuestion, QuestionOption
+from .models import Course, Lesson, Quiz, QuizQuestion, QuestionOption, LessonFeedback
 from .serializers import (
     CourseSerializer, 
     CourseListSerializer,
@@ -18,7 +18,8 @@ from .serializers import (
     QuizSerializer, 
     QuizDetailSerializer,
     QuizQuestionSerializer,
-    QuestionOptionSerializer
+    QuestionOptionSerializer,
+    LessonFeedbackSerializer
 )
 
 # Langchain and Structured Output
@@ -735,3 +736,22 @@ class QuestionOptionViewset(viewsets.ModelViewSet):
             },
             status=status.HTTP_200_OK
         )
+
+
+class LessonFeedbackViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing LessonFeedback objects.
+    
+    Endpoints:
+        GET /api/lesson-feedbacks/ - List all feedback
+        POST /api/lesson-feedbacks/ - Create new feedback
+        GET /api/lesson-feedbacks/{id}/ - Retrieve specific feedback
+        DELETE /api/lesson-feedbacks/{id}/ - Delete feedback (Admin only)
+    """
+    queryset = LessonFeedback.objects.all()
+    serializer_class = LessonFeedbackSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [AllowAny()]
+        return [IsAuthenticated()]

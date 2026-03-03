@@ -76,8 +76,16 @@ const CourseCardItem = ({ course, isonClickActive, mode = "default" }) => {
         className="flex items-start justify-between mb-3"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-          <BookOpen className="w-5 h-5 text-gray-900" />
+        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border-2 border-black">
+          {course.course_thumbnail ? (
+            <img
+              src={course.course_thumbnail}
+              alt={course.course_name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <BookOpen className="w-5 h-5 text-gray-900" />
+          )}
         </div>
 
         {/* Fixed Toggle Section */}

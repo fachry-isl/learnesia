@@ -24,6 +24,7 @@ class Course(models.Model):
         default='template',
         db_index=True
     )
+    course_thumbnail = models.URLField(blank=True, null=True)
     estimated_time = models.PositiveIntegerField(default=0, help_text="Estimated time to complete in minutes")
 
     def __str__(self):
@@ -207,3 +208,26 @@ class QuestionOption(models.Model):
 
     def __str__(self):
         return f"{self.question.question_text[:50]} - Option {self.order}"
+
+
+class LessonFeedback(models.Model):
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name='feedbacks',
+        db_column='lesson_id'
+    )
+    rating = models.PositiveIntegerField(default=5, help_text="Rating from 1 to 5")
+    comment = models.TextField(blank=True, null=True)
+    user_identifier = models.CharField(max_length=255, blank=True, null=True, help_text="Optional user ID or anonymous session ID")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'lesson_feedback'
+        verbose_name_plural = 'lesson feedbacks'
+        indexes = [
+            models.Index(fields=['lesson'], name='idx_feedback_lesson'),
+        ]
+
+    def __str__(self):
+        return f"Feedback for {self.lesson.lesson_name} - {self.rating} stars"

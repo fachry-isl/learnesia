@@ -1,10 +1,17 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import learnesiaLogo from "../assets/li_logo_full.png";
 import Navbar from "../components/public/Navbar";
 
 const PublicLayout = () => {
+  const location = useLocation();
+  const isLessonPage = location.pathname.includes("/lesson/");
+
   return (
-    <div className="min-h-screen relative flex flex-col pt-20 z-0">
+    <div
+      className={`min-h-screen relative flex flex-col z-0 ${
+        isLessonPage ? "md:pt-20" : "pt-20"
+      }`}
+    >
       {/* Grid background - Spans the whole screen including under the Navbar */}
       <div
         className="absolute inset-0 pointer-events-none -z-10"
@@ -17,7 +24,10 @@ const PublicLayout = () => {
         }}
       ></div>
 
-      <Navbar />
+      {/* Hide global navbar on mobile if it's a lesson page */}
+      <div className={isLessonPage ? "hidden md:block" : "block"}>
+        <Navbar />
+      </div>
 
       <div className="flex-1 relative z-10 w-full flex flex-col">
         {/* Main content */}

@@ -45,7 +45,7 @@ privateApi.interceptors.response.use(
         return privateApi(original);
       } catch {
         localStorage.clear();
-        window.location.href = "/login";
+        window.location.href = "/admin/login";
       }
     }
     return Promise.reject(error);
@@ -120,6 +120,27 @@ export async function changeCourseStatus(courseId, newStatus) {
     const response = await privateApi.patch(`/courses/${courseId}/`, {
       status: newStatus,
     });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw new Error(JSON.stringify(error.response.data));
+    }
+    throw error;
+  }
+}
+
+/**
+ * Update a course
+ * @param {number|string} courseId - Course ID
+ * @param {Object} courseData - Updated course data
+ * @returns {Promise<Object>} Updated course
+ */
+export async function updateCourse(courseId, courseData) {
+  try {
+    const response = await privateApi.patch(
+      `/courses/${courseId}/`,
+      courseData,
+    );
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -821,4 +842,20 @@ export function dummyQuizApi() {
   ];
 
   return quizzes;
+}
+/**
+ * Submit feedback for a lesson
+ * @param {Object} feedbackData - Feedback data (lesson, rating, comment)
+ * @returns {Promise<Object>} Created feedback
+ */
+export async function submitLessonFeedback(feedbackData) {
+  try {
+    const response = await publicApi.post("/lesson-feedbacks/", feedbackData);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw new Error(JSON.stringify(error.response.data));
+    }
+    throw error;
+  }
 }

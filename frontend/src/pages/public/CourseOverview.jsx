@@ -161,20 +161,6 @@ const CourseOverview = () => {
                   </button>
                 ))}
               </div>
-
-              <div className="pt-6">
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/course/${course_slug}/lesson/${course.lessons[0]?.lesson_slug}`,
-                    )
-                  }
-                  className="w-full py-4 bg-black text-white font-black rounded-xl shadow-xl shadow-gray-200 hover:bg-gray-900 hover:-translate-y-0.5 transition-all active:translate-y-0 uppercase text-xs tracking-widest flex items-center justify-center gap-2"
-                >
-                  <PlayCircle className="w-4 h-4" />
-                  Start Learning
-                </button>
-              </div>
             </div>
           </div>
 
@@ -236,9 +222,9 @@ const CourseOverview = () => {
                 <h2 className="text-4xl font-black text-gray-900 tracking-tight underline decoration-black-500/30 underline-offset-8">
                   Syllabus
                 </h2>
-                <button className="px-6 py-2.5 border-2 border-black-500 text-black-500 font-black rounded-full hover:bg-black-50 transition-all uppercase text-xs tracking-widest">
+                {/* <button className="px-6 py-2.5 border-2 border-black-500 text-black-500 font-black rounded-full hover:bg-black-50 transition-all uppercase text-xs tracking-widest">
                   Download syllabus
-                </button>
+                </button> */}
               </div>
 
               <div className="space-y-4">
@@ -307,6 +293,20 @@ const CourseOverview = () => {
                     </div>
                   );
                 })}
+              </div>
+
+              <div className="pt-6">
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/course/${course_slug}/lesson/${course.lessons[0]?.lesson_slug}`,
+                    )
+                  }
+                  className="w-full py-4 bg-black text-white font-black rounded-xl shadow-xl shadow-gray-200 hover:bg-gray-900 hover:-translate-y-0.5 transition-all active:translate-y-0 uppercase text-xs tracking-widest flex items-center justify-center gap-2"
+                >
+                  <PlayCircle className="w-4 h-4" />
+                  Start Learning
+                </button>
               </div>
             </section>
 

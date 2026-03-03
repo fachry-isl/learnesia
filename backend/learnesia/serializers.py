@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Lesson, Quiz, QuestionOption, QuizQuestion
+from .models import Course, Lesson, Quiz, QuestionOption, QuizQuestion, LessonFeedback
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
@@ -160,3 +160,9 @@ class QuizDetailSerializer(serializers.ModelSerializer):
                     QuestionOption.objects.create(question=question, **option_data)
         
         return instance    
+
+
+class LessonFeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonFeedback
+        fields = '__all__'
