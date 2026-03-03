@@ -3,7 +3,7 @@ import learnesiaLogo from "../../assets/li_logo_full.png";
 
 const Navbar = () => {
   return (
-    <nav className="fixed top-0 left-0 right-0 h-20 z-50 px-6 bg-white/90 backdrop-blur-md border-b border-gray-100 lg:bg-transparent lg:backdrop-blur-none lg:border-none">
+    <nav className="fixed top-0 left-0 right-0 h-20 z-50 px-6 backdrop-blur-md border-b border-gray-100 bg-transparent backdrop-blur-none border-none">
       <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
         {/* Logo Section */}
         <div className="flex items-center gap-2">
