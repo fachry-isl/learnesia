@@ -15,7 +15,7 @@ class Course(models.Model):
     course_slug = models.CharField(max_length=255, blank=True, null=True)
     course_description = models.TextField(blank=True)
     course_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
-    course_tags = ArrayField(models.CharField(max_length=255, blank=True, default=list))
+    course_tags = ArrayField(models.CharField(max_length=255), blank=True, default=list)
     created_at = models.DateTimeField(auto_now_add=True)
 
     status = models.CharField(

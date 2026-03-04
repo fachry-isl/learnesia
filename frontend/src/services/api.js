@@ -39,7 +39,7 @@ privateApi.interceptors.response.use(
       original._retry = true;
       try {
         const refresh = localStorage.getItem("refreshToken");
-        const { data } = await publicApi.post("/auth/refresh/", { refresh });
+        const { data } = await publicApi.post("/token/refresh/", { refresh });
         localStorage.setItem("accessToken", data.access);
         original.headers.Authorization = `Bearer ${data.access}`;
         return privateApi(original);
@@ -94,7 +94,7 @@ export async function getCourseById(courseId) {
 
 /**
  * Create a new course
- * @param {Object} courseData - Course data
+ * @param {Object} courseData - Course data (course_name, course_description, course_learning_objectives, course_tags)
  * @returns {Promise<Object>} Created course
  */
 export async function createCourse(courseData) {

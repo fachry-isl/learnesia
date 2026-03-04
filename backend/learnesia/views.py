@@ -49,6 +49,7 @@ class CourseStructure(BaseModel):
     course_name: str = Field(..., description="The name of the main subject")
     course_learning_objectives: List[str] = Field(..., description="A list of learning objectives of the course") 
     course_description: str = Field(..., description="Write a very short course description (1–2 sentences, max 35 words) for the following course. Focus on target learner, level, key Excel skills, and work benefit. Use active voice, no fluff.")
+    course_tags: List[str] = Field(..., description="A list of 3-5 relevant tags for the course category or skills")
     lessons: List[LessonStructure] = Field(..., description="List of lessons in the course")
 
 
@@ -170,7 +171,10 @@ class CourseViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
+            prompt = f"{prompt}\n\nPlease generate 3-5 relevant course tags that categorize this course topic."
+            
             model = init_chat_model("gemini-2.5-flash", model_provider="google_genai", temperature=0)
+
             structured_llm = model.with_structured_output(schema=CourseStructure)
             result = structured_llm.invoke(prompt)
             
@@ -261,6 +265,7 @@ class CourseViewSet(viewsets.ModelViewSet):
                - Specify learning outcomes (what students will be able to DO)
                - Indicate estimated time to complete
             5. Ensure logical progression considering target audience's background
+            6. Generate 3-5 relevant course tags that categorize this course topic
             
             # Output Language
             {language}
