@@ -54,6 +54,7 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
         course_name: course.course_name,
         course_description: course.course_description,
         course_learning_objectives: course.course_learning_objectives,
+        course_tags: course.course_tags || [],
       });
 
       if (response) {
@@ -180,6 +181,28 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
             className="border-2 border-black w-full text-black p-3 resize-none"
             rows={3}
           ></textarea>
+        </div>
+
+        <div>
+          <label className="text-black font-semibold block mb-2">
+            Course Tags
+          </label>
+          <p className="text-gray-600 text-sm mb-2">
+            Separate tags with commas
+          </p>
+          <input
+            type="text"
+            value={course.course_tags ? course.course_tags.join(", ") : ""}
+            onChange={(e) => {
+              const tags = e.target.value
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter((tag) => tag !== "");
+              handleCourseChange("course_tags", tags);
+            }}
+            placeholder="e.g. React, JavaScript, Frontend"
+            className="border-2 border-black w-full text-black p-3"
+          />
         </div>
       </div>
       {/* Lessons Section */}
