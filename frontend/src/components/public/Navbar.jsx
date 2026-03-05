@@ -1,9 +1,17 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import learnesiaLogo from "../../assets/li_logo_full.png";
 
 const Navbar = () => {
+  const { pathname } = useLocation();
+  const isLessonPage = pathname.includes("/lesson/");
+
   return (
-    <nav className="fixed top-0 left-0 right-0 h-20 z-50 px-6 backdrop-blur-md border-b border-gray-100 bg-transparent backdrop-blur-none border-none">
+    <nav
+      className={`fixed top-0 left-0 right-0 h-20 z-50 px-6 transition-colors duration-300 ${
+        isLessonPage && "bg-white border-gray-100"
+      }`}
+    >
       <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
         {/* Logo Section */}
         <div className="flex items-center gap-2">

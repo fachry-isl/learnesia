@@ -8,9 +8,10 @@ const PublicLayout = () => {
 
   return (
     <div
-      className={`min-h-screen relative flex flex-col z-0 ${
-        isLessonPage ? "md:pt-20" : "pt-20"
-      }`}
+      className={`relative flex flex-col z-0 ${
+        /* 1. Use h-screen and overflow-hidden to lock the viewport on lesson pages */
+        isLessonPage ? "h-screen overflow-hidden" : "min-h-screen"
+      } ${isLessonPage ? "md:pt-20" : "pt-20"}`}
     >
       {/* Grid background - Spans the whole screen including under the Navbar */}
       <div

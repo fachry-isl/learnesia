@@ -131,7 +131,7 @@ const markdownComponents = {
 
 const MarkdownRenderer = ({ content }) => {
   return (
-    <div className="prose prose-slate max-w-none">
+    <div className="border-2 border-black p-10 bg-white prose prose-slate max-w-none rounded-2xl">
       <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
         {content ||
           "No content generated yet. Click 'Generate Lesson' to start."}
