@@ -1,17 +1,12 @@
 import CreateCourseTemplate from "./pages/admin/CreateCourseTemplate";
-import IntegrationSandbox from "./pages/admin/IntegrationSandbox";
-import ContentContainer from "./pages/admin/ContentContainer";
 import CourseTemplateLibrary from "./pages/admin/CourseTemplateLibrary";
 
 import CreateLesson from "./pages/admin/CreateLesson";
-
-import SidebarLessonItem from "./components/admin/SidebarLessonItem";
 import AdminCourseLibrary from "./pages/admin/AdminCourseLibrary";
 import { Toaster } from "react-hot-toast";
 import CourseEditor from "./pages/admin/CourseEditor";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Home from "./pages/public/Home";
-import SidebarContainer from "./components/admin/SidebarContainer";
 import PublicLayout from "./layouts/PublicLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import CourseLibrary from "./pages/public/CourseLibrary";
@@ -53,10 +48,6 @@ function App() {
             <Route path="templates" element={<CourseTemplateLibrary />} />
             <Route path="create-template" element={<CreateCourseTemplate />} />
             <Route path="create-lesson" element={<CreateLesson />} />
-            <Route
-              path="integration-sandbox"
-              element={<IntegrationSandbox />}
-            />
           </Route>
         </Route>
       </Routes>

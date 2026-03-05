@@ -5,6 +5,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import YoutubeEmbed from "./YoutubeEmbed";
 
+import { useLocation } from "react-router-dom";
+
 const markdownComponents = {
   // Custom code block with syntax highlighting
   code({ node, inline, className, children, ...props }) {
@@ -130,8 +132,12 @@ const markdownComponents = {
 };
 
 const MarkdownRenderer = ({ content }) => {
+  const { pathname } = useLocation();
+  const isAdminPage = pathname.includes("/admin/");
   return (
-    <div className="border-2 border-black p-10 bg-white prose prose-slate max-w-none rounded-2xl">
+    <div
+      className={`${!isAdminPage && `border-2 border-black`} p-10 bg-white prose prose-slate max-w-none rounded-2xl`}
+    >
       <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
         {content ||
           "No content generated yet. Click 'Generate Lesson' to start."}

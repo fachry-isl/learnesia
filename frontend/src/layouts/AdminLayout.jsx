@@ -57,38 +57,12 @@ const AdminLayout = () => {
                 isActive={activeSidebar === "course_library"}
                 onClick={() => handleSidebarItemClick("course_library")}
               />
-
-              <SidebarItem
-                to="/admin/templates"
-                item_name="Course Template"
-                icon={<BookOpen className="w-5 h-5" />}
-                isActive={activeSidebar === "course_template_library"}
-                onClick={() =>
-                  handleSidebarItemClick("course_template_library")
-                }
-              />
-
               <SidebarItem
                 to="/admin/create-template"
                 item_name="Create Course Template"
                 icon={<PlusCircle className="w-5 h-5" />}
                 isActive={activeSidebar === "create_course_template"}
                 onClick={() => handleSidebarItemClick("create_course_template")}
-              />
-              <SidebarItem
-                to="/admin/create-lesson"
-                item_name="Create Course Lessons"
-                icon={<PlusCircle className="w-5 h-5" />}
-                isActive={activeSidebar === "create_course_lessons"}
-                onClick={() => handleSidebarItemClick("create_course_lessons")}
-              />
-
-              <SidebarItem
-                to="/admin/integration-sandbox"
-                item_name="Integration Sandbox"
-                icon={<Code2 className="w-5 h-5" />}
-                isActive={activeSidebar === "integration_sandbox"}
-                onClick={() => handleSidebarItemClick("integration_sandbox")}
               />
             </>
           ) : (
