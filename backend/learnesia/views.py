@@ -97,7 +97,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing Course objects.
     
-    Provides CRUD operations and AI-powered course generation.
+    Provides CRUD operations and AI-powered course generation for Learnesia.
     
     Endpoints:
         GET /api/courses/ - List all courses
