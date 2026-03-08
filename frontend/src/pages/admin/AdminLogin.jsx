@@ -76,15 +76,9 @@ const AdminLogin = () => {
       <div className="w-full max-w-md">
         {/* Logo / Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 mb-4 transition-transform hover:scale-105">
-            <ShieldCheck className="w-8 h-8 text-indigo-600" />
-          </div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-            Admin Portal
+            Learnesia Admin
           </h1>
-          <p className="text-slate-500 mt-2">
-            Welcome back! Please enter your details.
-          </p>
         </div>
 
         {/* Login Card */}
@@ -177,7 +171,7 @@ const AdminLogin = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="group relative w-full flex items-center justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/30 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_12px_rgb(79,70,229,0.2)]"
+              className="group relative w-full flex items-center justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-black hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/30 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_12px_rgb(79,70,229,0.2)]"
             >
               {isSubmitting ? (
                 <div className="flex items-center space-x-2">
@@ -197,10 +191,7 @@ const AdminLogin = () => {
         {/* Footer */}
         <p className="mt-8 text-center text-sm text-slate-500">
           Not an administrator?{" "}
-          <a
-            href="#"
-            className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
-          >
+          <a href="#" className="font-bold text-black transition-colors">
             Return to Home
           </a>
         </p>

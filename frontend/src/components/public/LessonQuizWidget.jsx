@@ -4,7 +4,7 @@ import { CheckCircle, XCircle, Info, HelpCircle } from "lucide-react";
 /**
  * A public-facing quiz widget for the lesson page.
  */
-const LessonQuizWidget = ({ quiz }) => {
+const LessonQuizWidget = ({ quiz, onComplete }) => {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
@@ -32,6 +32,10 @@ const LessonQuizWidget = ({ quiz }) => {
     });
     setScore(correctCount);
     setSubmitted(true);
+
+    if (correctCount === quiz.questions.length && onComplete) {
+      onComplete(true);
+    }
   };
 
   const handleReset = () => {

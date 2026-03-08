@@ -19,6 +19,7 @@ import {
   Bookmark,
   Menu,
   X,
+  Lock,
 } from "lucide-react";
 import MarkdownRenderer from "../../components/admin/MarkdownRenderer";
 import { getSortedLessons } from "../../utils/courseHelpers";
@@ -33,8 +34,61 @@ const CourseLesson = () => {
   const [quiz, setQuiz] = useState(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [progress, setProgress] = useState({
+    slug: lesson_slug,
+    hasRead: false,
+    quizPassed: false,
+  });
 
   const sortedLessons = course ? getSortedLessons(course?.lessons) : [];
+
+  // Load progress from localStorage
+  useEffect(() => {
+    if (lesson_slug) {
+      const savedProgress = localStorage.getItem(
+        `lesson_progress_${lesson_slug}`,
+      );
+      if (savedProgress) {
+        setProgress({ ...JSON.parse(savedProgress), slug: lesson_slug });
+      } else {
+        setProgress({ slug: lesson_slug, hasRead: false, quizPassed: false });
+      }
+    }
+  }, [lesson_slug]);
+
+  // Persist progress to localStorage
+  useEffect(() => {
+    if (
+      lesson_slug &&
+      progress.slug === lesson_slug &&
+      (progress.hasRead || progress.quizPassed)
+    ) {
+      const { slug, ...saveData } = progress;
+      localStorage.setItem(
+        `lesson_progress_${lesson_slug}`,
+        JSON.stringify(saveData),
+      );
+    }
+  }, [progress, lesson_slug]);
+
+  // Intersection Observer for reading detection
+  useEffect(() => {
+    if (isLoading || !lesson) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setProgress((prev) => ({ ...prev, hasRead: true }));
+        }
+      },
+      { threshold: 1.0 },
+    );
+
+    const sentinel = document.getElementById("reading-sentinel");
+    if (sentinel) observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [isLoading, lesson]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -220,17 +274,50 @@ const CourseLesson = () => {
               {sortedLessons?.map((l, index) => {
                 const isActive = l.lesson_slug === lesson.lesson_slug;
                 const isCompleted = index < currentLessonIndex;
+
+                // A lesson is unlocked if it's the first one, or if the previous lesson was completed
+                // Since we don't have a global progress sync yet, we'll assume previous are completed
+                // if they are before the current index for now, but in a real scenario we'd check localStorage for each.
+
+                // Better logic: determine if THIS lesson is unlocked
+                let isUnlocked = index <= currentLessonIndex;
+                if (!isUnlocked) {
+                  // Check if the IMMEDIATE previous lesson is completed in localStorage
+                  const prevLessonSlug = sortedLessons[index - 1]?.lesson_slug;
+                  const prevProgress = prevLessonSlug
+                    ? JSON.parse(
+                        localStorage.getItem(
+                          `lesson_progress_${prevLessonSlug}`,
+                        ) || "{}",
+                      )
+                    : null;
+
+                  // A lesson is unlocked only if the PREVIOUS one is fully completed
+                  isUnlocked =
+                    prevProgress?.hasRead && prevProgress?.quizPassed;
+                }
+
+                const NavItem = isUnlocked ? Link : "div";
+                const navProps = isUnlocked
+                  ? { to: `/course/${course_slug}/lesson/${l.lesson_slug}` }
+                  : {};
+
                 return (
-                  <Link
+                  <NavItem
                     key={l.lesson_slug}
-                    to={`/course/${course_slug}/lesson/${l.lesson_slug}`}
-                    className={`w-full flex items-start gap-3 px-6 py-3 transition-colors border-l-4 ${isActive ? "bg-gray-50 border-black text-gray-900" : "border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900"}`}
+                    {...navProps}
+                    className={`
+                      w-full flex items-start gap-3 px-6 py-3 transition-colors border-l-4 
+                      ${isActive ? "bg-gray-50 border-black text-gray-900" : isUnlocked ? "border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900" : "border-transparent text-gray-300 cursor-not-allowed"}
+                    `}
                   >
                     <div className="mt-0.5 shrink-0">
                       {isActive ? (
                         <PlayCircle className="w-4 h-4 text-black" />
                       ) : isCompleted ? (
                         <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : !isUnlocked ? (
+                        <Lock className="w-4 h-4 text-gray-300" />
                       ) : (
                         <div className="w-4 h-4 rounded-full border-2 border-gray-300 text-[10px] flex items-center justify-center font-bold text-gray-400">
                           {index + 1}
@@ -239,7 +326,7 @@ const CourseLesson = () => {
                     </div>
                     <div className="flex-1">
                       <p
-                        className={`text-sm font-bold ${isActive ? "text-gray-900" : "text-gray-600"}`}
+                        className={`text-sm font-bold ${isActive ? "text-gray-900" : isUnlocked ? "text-gray-600" : "text-gray-300"}`}
                       >
                         {l.lesson_name}
                       </p>
@@ -248,7 +335,7 @@ const CourseLesson = () => {
                         {`${l.estimated_time} min`}
                       </p>
                     </div>
-                  </Link>
+                  </NavItem>
                 );
               })}
             </nav>
@@ -329,7 +416,17 @@ const CourseLesson = () => {
                 />
               </section>
 
-              {quiz && <LessonQuizWidget quiz={quiz} />}
+              {/* Sentinel for reading detection */}
+              <div id="reading-sentinel" className="h-4 w-full" />
+
+              {quiz && (
+                <LessonQuizWidget
+                  quiz={quiz}
+                  onComplete={() =>
+                    setProgress((prev) => ({ ...prev, quizPassed: true }))
+                  }
+                />
+              )}
 
               <footer className="pt-12 border-t border-gray-100">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -350,24 +447,44 @@ const CourseLesson = () => {
                   )}
                   {nextLesson ? (
                     <button
+                      disabled={!(progress.hasRead && progress.quizPassed)}
                       onClick={() => handleLessonNavigation(nextLesson)}
-                      className="flex flex-col items-end p-4 rounded-xl bg-black text-white hover:bg-gray-800 transition-all text-right shadow-lg"
+                      className={`flex flex-col items-end p-4 rounded-xl transition-all text-right shadow-lg ${
+                        progress.hasRead && progress.quizPassed
+                          ? "bg-black text-white hover:bg-gray-800"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                      }`}
                     >
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                         Next <ChevronRight className="w-3 h-3" />
                       </span>
-                      <span className="font-bold text-white">
+                      <span className="font-bold">
                         {nextLesson.lesson_name}
                       </span>
+                      {!(progress.hasRead && progress.quizPassed) && (
+                        <span className="text-[10px] mt-1 font-bold text-red-400 uppercase tracking-tighter">
+                          Complete Reading & Quiz to Unlock
+                        </span>
+                      )}
                     </button>
                   ) : (
                     <button
+                      disabled={!(progress.hasRead && progress.quizPassed)}
                       onClick={handleCompleteCourse}
-                      className="flex flex-col items-center justify-center p-4 rounded-xl bg-green-600 text-white hover:bg-green-700 transition-all shadow-lg col-span-1 sm:col-start-2"
+                      className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all shadow-lg col-span-1 sm:col-start-2 ${
+                        progress.hasRead && progress.quizPassed
+                          ? "bg-green-600 text-white hover:bg-green-700"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                      }`}
                     >
-                      <span className="font-bold text-white flex items-center gap-2">
+                      <span className="font-bold flex items-center gap-2">
                         Complete Course <CheckCircle className="w-5 h-5" />
                       </span>
+                      {!(progress.hasRead && progress.quizPassed) && (
+                        <span className="text-[10px] mt-1 font-bold text-red-400 uppercase tracking-tighter">
+                          Complete Reading & Quiz to Unlock
+                        </span>
+                      )}
                     </button>
                   )}
                 </div>
