@@ -31,7 +31,7 @@ MIDDLEWARE = [
 
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -145,7 +145,7 @@ DATABASES = {
             'options': f'-c search_path={DB_SCHEMA},public',
         },
         # Pooler connections should not be persistent
-        'CONN_MAX_AGE': 0,
+        'CONN_MAX_AGE': config('CONN_MAX_AGE', default=60, cast=int),
         'DISABLE_SERVER_SIDE_CURSORS': True,
     }
 }
@@ -164,4 +164,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -36,5 +36,8 @@ ENV DJANGO_SETTINGS_MODULE=config.settings
 # Expose port
 EXPOSE 8000
 
+# Generate static files
+RUN python manage.py collectstatic --noinput || true
+
 # Run server (Default to Gunicorn for production)
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "-k", "uvicorn.workers.UvicornWorker", "config.asgi:application"]
