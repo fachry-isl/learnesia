@@ -136,7 +136,7 @@ const MarkdownRenderer = ({ content }) => {
   const isAdminPage = pathname.includes("/admin/");
   return (
     <div
-      className={`${!isAdminPage && `border-2 border-black`} p-10 bg-white prose prose-slate max-w-none rounded-2xl`}
+      className={`${!isAdminPage && `xl:border-2 xl:order-black`} xl:p-10 md:p-5 sm:p-1 bg-white prose prose-slate max-w-none rounded-2xl`}
     >
       <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
         {content ||

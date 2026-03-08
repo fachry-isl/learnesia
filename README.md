@@ -2,7 +2,7 @@
 
 Learnesia is a modern, AI-powered course generation platform designed for educators and content creators. It streamlines the process of creating, managing, and delivering structured educational content with ease.
 
-## 🚀 Key Features
+## Key Features
 
 - **AI-Powered Generation**: Instantly generate comprehensive course outlines and lesson content.
 - **Structured Learning**: Organize lessons with clear objectives and structured modules.
@@ -10,7 +10,7 @@ Learnesia is a modern, AI-powered course generation platform designed for educat
 - **Versatile Status Tracking**: Manage your content lifecycle with Draft, Published, and Template statuses.
 - **Seamless Editor**: A intuitive interface for lesson structure and content editing.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Backend
 
@@ -25,7 +25,7 @@ Learnesia is a modern, AI-powered course generation platform designed for educat
 - **Icons**: Lucide React
 - **UI Components**: Modern, responsive design
 
-## ⚡ Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -62,5 +62,3 @@ Learnesia is a modern, AI-powered course generation platform designed for educat
    ```
 
 ---
-
-Built with ❤️ by the Learnesia Team.
