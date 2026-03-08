@@ -36,5 +36,5 @@ ENV DJANGO_SETTINGS_MODULE=config.settings
 # Expose port
 EXPOSE 8000
 
-# Run server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Run server (Default to Gunicorn for production)
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]
