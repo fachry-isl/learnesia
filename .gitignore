@@ -1,1 +1,15 @@
-.vscode
+# VSCode settings and workspace-specific configuration
+.vscode/
+*.code-workspace
+
+# Backend dependencies (example, usually Django/Python needs these)
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Frontend dependencies
+node_modules/
+dist/
+.env.local
+.env.*.local
