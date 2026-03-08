@@ -15,6 +15,7 @@ import CourseLesson from "./pages/public/CourseLesson";
 import PublicCourseLayout from "./layouts/PublicCourseLayout";
 import AdminLogin from "./pages/admin/AdminLogin";
 import ProtectedRoute from "./pages/admin/ProtectedRoute";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -50,6 +51,8 @@ function App() {
             <Route path="create-lesson" element={<CreateLesson />} />
           </Route>
         </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
