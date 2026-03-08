@@ -10,7 +10,7 @@ Learnesia is a modern, AI-powered course generation platform designed for educat
 - **Versatile Status Tracking**: Manage your content lifecycle with Draft, Published, and Template statuses.
 - **Seamless Editor**: A intuitive interface for lesson structure and content editing.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Backend
 
