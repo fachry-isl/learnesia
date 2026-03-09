@@ -18,6 +18,8 @@ import ProtectedRoute from "./pages/admin/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 function App() {
+  const adminPath = import.meta.env.VITE_ADMIN_PATH || "/admin";
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Toaster />
@@ -27,7 +29,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<CourseLibrary />} />
-          <Route path="/admin/login" element={<AdminLogin />}></Route>
+          <Route path={`${adminPath}/login`} element={<AdminLogin />}></Route>
 
           <Route path="/course/:course_slug" element={<PublicCourseLayout />}>
             <Route index element={<CourseOverview />} />
@@ -41,7 +43,7 @@ function App() {
 
         {/* Protected Admin Page */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path={adminPath} element={<AdminLayout />}>
             <Route index element={<AdminCourseLibrary />} />
             <Route path="courses" element={<AdminCourseLibrary />} />
             <Route path="courses/:id" element={<CourseEditor />} />{" "}

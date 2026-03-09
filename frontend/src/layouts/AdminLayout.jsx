@@ -7,6 +7,8 @@ import { useSidebar } from "../contexts/SidebarContext";
 import SidebarItem from "../components/admin/SidebarItem";
 import SidebarLessonItem from "../components/admin/SidebarLessonItem";
 
+import learnesiaLogo from "../assets/li_logo_lite_white.png";
+
 import { BookOpen, PlusCircle, Code2 } from "lucide-react";
 
 const AdminLayout = () => {
@@ -35,14 +37,15 @@ const AdminLayout = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-950 flex flex-col fixed h-screen z-50 border-r border-slate-800/50">
+      <aside className="w-64 bg-white flex flex-col fixed h-screen z-50 border-r border-slate-800/50">
         {/* Logo/Brand Section */}
-        <div className="p-6 border-b border-slate-800/50">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent tracking-tight">
-            Learnesia
-          </h1>
-          <p className="text-slate-500 text-[10px] mt-1 uppercase tracking-[0.2em] font-bold opacity-80">
-            Course Management
+        <div className="p-6">
+          <img
+            src={learnesiaLogo}
+            className="p-2 w-20 border-1 border-black"
+          ></img>
+          <p className="mt-5 text-black text-[10px] mt-1 uppercase tracking-[0.2em] font-bold">
+            Content Management System
           </p>
         </div>
 
@@ -51,14 +54,14 @@ const AdminLayout = () => {
           {sidebarMode === "default" ? (
             <>
               <SidebarItem
-                to="/admin/courses"
+                to="courses"
                 item_name="Course Library"
                 icon={<BookOpen className="w-5 h-5" />}
                 isActive={activeSidebar === "course_library"}
                 onClick={() => handleSidebarItemClick("course_library")}
               />
               <SidebarItem
-                to="/admin/create-template"
+                to="create-template"
                 item_name="Create Course Template"
                 icon={<PlusCircle className="w-5 h-5" />}
                 isActive={activeSidebar === "create_course_template"}

@@ -1,5 +1,6 @@
 services:
   backend:
+    image: learnesia-backend-prod
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -12,6 +13,7 @@ services:
     restart: always
 
   frontend:
+    image: learnesia-frontend-prod
     build:
       context: ./frontend
       dockerfile: Dockerfile

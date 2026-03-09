@@ -3,11 +3,19 @@ import { Eye, EyeOff, Lock, User, ArrowRight, ShieldCheck } from "lucide-react";
 import { loginToGetAuthToken } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+
+  // Security Hardening: Check for secret access key in query params
+  const searchParams = new URLSearchParams(location.search);
+  const secretKey = searchParams.get("sk");
+  const expectedKey = import.meta.env.VITE_ADMIN_SECRET_KEY || "dev-secret-key";
+  const adminBase = import.meta.env.VITE_ADMIN_PATH || "/admin";
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -15,6 +23,11 @@ const AdminLogin = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // If secret key doesn't match, redirect to home (obfuscation)
+  if (secretKey !== expectedKey) {
+    return <Navigate to="/" replace />;
+  }
 
   const validate = () => {
     const newErrors = {};
@@ -58,7 +71,8 @@ const AdminLogin = () => {
         login(data);
       }
 
-      navigate("/admin");
+      // After successful login navigate to admin using the dynamic path
+      navigate(`${adminBase}/courses`);
     } catch (error) {
       toast.error(
         error.message || "Failed to login. Please check your credentials.",
@@ -92,7 +106,7 @@ const AdminLogin = () => {
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <User
-                    className={`w-5 h-5 transition-colors ${errors.username ? "text-rose-400" : "text-slate-400 group-focus-within:text-indigo-500"}`}
+                    className={`w-5 h-5 transition-colors ${errors.username ? "text-rose-400" : "text-slate-400 group-focus-within:text-black"}`}
                   />
                 </div>
                 <input
@@ -101,10 +115,10 @@ const AdminLogin = () => {
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border transition-all rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none ${
+                  className={`block w-full pl-11 pr-4 py-3.5 bg-slate-50 border transition-all rounded-xl focus:ring-4 focus:ring-black/10 focus:bg-white outline-none ${
                     errors.username
                       ? "border-rose-200 focus:border-rose-500"
-                      : "border-slate-200 focus:border-indigo-500"
+                      : "border-slate-200 focus:border-black"
                   }`}
                   placeholder="admin_user"
                 />
@@ -129,7 +143,7 @@ const AdminLogin = () => {
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock
-                    className={`w-5 h-5 transition-colors ${errors.password ? "text-rose-400" : "text-slate-400 group-focus-within:text-indigo-500"}`}
+                    className={`w-5 h-5 transition-colors ${errors.password ? "text-rose-400" : "text-slate-400 group-focus-within:text-black"}`}
                   />
                 </div>
                 <input
@@ -138,10 +152,10 @@ const AdminLogin = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`block w-full pl-11 pr-12 py-3.5 bg-slate-50 border transition-all rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none ${
+                  className={`block w-full pl-11 pr-12 py-3.5 bg-slate-50 border transition-all rounded-xl focus:ring-4 focus:ring-black/10 focus:bg-white outline-none ${
                     errors.password
                       ? "border-rose-200 focus:border-rose-500"
-                      : "border-slate-200 focus:border-indigo-500"
+                      : "border-slate-200 focus:border-black"
                   }`}
                   placeholder="••••••••"
                 />
@@ -168,7 +182,7 @@ const AdminLogin = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="group relative w-full flex items-center justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-black hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/30 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_12px_rgb(79,70,229,0.2)]"
+              className="group relative w-full flex items-center justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-black hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-4 focus:ring-black/30 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_12px_rgb(79,70,229,0.2)]"
             >
               {isSubmitting ? (
                 <div className="flex items-center space-x-2">
