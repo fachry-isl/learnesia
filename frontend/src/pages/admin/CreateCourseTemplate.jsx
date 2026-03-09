@@ -19,7 +19,7 @@ const CreateCourseTemplate = () => {
     const loadingToast = toast.loading("Creating lesson...");
     try {
       const result = await generateCourse(prompt);
-      // console.log("Generated Course: ", result.response);
+
       setCourseData(result.response);
 
       toast.success("Lesson created successfully!", { id: loadingToast });

@@ -10,12 +10,12 @@ Beyond content creation tools, Learnesia democratizes learning by curating struc
 
 ## Key Features
 
-- **AI Course Generation**: Generate course outlines, lesson content, and quizzes using Google Gemini.
+- **AI Course Generation**: Generate course outlines, lesson content, and quizzes using LLM.
 - **Structured Learning**: Organize lessons into modules with clear objectives.
 - **Content Management**: Manage lesson resources including external links, document attachments, and video embeds.
 - **Content Lifecycle**: Track progress with Draft, Published, and Template statuses.
 - **Lesson Editor**: Interface for refining and editing generated content.
-- **Authentication**: JWT-based secure access for users and administrators.
+- **Authentication**: JWT-based secure access for administrators.
 
 ## Tech Stack
 
@@ -119,3 +119,7 @@ docker compose -f docker-compose.prod.yml up --build -d
    ```
 
 ---
+
+## 📄 License
+
+This project is licensed under the AGPL v3 License.

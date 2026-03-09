@@ -21,17 +21,6 @@ const LessonQuiz = ({
     onGenerateQuiz();
   };
 
-  // if (quizzes) {
-  //   console.log("Quizzes on LessonQuiz:", quizzes);
-  //   console.log("Quizzes Question on LessonQuiz:", quizzes[0].questions);
-  // }
-
-  // console.log("Quizzes on LessonQuiz Index 0:", quizzes[0]);
-  // console.log(
-  //   "Quizzes on LessonQuiz Index 0 and Questions:",
-  //   quizzes[0].questions,
-  // );
-
   const onAddQuestionFormCallback = (questionData) => {
     onAddQuestionForm(questionData);
   };
@@ -101,7 +90,7 @@ const LessonQuiz = ({
             </div>
             {quizzes?.questions.map((question, idx) => {
               // Return the component
-              // console.log("Question", question);
+
               return (
                 <QuizQuestionItem
                   key={idx}

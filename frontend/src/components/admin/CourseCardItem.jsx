@@ -26,7 +26,6 @@ const CourseCardItem = ({ course, isonClickActive, mode = "default" }) => {
   const changeCourseStatusAPI = async (course_id, updatedValue) => {
     try {
       const isDraftorPublished = updatedValue ? "published" : "draft";
-      // console.log("Is Draft: ", isDraftorPublished);
 
       const response = await changeCourseStatus(course_id, isDraftorPublished);
 
@@ -55,10 +54,6 @@ const CourseCardItem = ({ course, isonClickActive, mode = "default" }) => {
 
     // Backend
     changeCourseStatusAPI(course.id, newValue);
-
-    // Do something with the value
-    // console.log("Toggle is now:", newValue ? "ON" : "OFF");
-    // console.log("Course ID:", course.id);
   };
 
   // Sort lessons by order column before finding

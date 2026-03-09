@@ -57,12 +57,6 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
         course_tags: course.course_tags || [],
       });
 
-      if (response) {
-        console.log("Course Submitted: ", course.course_name);
-        console.log(JSON.stringify(response));
-        console.log("Response Id: ", response.id);
-      }
-
       return response.id;
     } catch (error) {
       console.error("Error fetchCreateCourse: ", error);
@@ -70,8 +64,6 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
   };
 
   const fetchCreateLessonsFromCourse = async (course_id, lesson_data) => {
-    console.log("Course ID: ", course_id);
-    console.log("Lesson_Data: ", lesson_data);
     try {
       for (let i = 0; i <= lesson_data.length - 1; i++) {
         lesson_data[i]["course"] = course_id;
@@ -116,7 +108,6 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
       navigate("/admin/templates");
       setActiveSidebar("course_library");
     } catch (error) {
-      console.error("Submission error:", error);
       toast.error("Failed to submit course structure", { id: loadingToast });
     } finally {
       setIsSubmitting(false);

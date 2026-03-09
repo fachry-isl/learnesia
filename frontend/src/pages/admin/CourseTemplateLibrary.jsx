@@ -18,9 +18,6 @@ const CourseTemplateLibrary = () => {
       (course) => course.status === "template",
     );
 
-    // For Debug
-    // console.log("Filtered Course; ", filtered_course);
-
     setCourses(filtered_course);
   };
 
