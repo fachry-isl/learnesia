@@ -86,7 +86,6 @@ const CourseEditor = () => {
   const fetchQuizbyLessonId = async (lesson_id) => {
     try {
       const response = await getQuizDetailbyLessonId(lesson_id);
-      console.log("QuizbyLessonID: ", response[0]);
       setQuizzes(response[0]);
     } catch (error) {
       throw error;
@@ -96,8 +95,6 @@ const CourseEditor = () => {
   // This would get triggered every time user change lesson
   useEffect(() => {
     if (lessonData) {
-      // console.log("Course: ", course);
-      // console.log("LessonData: ", lessonData);
       // Get Lesson Content
       setContent(lessonData.lesson_content || "");
     }
@@ -147,7 +144,7 @@ const CourseEditor = () => {
 
       if (quizzes) {
         // Append Lesson ID on quizzes react state on payload
-        console.log("Quizzes: ", quizzes);
+
         const quizzesWithLesson = {
           ...quizzes,
           lesson: lessonData.id,
@@ -157,7 +154,6 @@ const CourseEditor = () => {
           await updateQuiz(quizzes.id, quizzesWithLesson);
         } else {
           const response = await createQuizzes(quizzesWithLesson);
-          console.log("Create Quizzes:", response);
 
           // If first time create quiz, append Quiz ID for subsequent Update
           setQuizzes(response);
@@ -199,12 +195,11 @@ const CourseEditor = () => {
   const onAddQuestionButtonHandler = () => {
     //setIsQuizModalOpen(true);
     setQuestionData(null);
-    // console.log("Question Data on Context:", questionData);
+
     setIsQuizModalOpen(true);
   };
 
   const onAddQuestionFormHandler = async (question_data) => {
-    //console.log("Question Data: ", question_data);
     // window.alert(JSON.stringify(question_data));
 
     const newQuestion = {
@@ -238,8 +233,6 @@ const CourseEditor = () => {
 
       const response = await addQuizApi(quizzes.id, newQuestion);
 
-      console.log("On Add QuizApi", response);
-
       // After getting question id we have to update questiondata on React State
       // So every subsequent action is working as intended
 
@@ -247,8 +240,6 @@ const CourseEditor = () => {
         ...newQuestion,
         id: response.id,
       };
-
-      console.log("newQuestionwithId: ", newQuestionwithId);
 
       const updatedQuiz = {
         ...quizzes,
@@ -271,8 +262,6 @@ const CourseEditor = () => {
         questions: [newQuestion],
       };
 
-      console.log("Quiz_Data: ", quiz_data);
-
       // Update Backend
       const createQuizApi = async () => {
         try {
@@ -280,7 +269,6 @@ const CourseEditor = () => {
 
           return response;
         } catch (error) {
-          console.log("Error when PostQuizApi: ", error);
           throw error;
         }
       };
@@ -290,8 +278,6 @@ const CourseEditor = () => {
 
       // Update Frontend with actual backend response
       setQuizzes(response);
-
-      console.log("Quiz created successfully: ", response);
     }
   };
 
@@ -322,7 +308,7 @@ const CourseEditor = () => {
       Lesson Content:
       ${lessonData.lesson_content}
       `;
-      // console.log(lessonData);
+
       // window.alert(lessonSummary);
 
       const quizParams = {
@@ -333,7 +319,6 @@ const CourseEditor = () => {
       };
       const response = await generateQuiz(quizParams);
 
-      console.log("Quizzes Generated: ", response);
       toast.success("Quiz Generated Succesfully!", { id: loadingToast });
 
       if (quiz_id) {

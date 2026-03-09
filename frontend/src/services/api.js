@@ -648,7 +648,6 @@ export async function geminiApiRequest(query) {
     });
     return response.data;
   } catch (error) {
-    console.error("Gemini API error: ", error);
     throw error;
   }
 }
@@ -681,7 +680,6 @@ export async function queryPerplexica(query) {
     });
     return response.data;
   } catch (error) {
-    console.error("Perplexica API error:", error);
     throw error;
   }
 }

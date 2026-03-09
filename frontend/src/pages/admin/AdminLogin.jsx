@@ -52,8 +52,6 @@ const AdminLogin = () => {
         formData.password,
       );
 
-      //console.log("Login successful:", data);
-
       // If data contains tokens, we can use them
       if (data && (data.access || data.token)) {
         toast.success("Login successful!");
@@ -62,7 +60,6 @@ const AdminLogin = () => {
 
       navigate("/admin");
     } catch (error) {
-      console.error("Login error:", error);
       toast.error(
         error.message || "Failed to login. Please check your credentials.",
       );

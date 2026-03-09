@@ -91,7 +91,6 @@ const CourseLibrary = () => {
 
   const onCourseClickHandle = (course) => {
     navigate(`/course/${course.course_slug}/overview`);
-    // console.log("course: ", course);
   };
 
   const handleSearchChange = (e) => {

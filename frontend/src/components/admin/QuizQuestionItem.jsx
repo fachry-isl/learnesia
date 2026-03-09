@@ -10,13 +10,11 @@ const QuizQuestionItem = ({
   const { setIsQuizModalOpen, setQuestionData } = useQuizQuestionModal();
 
   const onEditCallback = () => {
-    console.log("OnEditQuestion: ", question);
     setQuestionData(question);
     setIsQuizModalOpen(true);
   };
 
   const onDelete = () => {
-    console.log("OnDelete: ", question);
     onDeleteCallback(question.id);
   };
 

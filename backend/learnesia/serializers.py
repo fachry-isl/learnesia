@@ -56,8 +56,6 @@ class QuizQuestionSerializer(serializers.ModelSerializer):
         3. Put options into parent Instance
         """
 
-        print(validated_data)
-
         option_data = validated_data.pop('options')
 
         question = QuizQuestion.objects.create(**validated_data)
@@ -100,7 +98,6 @@ class QuizDetailSerializer(serializers.ModelSerializer):
             - Create option linked to question
         """
         # Extract questions before creating Quiz
-        print(validated_data)
         questions_data = validated_data.pop('questions')
         
         # Create Quiz with remaining data (lesson, title, description) without questions.

@@ -27,10 +27,7 @@ const QuizQuestionModal = ({ lessonName, onAddQuestionForm }) => {
     setQuestionText("");
   };
 
-  //console.log("Question Data", questionData);
-
   useEffect(() => {
-    //console.log("UseEffect QuizQuestionModal Triggered");
     clearForm();
 
     if (questionData) {
@@ -86,8 +83,6 @@ const QuizQuestionModal = ({ lessonName, onAddQuestionForm }) => {
       // await onAddQuestionForm(questionData);
       onAddQuestionForm(questionData);
 
-      console.log(questionData);
-
       // Reset form
       setQuestionText("");
       setOptions([
@@ -99,7 +94,7 @@ const QuizQuestionModal = ({ lessonName, onAddQuestionForm }) => {
 
       setIsQuizModalOpen(false); // Close modal on success
     } catch (error) {
-      console.error("Failed to add question:", error);
+      // Failed to add question
     } finally {
       setIsAdding(false);
     }

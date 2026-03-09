@@ -1,15 +1,44 @@
+[![CI/CD Deployment](https://github.com/fachry-isl/learnesia/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/fachry-isl/learnesia/actions/workflows/deploy.yml) [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
 # Learnesia
 
-Learnesia is an AI-powered course generation platform for educators and content creators. It automates the process of creating and managing structured educational content using Google Gemini and a modern web stack.
+Learnesia is an AI-powered course generation platform designed for educators, content creators, and curious learners alike. It automates the creation and management of structured educational content using Google Gemini, transforming raw ideas into well-organized, curriculum-ready courses in minutes.
+
+Beyond content creation tools, Learnesia democratizes learning by curating structured courses from freely available internet resources — so anyone can learn anything without the barrier of expensive platforms or scattered, unorganized materials. Whether you're an educator building a course from scratch or a self-learner looking for a guided path through a new subject, Learnesia turns the vast knowledge of the internet into a coherent, accessible learning experience tailored to your goals.
+
+---
+
+## 🏗️ Project Architecture
+
+```text
+                                 +------------------+
+                                 |   Web Browser    |
+                                 |  (React + Vite)  |
+                                 +--------+---------+
+                                          |
+                                          | HTTP (REST API)
+                                          v
++------------------+             +--------+---------+             +------------------+
+|   Google Gemini  | <---------- |  Django Backend  | ----------> |    Supabase DB   |
+|     (AI API)     |             | (DRF + Gunicorn) |             |   (PostgreSQL)   |
++------------------+             +--------+---------+             +------------------+
+                                          |
+                                          | CI/CD
+                                          v
+                                 +--------+---------+
+                                 |   VPS Server     |
+                                 | (Docker Compose) |
+                                 +------------------+
+```
 
 ## Key Features
 
-- **AI Course Generation**: Generate course outlines, lesson content, and quizzes using Google Gemini.
+- **AI Course Generation**: Generate course outlines, lesson content, and quizzes using LLM.
 - **Structured Learning**: Organize lessons into modules with clear objectives.
 - **Content Management**: Manage lesson resources including external links, document attachments, and video embeds.
 - **Content Lifecycle**: Track progress with Draft, Published, and Template statuses.
 - **Lesson Editor**: Interface for refining and editing generated content.
-- **Authentication**: JWT-based secure access for users and administrators.
+- **Authentication**: JWT-based secure access for administrators.
 
 ## Tech Stack
 
@@ -51,7 +80,7 @@ Recommended for contributors. This setup uses Django's development server (`runs
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/fachry-isl/course-generation.git
+git clone https://github.com/fachry-isl/learnesia.git
 cd learnesia
 
 # 2. Configure environment variables (see Environment Variables section)
@@ -113,3 +142,7 @@ docker compose -f docker-compose.prod.yml up --build -d
    ```
 
 ---
+
+## 📄 License
+
+This project is licensed under the AGPL v3 License.
