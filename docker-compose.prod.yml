@@ -3,14 +3,12 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    env_file:
-      - ./backend/.env
     environment:
-      - DEBUG=False
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-      - CONN_MAX_AGE=60
-    ports:
-      - "8000:8000"
+      - DEBUG=${DEBUG:-False}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - CONN_MAX_AGE=${CONN_MAX_AGE:-60}
+    expose:
+      - "8000"
     restart: always
 
   frontend:
