@@ -105,7 +105,8 @@ const EditCourseFromGenerate = ({ course_prop, onBackButtonCallback }) => {
       toast.success("Course created successfully!", { id: loadingToast });
 
       // 3. Navigate to Course Library
-      navigate("/admin/templates");
+      const adminPath = import.meta.env.VITE_ADMIN_PATH || "/admin";
+      navigate(`${adminPath}/courses`);
       setActiveSidebar("course_library");
     } catch (error) {
       toast.error("Failed to submit course structure", { id: loadingToast });

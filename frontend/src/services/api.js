@@ -45,7 +45,8 @@ privateApi.interceptors.response.use(
         return privateApi(original);
       } catch {
         localStorage.clear();
-        window.location.href = "/admin/login";
+        const adminPath = import.meta.env.VITE_ADMIN_PATH || "/admin";
+        window.location.href = `${adminPath}/login`;
       }
     }
     return Promise.reject(error);

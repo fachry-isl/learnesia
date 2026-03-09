@@ -10,8 +10,8 @@ const SidebarItem = ({ item_name, icon, to }) => {
         text-left font-medium text-sm
         ${
           isActive
-            ? "bg-white text-gray-900 shadow-md"
-            : "text-gray-300 hover:bg-gray-800 hover:text-white"
+            ? "bg-black text-white shadow-md"
+            : "text-black-300 hover:bg-gray-200 hover:text-black"
         }
       `}
     >

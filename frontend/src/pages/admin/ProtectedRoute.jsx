@@ -3,7 +3,13 @@ import { useAuth } from "../../contexts/AuthContext";
 
 const ProtectedRoute = () => {
   const { accessToken } = useAuth();
-  return accessToken ? <Outlet /> : <Navigate to="/admin/login" replace />;
+  const adminPath = import.meta.env.VITE_ADMIN_PATH || "/admin";
+
+  return accessToken ? (
+    <Outlet />
+  ) : (
+    <Navigate to={`${adminPath}/login`} replace />
+  );
 };
 
 export default ProtectedRoute;
