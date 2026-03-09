@@ -1,3 +1,5 @@
+[![CI/CD Deployment](https://github.com/fachry-isl/learnesia/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/fachry-isl/learnesia/actions/workflows/deploy.yml)
+
 # Learnesia
 
 Learnesia is an AI-powered course generation platform for educators and content creators. It automates the process of creating and managing structured educational content using Google Gemini and a modern web stack.
@@ -51,7 +53,7 @@ Recommended for contributors. This setup uses Django's development server (`runs
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/fachry-isl/course-generation.git
+git clone https://github.com/fachry-isl/learnesia.git
 cd learnesia
 
 # 2. Configure environment variables (see Environment Variables section)
