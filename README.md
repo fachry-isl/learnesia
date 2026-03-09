@@ -2,7 +2,9 @@
 
 # Learnesia
 
-Learnesia is an AI-powered course generation platform for educators and content creators. It automates the process of creating and managing structured educational content using Google Gemini and a modern web stack.
+Learnesia is an AI-powered course generation platform designed for educators, content creators, and curious learners alike. It automates the creation and management of structured educational content using Google Gemini, transforming raw ideas into well-organized, curriculum-ready courses in minutes.
+
+Beyond content creation tools, Learnesia democratizes learning by curating structured courses from freely available internet resources — so anyone can learn anything without the barrier of expensive platforms or scattered, unorganized materials. Whether you're an educator building a course from scratch or a self-learner looking for a guided path through a new subject, Learnesia turns the vast knowledge of the internet into a coherent, accessible learning experience tailored to your goals.
 
 ## Key Features
 
