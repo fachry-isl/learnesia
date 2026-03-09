@@ -1,12 +1,18 @@
-[![CI/CD Deployment](https://github.com/fachry-isl/learnesia/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/fachry-isl/learnesia/actions/workflows/deploy.yml)
-
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![CI/CD Deployment](https://github.com/fachry-isl/learnesia/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/fachry-isl/learnesia/actions/workflows/deploy.yml) [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 # Learnesia
 
 Learnesia is an AI-powered course generation platform designed for educators, content creators, and curious learners alike. It automates the creation and management of structured educational content using Google Gemini, transforming raw ideas into well-organized, curriculum-ready courses in minutes.
 
 Beyond content creation tools, Learnesia democratizes learning by curating structured courses from freely available internet resources — so anyone can learn anything without the barrier of expensive platforms or scattered, unorganized materials. Whether you're an educator building a course from scratch or a self-learner looking for a guided path through a new subject, Learnesia turns the vast knowledge of the internet into a coherent, accessible learning experience tailored to your goals.
+
+## Preview
+
+🌐 **Live Demo**: [https://learnesia.co.id](https://learnesia.co.id)
+
+|            Public Page            |           Admin Page            |
+| :-------------------------------: | :-----------------------------: |
+| ![public](./demo/public_page.gif) | ![admin](./demo/admin_page.gif) |
 
 ## Key Features
 
