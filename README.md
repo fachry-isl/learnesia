@@ -16,11 +16,12 @@ Beyond content creation tools, Learnesia democratizes learning by curating struc
 
 ## Key Features
 
-- **AI Course Generation**: Generate course outlines, lesson content, and quizzes using LLM.
+- **AI Course Generation**: Generate course outlines, lesson content, and quizzes using Google Gemini.
 - **Structured Learning**: Organize lessons into modules with clear objectives.
 - **Content Management**: Manage lesson resources including external links, document attachments, and video embeds.
 - **Content Lifecycle**: Track progress with Draft, Published, and Template statuses.
 - **Lesson Editor**: Interface for refining and editing generated content.
+- **Security & Obfuscation**: Custom admin paths and secret keys to harden the platform.
 - **Authentication**: JWT-based secure access for administrators.
 
 ## Tech Stack
@@ -30,14 +31,17 @@ Beyond content creation tools, Learnesia democratizes learning by curating struc
 - **Framework**: Django & Django REST Framework (DRF)
 - **Database**: PostgreSQL (via Supabase)
 - **AI Integration**: Google Gemini API
-- **Authentication**: Simple JWT
+- **Authentication**: JWT for Admin Page
+- **Production Server**: Gunicorn with Uvicorn workers (ASGI)
+- **Static Files**: WhiteNoise
 
 ### Frontend
 
-- **Framework**: React (Vite)
-- **Styling**: Vanilla CSS / Tailwind CSS
+- **Framework**: React 19 (Vite)
+- **Styling**: Tailwind CSS 4
 - **Icons**: Lucide React
 - **State Management**: React Hooks & Context API
+- **Routing**: React Router 7
 
 ---
 
@@ -45,28 +49,29 @@ Beyond content creation tools, Learnesia democratizes learning by curating struc
 
 ### Prerequisites
 
-- Python 3.10+
-- Node.js 18+ & npm
+- Python 3.12+
+- Node.js 22+ & npm
 - Docker & Docker Compose
-- Supabase project (PostgreSQL)
+- Supabase account (PostgreSQL)
 - Google Gemini API Key
 
 ---
 
-### Docker Setup
+## Docker Setup
 
 Learnesia uses a hybrid Docker strategy to provide a production-ready environment while maintaining a smooth developer experience.
 
 #### 🛠️ Local Development (with hot-reload)
 
-Recommended for contributors. This setup uses Django's development server (`runserver`) with automatic code reloading.
+Recommended for contributors. This setup uses Django's development server (`runserver`) and Vite's dev server with automatic code reloading.
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/fachry-isl/learnesia.git
 cd learnesia
 
-# 2. Configure environment variables (see Environment Variables section)
+# 2. Configure environment variables
+# Copy .env.example to .env in both /backend and /frontend directories.
 
 # 3. Start containers
 docker compose up --build
@@ -78,51 +83,42 @@ docker compose up --build
 
 #### 🚀 Production Deployment
 
-Optimized for performance and security. This setup uses **Gunicorn** as the WSGI server.
+Optimized for performance and security. This setup uses **Gunicorn** as the application server and **Nginx** for the frontend.
 
 ```bash
 docker compose -f docker-compose.prod.yml up --build -d
 ```
 
 - **Frontend**: `http://localhost:80` (Nginx serving production build)
-- **Backend**: `http://localhost:8000` (Gunicorn with multiple workers)
-- **Strategy**: The base `Dockerfile` defaults to Gunicorn for security, which is overridden by the development `docker-compose.yml` for productivity.
+- **Backend**: `http://localhost:8000` (Gunicorn with Uvicorn workers)
 
 ---
 
-### Local Setup
+## Environment Variables & Security
 
-#### Backend Setup
+### Admin Path Obfuscation
 
-1. Navigate to the `backend/` directory.
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Configure the `.env` file (refer to the Environment Variables section).
-5. Run migrations and start the server:
-   ```bash
-   python manage.py migrate
-   python manage.py runserver
-   ```
+To harden the admin interface, Learnesia uses environment-based path obfuscation.
 
-#### Frontend Setup
+**Frontend (`frontend/.env`)**:
 
-1. Navigate to the `frontend/` directory.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure the `.env` file.
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
+```env
+VITE_ADMIN_PATH=/your-custom-path
+VITE_ADMIN_SECRET_KEY=your-secret-key-here
+```
+
+**Backend (`backend/.env`)**:
+
+```env
+# Standard Django/DB configs
+SECRET_KEY=...
+DB_NAME=...
+GEMINI_API_KEY=...
+
+# Allowed Hosts & CORS
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+```
 
 ---
 
