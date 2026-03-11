@@ -12,7 +12,8 @@ Beyond content creation tools, Learnesia democratizes learning by curating struc
 
 |            Public Page            |           Admin Page            |
 | :-------------------------------: | :-----------------------------: |
-| ![public](./demo/public_page.gif) | ![admin](./demo/admin_page.gif) |
+| [![public](./demo/public_page.gif)](https://github.com/user-attachments/assets/179ecc24-0e22-41b3-a2c6-8e4acff8b186) | [![admin](./demo/admin_page.gif)](https://github.com/user-attachments/assets/785266da-d0d1-4bdb-8ecb-870bb1e2f283) |
+
 
 ## Key Features
 
