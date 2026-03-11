@@ -10,10 +10,9 @@ Beyond content creation tools, Learnesia democratizes learning by curating struc
 
 🌐 **Live Demo**: [https://learnesia.co.id](https://learnesia.co.id)
 
-|            Public Page            |           Admin Page            |
-| :-------------------------------: | :-----------------------------: |
+|                                                     Public Page                                                      |                                                     Admin Page                                                     |
+| :------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------: |
 | [![public](./demo/public_page.gif)](https://github.com/user-attachments/assets/179ecc24-0e22-41b3-a2c6-8e4acff8b186) | [![admin](./demo/admin_page.gif)](https://github.com/user-attachments/assets/785266da-d0d1-4bdb-8ecb-870bb1e2f283) |
-
 
 ## Key Features
 
@@ -120,6 +119,16 @@ GEMINI_API_KEY=...
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 CORS_ALLOWED_ORIGINS=http://localhost:5173
 ```
+
+---
+
+## Feature Checklist / Roadmap
+
+- **Content Generation with AI Agent Orchestration**
+- **Add Image, Diagram, and Interactivity on Course**
+- **Learning Statistics on Admin**
+- **Content Modularity** (Text, Video, Article, Quiz, Exercise) for reproducibility
+- **Content Citations**
 
 ---
 
