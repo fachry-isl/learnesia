@@ -15,7 +15,7 @@ const Home = () => {
         </p>
       </div> */}
 
-      <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-1 text-center">
+      <h1 className="text-3xl md:text-5xl font-extrabold font-jakarta text-gray-900 mb-1 text-center">
         Microlearning dari Apapun,
         <br />
         Kapanpun, di Manapun.
