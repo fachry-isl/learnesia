@@ -43,7 +43,7 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
       {/* Course Content - Reduced padding */}
       <div className="flex flex-col flex-1 p-4">
         {/* Course Title */}
-        <h3 className="text-base font-black text-gray-900 mb-1.5 line-clamp-2 group-hover:text-black transition-colors">
+        <h3 className="text-base font-black font-jakarta text-gray-900 mb-1.5 line-clamp-2 group-hover:text-black transition-colors">
           {course.course_name}
         </h3>
 
@@ -58,7 +58,7 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
           <div className="flex items-center gap-1.5 bg-gray-50 border-2 border-black px-2 py-1.5 rounded">
             <BookOpen className="w-4 h-4 text-black-600" strokeWidth={2.5} />
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-gray-500 uppercase leading-tight">
+              <p className="text-[10px] font-bold font-space text-gray-500 uppercase leading-tight">
                 Lessons
               </p>
               <p className="text-sm font-black text-gray-900">
@@ -71,7 +71,7 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
           <div className="flex items-center gap-1.5 bg-gray-50 border-2 border-black px-2 py-1.5 rounded">
             <Clock className="w-4 h-4 text-black" strokeWidth={2.5} />
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-gray-500 uppercase leading-tight">
+              <p className="text-[10px] font-bold font-space text-gray-500 uppercase leading-tight">
                 Duration
               </p>
               <p className="text-sm font-black text-gray-900">
@@ -84,7 +84,7 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
           <div className="flex items-center gap-1.5 bg-gray-50 border-2 border-black px-2 py-1.5 rounded">
             <Target className="w-4 h-4 text-black" strokeWidth={2.5} />
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-gray-500 uppercase leading-tight">
+              <p className="text-[10px] font-bold font-space text-gray-500 uppercase leading-tight">
                 Objectives
               </p>
               <p className="text-sm font-black text-gray-900">
@@ -97,7 +97,7 @@ const PublicCourseCard = ({ course, onCourseClick }) => {
           <div className="flex items-center gap-1.5 bg-gray-50 border-2 border-black px-2 py-1.5 rounded">
             <Layers className="w-4 h-4 text-black" strokeWidth={2.5} />
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-gray-500 uppercase leading-tight">
+              <p className="text-[10px] font-bold font-space text-gray-500 uppercase leading-tight">
                 Goals
               </p>
               <p className="text-sm font-black text-gray-900">

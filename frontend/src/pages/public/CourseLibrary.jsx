@@ -102,7 +102,7 @@ const CourseLibrary = () => {
       {/* Hero Section */}
       <section className="border-b-4 border-black">
         <div className="max-w-7xl mx-auto px-6 py-16 text-center">
-          <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-6xl font-black font-jakarta text-gray-900 mb-4">
             Bite-sized learning,
             <br />
             big time impact
@@ -135,7 +135,7 @@ const CourseLibrary = () => {
               <button
                 key={category}
                 onClick={() => setSelectedPrimaryCategory(category)}
-                className={`px-6 py-2 rounded-full font-bold text-sm whitespace-nowrap border-2 transition-all ${
+                className={`px-6 py-2 rounded-full font-bold font-space text-sm whitespace-nowrap border-2 transition-all ${
                   selectedPrimaryCategory === category
                     ? "bg-gradient-to-r from-gray-500 to-gray-600 text-white border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                     : "bg-white text-gray-700 border-gray-300 hover:border-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
@@ -150,7 +150,7 @@ const CourseLibrary = () => {
 
       {/* Course Count */}
       <section className="max-w-7xl mx-auto px-6 py-6">
-        <p className="text-gray-600 font-medium">
+        <p className="text-gray-600 font-medium font-space">
           {filteredCourses.length} courses
         </p>
       </section>
