@@ -1,7 +1,13 @@
-import React, { useState } from "react";
-import { createContext, useContext } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { AuthResponse } from "../types";
 
-export const AuthContext = createContext();
+interface AuthContextType {
+  accessToken: string | null;
+  login: (tokens: AuthResponse) => void;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -11,12 +17,16 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }) => {
-  const [accessToken, setAccessToken] = useState(
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [accessToken, setAccessToken] = useState<string | null>(
     () => localStorage.getItem("accessToken") || null,
   );
 
-  const login = (tokens) => {
+  const login = (tokens: AuthResponse) => {
     localStorage.setItem("accessToken", tokens.access);
     localStorage.setItem("refreshToken", tokens.refresh);
     setAccessToken(tokens.access);

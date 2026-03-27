@@ -8,13 +8,12 @@ import {
   createQuiz,
   createQuizQuestion,
   deleteQuizQuestion,
-  editLesson,
-  getQuizDetailbyLessonId,
-  generateCourseLesson,
-  generateQuiz,
   createQuizzes,
   updateQuiz,
   updateCourse,
+  updateLesson,
+  createLesson,
+  deleteLesson,
 } from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -40,8 +39,13 @@ const CourseEditor = () => {
   const [isLoadQuiz, setIsLoadQuiz] = useState(false);
   const [thumbnail, setThumbnail] = useState("");
 
-  const { activeLessonId, setSidebarMode, setSidebarData, setActiveLessonId } =
-    useSidebar();
+  const {
+    activeLessonId,
+    setSidebarMode,
+    setSidebarData,
+    setActiveLessonId,
+    setLessonHandlers,
+  } = useSidebar();
 
   const [quizzes, setQuizzes] = useState(null);
   const { setIsQuizModalOpen, setQuestionData, questionData } =
@@ -82,6 +86,115 @@ const CourseEditor = () => {
 
     fetchCourseData();
   }, [id]);
+
+  useEffect(() => {
+    if (!course) return;
+
+    const handleAddLesson = async () => {
+      const lessonName = window.prompt("Enter lesson name:");
+      if (!lessonName) return;
+
+      const newOrder =
+        course.lessons.length > 0
+          ? Math.max(...course.lessons.map((l) => l.order)) + 1
+          : 1;
+
+      const loadingToast = toast.loading("Adding Lesson...");
+      try {
+        const newLesson = await createLesson({
+          course: course.id,
+          lesson_name: lessonName,
+          order: newOrder,
+          lesson_learning_objectives: [],
+          lesson_content: "",
+        });
+
+        const updatedLessons = [...course.lessons, newLesson];
+        setCourse({ ...course, lessons: updatedLessons });
+        setSidebarData(getSortedLessons(updatedLessons));
+        setActiveLessonId(newLesson.id);
+        toast.success("Lesson added successfully", { id: loadingToast });
+      } catch (error) {
+        toast.error("Failed to add lesson", { id: loadingToast });
+      }
+    };
+
+    const handleDeleteLesson = async (lessonId) => {
+      if (!window.confirm("Are you sure you want to delete this lesson?"))
+        return;
+
+      const loadingToast = toast.loading("Deleting Lesson...");
+      try {
+        await deleteLesson(lessonId);
+        const updatedLessons = course.lessons.filter((l) => l.id !== lessonId);
+        setCourse({ ...course, lessons: updatedLessons });
+        const sorted = getSortedLessons(updatedLessons);
+        setSidebarData(sorted);
+
+        if (activeLessonId === lessonId && sorted.length > 0) {
+          setActiveLessonId(sorted[0].id);
+        } else if (sorted.length === 0) {
+          setActiveLessonId(null);
+        }
+
+        toast.success("Lesson deleted", { id: loadingToast });
+      } catch (error) {
+        toast.error("Failed to delete lesson", { id: loadingToast });
+      }
+    };
+
+    const handleMoveLesson = async (lessonId, direction) => {
+      const sorted = getSortedLessons(course.lessons);
+      const index = sorted.findIndex((l) => l.id === lessonId);
+      if (index === -1) return;
+
+      const newIndex = direction === "up" ? index - 1 : index + 1;
+      if (newIndex < 0 || newIndex >= sorted.length) return;
+
+      const newSorted = [...sorted];
+      const temp = newSorted[index].order;
+      newSorted[index].order = newSorted[newIndex].order;
+      newSorted[newIndex].order = temp;
+
+      const loadingToast = toast.loading("Updating Order...");
+      try {
+        // Update both lessons in backend
+        await Promise.all([
+          updateLesson(newSorted[index].id, { order: newSorted[index].order }),
+          updateLesson(newSorted[newIndex].id, {
+            order: newSorted[newIndex].order,
+          }),
+        ]);
+
+        const updatedLessons = course.lessons.map((l) => {
+          const match = newSorted.find((ns) => ns.id === l.id);
+          return match ? { ...l, order: match.order } : l;
+        });
+
+        setCourse({ ...course, lessons: updatedLessons });
+        setSidebarData(getSortedLessons(updatedLessons));
+        toast.success("Order updated", { id: loadingToast });
+      } catch (error) {
+        toast.error("Failed to update order", { id: loadingToast });
+      }
+    };
+
+    setLessonHandlers({
+      onAdd: handleAddLesson,
+      onDelete: handleDeleteLesson,
+      onMoveUp: (id) => handleMoveLesson(id, "up"),
+      onMoveDown: (id) => handleMoveLesson(id, "down"),
+    });
+
+    return () => {
+      setLessonHandlers({
+        onAdd: null,
+        onDelete: null,
+        onMoveUp: null,
+        onMoveDown: null,
+      });
+    };
+  }, [course, activeLessonId]);
 
   const fetchQuizbyLessonId = async (lesson_id) => {
     try {
@@ -126,7 +239,10 @@ const CourseEditor = () => {
     const loadingToast = toast.loading("Saving Changes...");
     try {
       // Save Lesson to Backend
-      await editLesson(lessonData.id, content);
+      await updateLesson(lessonData.id, {
+        lesson_content: content,
+        lesson_learning_objectives: lessonData.lesson_learning_objectives,
+      });
 
       // Save Course Level Changes (Thumbnail)
       if (thumbnail !== course.course_thumbnail) {
@@ -138,7 +254,13 @@ const CourseEditor = () => {
         ...prev,
         course_thumbnail: thumbnail,
         lessons: prev.lessons.map((l) =>
-          l.id === lessonData.id ? { ...l, lesson_content: content } : l,
+          l.id === lessonData.id
+            ? {
+                ...l,
+                lesson_content: content,
+                lesson_learning_objectives: l.lesson_learning_objectives,
+              }
+            : l,
         ),
       }));
 
@@ -164,6 +286,17 @@ const CourseEditor = () => {
     } catch (error) {
       toast.error("Failed to save Changes", { id: loadingToast });
     }
+  };
+
+  const handleUpdateObjectives = (newObjectives) => {
+    setCourse((prev) => ({
+      ...prev,
+      lessons: prev.lessons.map((l) =>
+        l.id === lessonData.id
+          ? { ...l, lesson_learning_objectives: newObjectives }
+          : l,
+      ),
+    }));
   };
 
   const handleGenerateLesson = async () => {
@@ -377,6 +510,8 @@ const CourseEditor = () => {
         <aside className="w-95 flex flex-col gap-6 overflow-y-auto pr-2 pb-6">
           <LearningObjectives
             objectives={lessonData.lesson_learning_objectives}
+            onUpdate={handleUpdateObjectives}
+            isEditing={isEditing}
           />
 
           {/* Course Thumbnail Editor */}

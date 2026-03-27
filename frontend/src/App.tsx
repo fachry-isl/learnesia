@@ -1,3 +1,4 @@
+import React from "react";
 import CreateCourseTemplate from "./pages/admin/CreateCourseTemplate";
 import CourseTemplateLibrary from "./pages/admin/CourseTemplateLibrary";
 
@@ -17,8 +18,8 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import ProtectedRoute from "./pages/admin/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
-function App() {
-  const adminPath = import.meta.env.VITE_ADMIN_PATH || "/admin";
+const App: React.FC = () => {
+  const adminPath = (import.meta.env.VITE_ADMIN_PATH as string) || "/admin";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,6 +59,6 @@ function App() {
       </Routes>
     </div>
   );
-}
+};
 
 export default App;

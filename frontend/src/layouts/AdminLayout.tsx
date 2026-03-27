@@ -1,30 +1,30 @@
+import React from "react";
 import { Outlet } from "react-router-dom";
-
 import { useNavigate } from "react-router-dom";
-
 import { useSidebar } from "../contexts/SidebarContext";
-
 import SidebarItem from "../components/admin/SidebarItem";
 import SidebarLessonItem from "../components/admin/SidebarLessonItem";
-
 import learnesiaLogo from "../assets/li_logo_lite_white.png";
+import { BookOpen, PlusCircle } from "lucide-react";
 
-import { BookOpen, PlusCircle, Code2 } from "lucide-react";
-
-const AdminLayout = () => {
+const AdminLayout: React.FC = () => {
   // Use Context
   const {
     activeSidebar,
     setActiveSidebar,
-    setSidebarMode,
     sidebarMode,
     sidebarData,
     activeLessonId,
     setActiveLessonId,
+    lessonHandlers,
   } = useSidebar();
 
+  const sortedLessons = sidebarData
+    ? [...sidebarData].sort((a, b) => (a.order || 0) - (b.order || 0))
+    : [];
+
   // Sidebar Click Handler
-  const handleSidebarItemClick = (item) => {
+  const handleSidebarItemClick = (item: string) => {
     setActiveSidebar(item);
   };
 
@@ -42,9 +42,10 @@ const AdminLayout = () => {
         <div className="p-6">
           <img
             src={learnesiaLogo}
+            alt="Learnesia Logo"
             className="p-2 w-20 border-1 border-black"
-          ></img>
-          <p className="mt-5 text-black text-[10px] mt-1 uppercase tracking-[0.2em] font-bold">
+          />
+          <p className="mt-5 text-black text-[10px] uppercase tracking-[0.2em] font-bold">
             Content Management System
           </p>
         </div>
@@ -70,14 +71,43 @@ const AdminLayout = () => {
             </>
           ) : (
             <>
-              {sidebarData?.map((lesson, idx) => (
-                <SidebarLessonItem
-                  key={idx}
-                  lesson_name={lesson.lesson_name}
-                  isActive={activeLessonId === lesson.id}
-                  onClick={() => setActiveLessonId(lesson.id)}
-                />
-              ))}
+              <div className="flex justify-between items-center mb-4 px-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  Course Lessons
+                </span>
+                {lessonHandlers.onAdd && (
+                  <button
+                    onClick={lessonHandlers.onAdd}
+                    className="p-1 bg-black text-white hover:bg-gray-800 rounded transition-colors"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1">
+                {sortedLessons?.map((lesson, idx) => (
+                  <SidebarLessonItem
+                    key={lesson.id || idx}
+                    lesson_name={lesson.lesson_name}
+                    isActive={activeLessonId === lesson.id}
+                    onClick={() => setActiveLessonId(lesson.id)}
+                    onDelete={() =>
+                      lessonHandlers.onDelete &&
+                      lessonHandlers.onDelete(lesson.id)
+                    }
+                    onMoveUp={() =>
+                      lessonHandlers.onMoveUp &&
+                      lessonHandlers.onMoveUp(lesson.id)
+                    }
+                    onMoveDown={() =>
+                      lessonHandlers.onMoveDown &&
+                      lessonHandlers.onMoveDown(lesson.id)
+                    }
+                    isFirst={idx === 0}
+                    isLast={idx === sortedLessons.length - 1}
+                  />
+                ))}
+              </div>
             </>
           )}
         </nav>
