@@ -9,7 +9,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app # For development hot-reload
+      - ./backend:/app
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     restart: always
 
   frontend:
@@ -24,4 +27,7 @@ services:
       - /app/node_modules
     depends_on:
       - backend
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     restart: always

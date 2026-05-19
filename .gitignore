@@ -13,3 +13,14 @@ node_modules/
 dist/
 .env.local
 .env.*.local
+.env.production
+
+# Opencode AI tool
+.opencode/
+opencode.json
+
+# Session summaries
+changes/
+
+# Backup files
+*.backup
