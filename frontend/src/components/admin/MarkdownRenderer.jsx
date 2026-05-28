@@ -1,11 +1,30 @@
-import React from "react";
+"use client";
+
+import { usePathname } from "next/navigation";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { remarkYoutubeParagraph } from "@/lib/remarkYoutubeParagraph";
+import { isYoutubeUrl } from "@/lib/youtube";
 import YoutubeEmbed from "./YoutubeEmbed";
 
-import { useLocation } from "react-router-dom";
+function getHref(properties) {
+  const href = properties?.href;
+  if (typeof href === "string") return href;
+  if (Array.isArray(href)) return href[0];
+  return undefined;
+}
+
+/** HAST paragraph node may still be <p> when children include a YouTube anchor. */
+function paragraphHasYoutubeLink(node) {
+  return node?.children?.some(
+    (child) =>
+      child.type === "element" &&
+      child.tagName === "a" &&
+      isYoutubeUrl(getHref(child.properties)),
+  );
+}
 
 const markdownComponents = {
   // Custom code block with syntax highlighting
@@ -32,7 +51,7 @@ const markdownComponents = {
   },
   // Youtube Renderer
   a: ({ href, children, ...props }) => {
-    if (YoutubeEmbed.isYoutubeUrl(href)) {
+    if (isYoutubeUrl(href)) {
       return <YoutubeEmbed url={href} />;
     }
     return (
@@ -72,7 +91,12 @@ const markdownComponents = {
     if (parent && parent > 1) {
       return <span className="block">{children}</span>;
     }
-    return <p className="mb-4 leading-relaxed">{children}</p>;
+    const className = "mb-4 leading-relaxed";
+    // YouTube embeds are block-level; <div> avoids invalid <div> inside <p> (hydration error)
+    if (paragraphHasYoutubeLink(node)) {
+      return <div className={className}>{children}</div>;
+    }
+    return <p className={className}>{children}</p>;
   },
 
   // Custom link styling
@@ -132,13 +156,16 @@ const markdownComponents = {
 };
 
 const MarkdownRenderer = ({ content }) => {
-  const { pathname } = useLocation();
+  const pathname = usePathname();
   const isAdminPage = pathname.includes("/admin/");
   return (
     <div
       className={`${!isAdminPage && `xl:border-2 xl:order-black`} xl:p-10 md:p-5 sm:p-1 bg-white prose prose-slate max-w-none rounded-2xl`}
     >
-      <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+      <Markdown
+        remarkPlugins={[remarkGfm, remarkYoutubeParagraph]}
+        components={markdownComponents}
+      >
         {content ||
           "No content generated yet. Click 'Generate Lesson' to start."}
       </Markdown>

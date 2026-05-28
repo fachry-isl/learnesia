@@ -1,14 +1,14 @@
 import axios from "axios";
+import {
+  PUBLIC_API_BASE_URL,
+  PRIVATE_API_BASE_URL,
+  ADMIN_PATH,
+  PERPLEXICA_API_URL,
+} from "@/utils/env";
 
 // ============================================================================
 // Base Configuration
 // ============================================================================
-
-const PUBLIC_API_BASE_URL =
-  import.meta.env.VITE_API_PUBLIC_URL || "http://localhost:8000/api";
-const PRIVATE_API_BASE_URL =
-  import.meta.env.VITE_API_PRIVATE_URL || "http://localhost:8000/api";
-const PERPLEXICA_API_URL = "http://100.122.67.1:3000";
 
 const publicApi = axios.create({
   baseURL: PUBLIC_API_BASE_URL,
@@ -25,8 +25,10 @@ const privateApi = axios.create({
 });
 
 privateApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("accessToken");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -38,15 +40,19 @@ privateApi.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {
+        if (typeof window === "undefined") {
+          return Promise.reject(error);
+        }
         const refresh = localStorage.getItem("refreshToken");
         const { data } = await publicApi.post("/token/refresh/", { refresh });
         localStorage.setItem("accessToken", data.access);
         original.headers.Authorization = `Bearer ${data.access}`;
         return privateApi(original);
       } catch {
-        localStorage.clear();
-        const adminPath = import.meta.env.VITE_ADMIN_PATH || "/admin";
-        window.location.href = `${adminPath}/login`;
+        if (typeof window !== "undefined") {
+          localStorage.clear();
+          window.location.assign(`${ADMIN_PATH}/login`);
+        }
       }
     }
     return Promise.reject(error);

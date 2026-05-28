@@ -1,9 +1,10 @@
-import React from "react";
-import { useLocation } from "react-router-dom";
-import learnesiaLogo from "../../assets/li_logo_full.png";
+"use client";
+
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const Navbar = () => {
-  const { pathname } = useLocation();
+  const pathname = usePathname();
   const isLessonPage = pathname.includes("/lesson/");
 
   return (
@@ -13,25 +14,23 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
-        {/* Logo Section */}
         <div className="flex items-center gap-2">
-          <img src={learnesiaLogo} alt="Learnesia" className="h-10 w-auto" />
+          <img src="/li_logo_full.png" alt="Learnesia" className="h-10 w-auto" />
         </div>
 
-        {/* Navigation Links */}
         <div className="flex items-center gap-8">
-          <a
+          <Link
             href="/"
             className="font-bold text-sm uppercase tracking-widest hover:text-blue-600 transition-colors"
           >
             Home
-          </a>
-          <a
+          </Link>
+          <Link
             href="/courses"
             className="font-bold text-sm uppercase tracking-widest hover:text-blue-600 transition-colors"
           >
             Courses
-          </a>
+          </Link>
         </div>
       </div>
     </nav>
