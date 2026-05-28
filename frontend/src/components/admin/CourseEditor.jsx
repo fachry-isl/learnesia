@@ -1,0 +1,440 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useSidebar } from "@/contexts/SidebarContext";
+import { Info, Layers } from "lucide-react";
+import {
+  getCourseById,
+  changeCourseStatus,
+  createQuiz,
+  createQuizQuestion,
+  deleteQuizQuestion,
+  editLesson,
+  getQuizDetailbyLessonId,
+  generateCourseLesson,
+  generateQuiz,
+  createQuizzes,
+  updateQuiz,
+  updateCourse,
+} from "@/services/api";
+import toast from "react-hot-toast";
+import MarkdownRenderer from "@/components/admin/MarkdownRenderer";
+import LearningObjectives from "@/components/admin/LearningObjectives";
+import LessonQuiz from "@/components/admin/LessonQuiz";
+import LessonActions from "@/components/admin/LessonActions";
+import CourseDetailHeader from "@/components/admin/CourseDetailHeader";
+import {
+  getSortedLessons,
+  generateCourseSummary,
+} from "@/utils/courseHelpers";
+import { useQuizQuestionModal } from "@/contexts/QuizQuestionModalContext";
+
+export default function CourseEditor({ courseId: courseIdProp, course: courseProp, onLessonUpdate }) {
+  const params = useParams();
+  const courseId = courseIdProp ?? params?.id;
+  const [course, setCourse] = useState(null);
+  const [content, setContent] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoadQuiz, setIsLoadQuiz] = useState(false);
+  const [thumbnail, setThumbnail] = useState("");
+
+  const { activeLessonId, setSidebarMode, setSidebarData, setActiveLessonId } =
+    useSidebar();
+
+  const [quizzes, setQuizzes] = useState(null);
+  const { setIsQuizModalOpen, setQuestionData, questionData } =
+    useQuizQuestionModal();
+
+  const sortedLessons = course ? getSortedLessons(course?.lessons) : [];
+  const lessonData = sortedLessons.find((l) => l.id === activeLessonId);
+
+  useEffect(() => {
+    if (courseProp) {
+      setCourse(courseProp);
+      setThumbnail(courseProp.course_thumbnail || "");
+      setSidebarMode("course_detail");
+      const sorted = courseProp?.lessons
+        ? [...courseProp.lessons].sort((a, b) => a.order - b.order)
+        : [];
+      setSidebarData(sorted);
+      if (sorted.length > 0) {
+        setActiveLessonId(sorted[0].id);
+      }
+      return;
+    }
+
+    const fetchCourseData = async () => {
+      if (!courseId) return;
+      try {
+        const foundCourse = await getCourseById(courseId);
+
+        if (foundCourse) {
+          setCourse(foundCourse);
+          setThumbnail(foundCourse.course_thumbnail || "");
+
+          // 2. Configure Sidebar for "Detail Mode"
+          setSidebarMode("course_detail");
+
+          // Sort lessons for sidebar
+          const sortedLessons = foundCourse?.lessons
+            ? [...foundCourse.lessons].sort((a, b) => a.order - b.order)
+            : [];
+          setSidebarData(sortedLessons);
+
+          // Default to first lesson if none selected
+          if (sortedLessons.length > 0) {
+            setActiveLessonId(sortedLessons[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch course:", error);
+        toast.error("Failed to load course");
+      }
+    };
+
+    fetchCourseData();
+  }, [courseId, courseProp]);
+
+  const fetchQuizbyLessonId = async (lesson_id) => {
+    try {
+      const response = await getQuizDetailbyLessonId(lesson_id);
+      setQuizzes(response[0]);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // This would get triggered every time user change lesson
+  useEffect(() => {
+    if (lessonData) {
+      // Get Lesson Content
+      setContent(lessonData.lesson_content || "");
+    }
+    const loadQuiz = async () => {
+      if (!activeLessonId) return;
+      setIsLoadQuiz(true);
+      try {
+        await fetchQuizbyLessonId(activeLessonId);
+      } catch (error) {
+        console.error("fetchQuiz error:", error);
+      }
+      setIsLoadQuiz(false);
+    };
+
+    // Get Quiz for this specific lesson id
+    loadQuiz();
+  }, [activeLessonId]);
+
+  if (!course) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full space-y-4 animate-pulse">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+        <p className="text-gray-500 font-medium">Loading course editor...</p>
+      </div>
+    );
+  }
+
+  const handleSaveChanges = async () => {
+    const loadingToast = toast.loading("Saving Changes...");
+    try {
+      // Save Lesson to Backend
+      await editLesson(lessonData.id, content);
+
+      // Save Course Level Changes (Thumbnail)
+      if (thumbnail !== course.course_thumbnail) {
+        await updateCourse(course.id, { course_thumbnail: thumbnail });
+      }
+
+      // Save Lesson and Course to Frontend
+      setCourse((prev) => ({
+        ...prev,
+        course_thumbnail: thumbnail,
+        lessons: prev.lessons.map((l) =>
+          l.id === lessonData.id ? { ...l, lesson_content: content } : l,
+        ),
+      }));
+
+      if (quizzes) {
+        // Append Lesson ID on quizzes react state on payload
+
+        const quizzesWithLesson = {
+          ...quizzes,
+          lesson: lessonData.id,
+        };
+
+        if (quizzes.id) {
+          await updateQuiz(quizzes.id, quizzesWithLesson);
+        } else {
+          const response = await createQuizzes(quizzesWithLesson);
+
+          // If first time create quiz, append Quiz ID for subsequent Update
+          setQuizzes(response);
+        }
+      }
+
+      toast.success("Changes is Saved", { id: loadingToast });
+    } catch (error) {
+      toast.error("Failed to save Changes", { id: loadingToast });
+    }
+  };
+
+  const handleGenerateLesson = async () => {
+    const loadingToast = toast.loading("Generating Lesson...");
+    try {
+      const summary = generateCourseSummary(course);
+      const response = await generateCourseLesson(
+        summary,
+        lessonData.lesson_name,
+      );
+      setContent(response.response.content);
+      toast.success("Lesson Created Successfully", { id: loadingToast });
+    } catch (error) {
+      toast.error(`Failed to generate lesson`, {
+        id: loadingToast,
+      });
+    }
+  };
+
+  const handleTurnToDraft = async () => {
+    try {
+      await changeCourseStatus(course.id, "draft");
+      toast.success("Course is saved into Draft");
+    } catch (error) {
+      toast.error("Failed to update course status");
+    }
+  };
+
+  const onAddQuestionButtonHandler = () => {
+    //setIsQuizModalOpen(true);
+    setQuestionData(null);
+
+    setIsQuizModalOpen(true);
+  };
+
+  const onAddQuestionFormHandler = async (question_data) => {
+    // window.alert(JSON.stringify(question_data));
+
+    const newQuestion = {
+      question_text: question_data.question_text,
+      explanation: "Under Development",
+      options:
+        question_data?.options?.map((opt, index) => ({
+          id: index + 1,
+          option_text: opt.option_text,
+          is_correct: opt.is_correct || false,
+        })) || [],
+    };
+
+    console.log("Quizzes Initial Value: ", quizzes);
+    // Depending on the existence of the quiz,
+    // We would use different API endpoint to store the question
+    if (quizzes) {
+      // Update Backend
+      const addQuizApi = async (quiz_id, new_question) => {
+        try {
+          const response = await createQuizQuestion({
+            quiz: quiz_id,
+            ...new_question,
+          });
+
+          return response;
+        } catch (error) {
+          throw error;
+        }
+      };
+
+      const response = await addQuizApi(quizzes.id, newQuestion);
+
+      // After getting question id we have to update questiondata on React State
+      // So every subsequent action is working as intended
+
+      const newQuestionwithId = {
+        ...newQuestion,
+        id: response.id,
+      };
+
+      const updatedQuiz = {
+        ...quizzes,
+        questions: [...quizzes.questions, newQuestionwithId],
+      };
+
+      // Update Frontend
+      setQuizzes(updatedQuiz);
+    } else {
+      // If quizzes doesnt exist yet Create Quiz and get Quiz ID, pass that id to create new question.
+      // Check postman for how to create new quiz given lesson id.
+      // I think it have been implemented with the unique constraint.
+      // Just have to integrate it in api.js
+      // Required Note: Make sure to have atleast on question for this to work as intended
+
+      const quiz_data = {
+        lesson: activeLessonId,
+        quiz_title: lessonData.lesson_name,
+        quiz_description: `Quiz for ${lessonData.lesson_name}`,
+        questions: [newQuestion],
+      };
+
+      // Update Backend
+      const createQuizApi = async () => {
+        try {
+          const response = await createQuiz(quiz_data);
+
+          return response;
+        } catch (error) {
+          throw error;
+        }
+      };
+
+      // Update Backend FIRST
+      const response = await createQuizApi(quiz_data);
+
+      // Update Frontend with actual backend response
+      setQuizzes(response);
+    }
+  };
+
+  const onDeleteQuestionHandler = async (questionId) => {
+    setQuizzes({
+      ...quizzes,
+      questions: quizzes.questions.filter((q) => q.id !== questionId),
+    });
+
+    const response = await deleteQuizQuestion(questionId);
+
+    toast.success("Question deleted: ", response);
+  };
+
+  const generateQuizwithAIApi = async () => {
+    const loadingToast = toast.loading("Generating Quiz...");
+    try {
+      // If quizzes already exist, in this case it got regenerated. We store the ID
+      let quiz_id = null;
+      if (quizzes) {
+        quiz_id = quizzes.id;
+      }
+
+      const lessonSummary = `
+      Learning Objectives:
+      ${JSON.stringify(lessonData.lesson_learning_objectives)}
+
+      Lesson Content:
+      ${lessonData.lesson_content}
+      `;
+
+      // window.alert(lessonSummary);
+
+      const quizParams = {
+        lesson_summary: lessonSummary,
+        prompt: `Create questions about ${lessonData.lessonName}`,
+        num_questions: 3,
+        num_options: 4,
+      };
+      const response = await generateQuiz(quizParams);
+
+      toast.success("Quiz Generated Succesfully!", { id: loadingToast });
+
+      if (quiz_id) {
+        setQuizzes({ ...response.response, id: quiz_id });
+      } else {
+        setQuizzes(response.response);
+      }
+    } catch (error) {
+      toast.error("Failed to generate quiz", { id: loadingToast });
+      throw error;
+    }
+  };
+
+  const onGenerateQuizHandler = () => {
+    generateQuizwithAIApi();
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden font-sans">
+      <CourseDetailHeader
+        lessonName={lessonData.lesson_name}
+        courseName={course.course_name}
+        lessonId={lessonData.id}
+        isEditing={isEditing}
+        setIsEditing={setIsEditing}
+        onSaveChanges={handleSaveChanges}
+      />
+
+      <div className="flex flex-1 gap-6 overflow-hidden">
+        {/* MAIN WORKSPACE */}
+        <section className="flex-1 flex flex-col bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+          <div className="flex items-center justify-between p-3 bg-gray-50 border-b-2 border-black">
+            <span className="text-xs font-black uppercase tracking-widest px-2 py-1 bg-black text-white">
+              Editor
+            </span>
+            <span className="text-[10px] font-bold text-gray-400">
+              MARKDOWN SUPPORTED
+            </span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-8">
+            {isEditing ? (
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full h-full min-h-125 border-none focus:ring-0 font-mono text-sm leading-relaxed resize-none"
+                placeholder="Start writing or let AI generate content..."
+              />
+            ) : (
+              <MarkdownRenderer content={content} />
+            )}
+          </div>
+        </section>
+
+        {/* SIDEBAR */}
+        <aside className="w-95 flex flex-col gap-6 overflow-y-auto pr-2 pb-6">
+          <LearningObjectives
+            objectives={lessonData.lesson_learning_objectives}
+          />
+
+          {/* Course Thumbnail Editor */}
+          <div className="bg-white border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <h4 className="text-xs font-black uppercase tracking-widest mb-3 flex items-center gap-2">
+              <Layers className="w-4 h-4" /> Course Thumbnail
+            </h4>
+            <div className="space-y-3">
+              {thumbnail && (
+                <div className="aspect-video border-2 border-black overflow-hidden bg-gray-100">
+                  <img
+                    src={thumbnail}
+                    alt="Course Thumbnail Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <input
+                type="text"
+                value={thumbnail}
+                onChange={(e) => setThumbnail(e.target.value)}
+                placeholder="Paste Image Public URL..."
+                className="w-full px-3 py-2 text-xs border-2 border-black focus:outline-none focus:bg-gray-50 font-bold"
+              />
+              <p className="text-[10px] text-gray-500 font-bold">
+                * Paste a direct image URL (jpg, png, etc.)
+              </p>
+            </div>
+          </div>
+
+          <LessonQuiz
+            quizzes={quizzes}
+            lessonName={lessonData.lesson_name}
+            isLoadQuiz={isLoadQuiz}
+            onQuizDelete={onDeleteQuestionHandler}
+            onAddQuestionButton={onAddQuestionButtonHandler}
+            onAddQuestionForm={onAddQuestionFormHandler}
+            onGenerateQuiz={onGenerateQuizHandler}
+          />
+          <LessonActions
+            onGenerateLesson={handleGenerateLesson}
+            onClickTurnToDraft={handleTurnToDraft}
+          />
+        </aside>
+      </div>
+    </div>
+  );
+}

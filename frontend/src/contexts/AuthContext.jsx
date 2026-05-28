@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
 
@@ -11,20 +10,41 @@ export const useAuth = () => {
   return context;
 };
 
+const ACCESS_TOKEN_COOKIE = "accessToken";
+
+function setAccessTokenCookie(token) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${ACCESS_TOKEN_COOKIE}=${token}; Path=/; SameSite=Lax`;
+}
+
+function clearAccessTokenCookie() {
+  if (typeof document === "undefined") return;
+  document.cookie = `${ACCESS_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
 export const AuthProvider = ({ children }) => {
-  const [accessToken, setAccessToken] = useState(
-    () => localStorage.getItem("accessToken") || null,
-  );
+  const [accessToken, setAccessToken] = useState(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") return;
+    setAccessToken(localStorage.getItem("accessToken") || null);
+  }, []);
 
   const login = (tokens) => {
-    localStorage.setItem("accessToken", tokens.access);
-    localStorage.setItem("refreshToken", tokens.refresh);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("accessToken", tokens.access);
+      localStorage.setItem("refreshToken", tokens.refresh);
+    }
+    setAccessTokenCookie(tokens.access);
     setAccessToken(tokens.access);
   };
 
   const logout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+    }
+    clearAccessTokenCookie();
     setAccessToken(null);
   };
 
