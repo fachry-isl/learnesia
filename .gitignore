@@ -37,3 +37,5 @@ migration/
 .env.*
 !.env.example
 !**/.env.example
+
+NEXTJS_GUIDE_FOR_REACT_DEVS.md
