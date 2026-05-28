@@ -37,11 +37,11 @@ Beyond content creation tools, Learnesia democratizes learning by curating struc
 
 ### Frontend
 
-- **Framework**: React 19 (Vite)
+- **Framework**: Next.js 16 (App Router) + React 19
 - **Styling**: Tailwind CSS 4
 - **Icons**: Lucide React
 - **State Management**: React Hooks & Context API
-- **Routing**: React Router 7
+- **Routing**: Next.js file-based routing
 
 ---
 
@@ -63,7 +63,7 @@ Learnesia uses a hybrid Docker strategy to provide a production-ready environmen
 
 #### 🛠️ Local Development (with hot-reload)
 
-Recommended for contributors. This setup uses Django's development server (`runserver`) and Vite's dev server with automatic code reloading.
+Recommended for contributors. This setup uses Django's development server (`runserver`) and Next.js dev server with automatic code reloading.
 
 ```bash
 # 1. Clone the repository
@@ -77,19 +77,19 @@ cd learnesia
 docker compose up --build
 ```
 
-- **Frontend**: `http://localhost:5173` (Vite dev server)
+- **Frontend**: `http://localhost:3000` (Next.js dev server)
 - **Backend**: `http://localhost:8000` (`python manage.py runserver`)
 - **Hot-Reload**: Enabled via Docker volumes.
 
 #### 🚀 Production Deployment
 
-Optimized for performance and security. This setup uses **Gunicorn** as the application server and **Nginx** for the frontend.
+Optimized for performance and security. This setup uses **Gunicorn** for backend and **Next.js production server** for frontend.
 
 ```bash
 docker compose -f docker-compose.prod.yml up --build -d
 ```
 
-- **Frontend**: `http://localhost:80` (Nginx serving production build)
+- **Frontend**: `http://localhost:8080` (Next.js production server)
 - **Backend**: `http://localhost:8000` (Gunicorn with Uvicorn workers)
 
 ---
@@ -135,3 +135,11 @@ CORS_ALLOWED_ORIGINS=http://localhost:5173
 ## 📄 License
 
 This project is licensed under the AGPL v3 License.
+
+---
+
+## Repository Hygiene
+
+- Keep local secrets in `.env` files only (`backend/.env`, `frontend/.env`, root `.env`) and never commit them.
+- Commit only `.env.example` as environment variable templates.
+- Local workspace artifacts such as `.cursor/`, `changes/`, and `learning/` are ignored by Git.
