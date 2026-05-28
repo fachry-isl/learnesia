@@ -22,5 +22,18 @@ opencode.json
 # Session summaries
 changes/
 
+# Local agent/context artifacts
+.cursor/
+learning/
+migration/
+
 # Backup files
 *.backup
+*.bak
+*.tmp
+
+# Environment files (keep examples tracked)
+.env
+.env.*
+!.env.example
+!**/.env.example
