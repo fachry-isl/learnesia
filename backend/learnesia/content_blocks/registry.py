@@ -9,8 +9,15 @@ class TextBlockPayload(BaseModel):
     markdown: str
 
 
+class QuizBlockPayload(BaseModel):
+    """Quiz blocks store data in the Quiz FK; payload is always empty."""
+
+    model_config = {'extra': 'forbid'}
+
+
 BLOCK_PAYLOAD_SCHEMAS = {
     'text': TextBlockPayload,
+    'quiz': QuizBlockPayload,
 }
 
 
