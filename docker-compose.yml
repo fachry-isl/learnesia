@@ -1,3 +1,8 @@
+# Local development — hot reload via bind mounts.
+# Usage: docker compose up --build
+# Do NOT merge with docker-compose.prod.yml (separate project name + services).
+name: learnesia-dev
+
 services:
   backend-dev:
     image: learnesia-backend-dev
@@ -13,7 +18,7 @@ services:
     dns:
       - 8.8.8.8
       - 1.1.1.1
-    restart: always
+    restart: unless-stopped
 
   frontend-dev:
     image: learnesia-frontend-dev
@@ -26,7 +31,9 @@ services:
       - "3000:3000"
     environment:
       - HOST=0.0.0.0
+      # SSR / server-side fetches inside the dev network
       - API_URL=http://backend-dev:8000/api
+      # Browser / client bundle (host-visible URL)
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     volumes:
       - ./frontend:/app
@@ -37,4 +44,4 @@ services:
     dns:
       - 8.8.8.8
       - 1.1.1.1
-    restart: always
+    restart: unless-stopped

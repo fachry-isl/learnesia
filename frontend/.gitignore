@@ -7,12 +7,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies & build
 node_modules
 .next
 next-env.d.ts
+dist
+*.tsbuildinfo
+
+# Environment (examples stay tracked)
+.env
+.env.*
+!.env.example
+
+# Local overrides
 *.local
 
-# Editor directories and files
+# Editor
 .vscode/*
 !.vscode/extensions.json
 .idea

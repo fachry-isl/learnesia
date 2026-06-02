@@ -28,8 +28,8 @@ export const metadata = {
     path: "/",
   }),
   icons: {
-    icon: "/li_logo_full.png",
-    apple: "/li_logo_full.png",
+    icon: "/li_logo_lite_white.png",
+    apple: "/li_logo_lite_white.png",
   },
 };
 

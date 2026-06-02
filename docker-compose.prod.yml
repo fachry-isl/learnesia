@@ -1,3 +1,8 @@
+# Production deployment — Gunicorn backend + Next.js standalone frontend.
+# Usage: docker compose -f docker-compose.prod.yml up --build -d
+# Requires: backend/.env, frontend/.env, and root .env (CLOUDFLARE_TUNNEL_TOKEN).
+name: learnesia-prod
+
 services:
   backend:
     image: learnesia-backend-prod
@@ -8,6 +13,7 @@ services:
       - ./backend/.env
     environment:
       - DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=www.learnesia.co.id,learnesia.co.id,43.163.89.152,localhost,127.0.0.1,backend,frontend
     expose:
       - "8000"
     restart: always
@@ -17,12 +23,19 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* are inlined at build time — runtime env cannot change client bundles.
+        NEXT_PUBLIC_API_URL: /api
+        NEXT_PUBLIC_SITE_URL: https://learnesia.co.id
+        NEXT_PUBLIC_ADMIN_PATH: ${NEXT_PUBLIC_ADMIN_PATH:-/admin-lns-123}
+        NEXT_PUBLIC_ADMIN_SECRET_KEY: ${NEXT_PUBLIC_ADMIN_SECRET_KEY:-secret-key-123}
+    env_file:
+      - ./frontend/.env
     ports:
       - "8080:3000"
     environment:
+      # Server-side SSR / rewrites only — browser uses build-time NEXT_PUBLIC_API_URL (/api).
       - API_URL=http://backend:8000/api
-      - NEXT_PUBLIC_API_URL=/api
-      - NEXT_PUBLIC_SITE_URL=https://learnesia.co.id
     depends_on:
       - backend
     restart: always
@@ -30,6 +43,8 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run
+    env_file:
+      - ./.env
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:

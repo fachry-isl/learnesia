@@ -1,6 +1,18 @@
 /** Browser and client-side requests (host-visible URL). */
-export const PUBLIC_API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+function resolvePublicApiBaseUrl() {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return '/api';
+    }
+  }
+  return 'http://localhost:8000/api';
+}
+
+export const PUBLIC_API_BASE_URL = resolvePublicApiBaseUrl();
 
 /**
  * Server-side requests (e.g. generateMetadata).

@@ -71,9 +71,9 @@ git clone https://github.com/fachry-isl/learnesia.git
 cd learnesia
 
 # 2. Configure environment variables
-# Copy .env.example to .env in both /backend and /frontend directories.
+# Copy .env.example to .env in backend/, frontend/, and repo root (prod tunnel only).
 
-# 3. Start containers
+# 3. Start dev containers (project: learnesia-dev)
 docker compose up --build
 ```
 
@@ -86,6 +86,7 @@ docker compose up --build
 Optimized for performance and security. This setup uses **Gunicorn** for backend and **Next.js production server** for frontend.
 
 ```bash
+# Project: learnesia-prod — do not merge with docker-compose.yml
 docker compose -f docker-compose.prod.yml up --build -d
 ```
 
@@ -140,6 +141,7 @@ This project is licensed under the AGPL v3 License.
 
 ## Repository Hygiene
 
-- Keep local secrets in `.env` files only (`backend/.env`, `frontend/.env`, root `.env`) and never commit them.
-- Commit only `.env.example` as environment variable templates.
+- Keep local secrets in `.env` files only (`backend/.env`, `frontend/.env`, root `.env` for Cloudflare tunnel) and never commit them.
+- Commit only `.env.example` files as environment variable templates.
+- Dev and prod use separate Compose project names (`learnesia-dev` / `learnesia-prod`) so stacks never collide.
 - Local workspace artifacts such as `.cursor/`, `changes/`, and `learning/` are ignored by Git.

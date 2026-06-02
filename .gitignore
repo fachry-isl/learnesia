@@ -1,36 +1,27 @@
-# VSCode settings and workspace-specific configuration
+# Editor / IDE
 .vscode/
 *.code-workspace
+.idea/
 
-# Backend dependencies (example, usually Django/Python needs these)
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
 __pycache__/
+*.py[cod]
 *.pyc
 venv/
-.env
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Frontend dependencies
+# Node / frontend build output
 node_modules/
+.next/
 dist/
-.env.local
-.env.*.local
-.env.production
-
-# Opencode AI tool
-.opencode/
-opencode.json
-
-# Session summaries
-changes/
-
-# Local agent/context artifacts
-.cursor/
-learning/
-migration/
-
-# Backup files
-*.backup
-*.bak
-*.tmp
+*.tsbuildinfo
 
 # Environment files (keep examples tracked)
 .env
@@ -38,4 +29,27 @@ migration/
 !.env.example
 !**/.env.example
 
+# Docker / local overrides
+docker-compose.override.yml
+
+# Local agent / session artifacts
+.opencode/
+opencode.json
+.cursor/
+learning/
+migration/
+changes/
+
+# Backup / temp
+*.backup
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Secrets / certs
+*.pem
+*.key
+
+# Local docs (not part of app source)
 NEXTJS_GUIDE_FOR_REACT_DEVS.md
