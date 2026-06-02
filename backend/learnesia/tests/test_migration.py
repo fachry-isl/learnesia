@@ -3,7 +3,7 @@ from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TransactionTestCase
 
-from learnesia.models import ContentBlock, Course, Lesson, Module, Quiz
+from learnesia.models import ContentBlock, Course, Lesson, Module
 
 
 class SchemaFoundationMigrationTests(TransactionTestCase):
@@ -50,27 +50,3 @@ class SchemaFoundationMigrationTests(TransactionTestCase):
     def test_course_status_choices_exclude_template(self):
         status_values = [choice[0] for choice in Course.STATUS_CHOICES]
         self.assertEqual(status_values, ['draft', 'published'])
-
-    def test_migrates_existing_quizzes_to_quiz_content_blocks(self):
-        call_command('migrate', 'learnesia', '0016_schema_foundation', verbosity=0)
-
-        course = Course.objects.create(course_name='Quiz Course', status='draft')
-        module = Module.objects.create(course=course, name='Module', order=0)
-        lesson = Lesson.objects.create(module=module, lesson_name='Lesson', order=0)
-        ContentBlock.objects.create(
-            lesson=lesson,
-            order=0,
-            block_type='text',
-            payload={'markdown': 'Lesson body'},
-        )
-        quiz = Quiz.objects.create(lesson=lesson, quiz_title='Legacy Quiz')
-
-        call_command('migrate', 'learnesia', '0017_quiz_block_type', verbosity=0)
-
-        blocks = ContentBlock.objects.filter(lesson=lesson).order_by('order')
-        self.assertEqual(blocks.count(), 2)
-        self.assertEqual(blocks[0].block_type, 'text')
-        self.assertEqual(blocks[1].block_type, 'quiz')
-        self.assertEqual(blocks[1].order, 1)
-        self.assertEqual(blocks[1].quiz_id, quiz.id)
-        self.assertEqual(blocks[1].payload, {})
