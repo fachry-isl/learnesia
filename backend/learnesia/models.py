@@ -172,6 +172,7 @@ class Quiz(models.Model):
         on_delete=models.CASCADE,
         related_name='quizzes',
         db_column='lesson_id',
+        unique=True
     )
     quiz_title = models.CharField(max_length=255)
     quiz_description = models.TextField(blank=True, null=True)

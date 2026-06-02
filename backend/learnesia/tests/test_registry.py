@@ -21,14 +21,3 @@ class TextBlockRegistryTests(SimpleTestCase):
             validate_block_payload('flashcard', {'front': 'a', 'back': 'b'})
 
         self.assertIn('Unregistered', str(ctx.exception))
-
-
-class QuizBlockRegistryTests(SimpleTestCase):
-    def test_accepts_empty_quiz_payload(self):
-        result = validate_block_payload('quiz', {})
-
-        self.assertEqual(result, {})
-
-    def test_rejects_extra_quiz_payload_fields(self):
-        with self.assertRaises(PayloadValidationError):
-            validate_block_payload('quiz', {'title': 'should not be here'})

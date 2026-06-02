@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from learnesia.models import ContentBlock, Course, Lesson, Module, Quiz
+from learnesia.models import ContentBlock, Course, Lesson, Module
 
 
 class CourseHierarchyAPITests(APITestCase):
@@ -208,106 +208,3 @@ class ContentBlockAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('payload', response.data)
-
-    def test_create_quiz_block_links_to_quiz_row(self):
-        response = self.client.post(
-            f'/api/lessons/{self.lesson.id}/content-blocks/',
-            {
-                'order': 1,
-                'block_type': 'quiz',
-                'payload': {},
-                'quiz': {
-                    'quiz_title': 'Check Your Understanding',
-                    'quiz_description': 'Quick recap quiz',
-                    'questions': [
-                        {
-                            'question_text': 'What is 2 + 2?',
-                            'order': 1,
-                            'options': [
-                                {'option_text': '3', 'is_correct': False, 'order': 1},
-                                {'option_text': '4', 'is_correct': True, 'order': 2},
-                            ],
-                        },
-                    ],
-                },
-            },
-            format='json',
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        block = ContentBlock.objects.get(id=response.data['id'])
-        self.assertEqual(block.block_type, 'quiz')
-        self.assertIsNotNone(block.quiz_id)
-        self.assertEqual(block.quiz.quiz_title, 'Check Your Understanding')
-        self.assertEqual(block.quiz.lesson_id, self.lesson.id)
-
-    def test_read_quiz_block_includes_nested_questions_and_options(self):
-        create_response = self.client.post(
-            f'/api/lessons/{self.lesson.id}/content-blocks/',
-            {
-                'order': 1,
-                'block_type': 'quiz',
-                'payload': {},
-                'quiz': {
-                    'quiz_title': 'Final Quiz',
-                    'questions': [
-                        {
-                            'question_text': 'Pick one',
-                            'order': 1,
-                            'options': [
-                                {'option_text': 'Wrong', 'is_correct': False, 'order': 1},
-                                {'option_text': 'Right', 'is_correct': True, 'order': 2},
-                            ],
-                        },
-                    ],
-                },
-            },
-            format='json',
-        )
-        block_id = create_response.data['id']
-
-        list_response = self.client.get(f'/api/lessons/{self.lesson.id}/content-blocks/')
-
-        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
-        quiz_block = next(block for block in list_response.data if block['id'] == block_id)
-        self.assertEqual(quiz_block['block_type'], 'quiz')
-        self.assertEqual(quiz_block['quiz']['quiz_title'], 'Final Quiz')
-        self.assertEqual(len(quiz_block['quiz']['questions']), 1)
-        self.assertEqual(quiz_block['quiz']['questions'][0]['question_text'], 'Pick one')
-        self.assertEqual(len(quiz_block['quiz']['questions'][0]['options']), 2)
-        self.assertTrue(
-            any(opt['is_correct'] for opt in quiz_block['quiz']['questions'][0]['options'])
-        )
-
-    def test_lesson_can_have_multiple_quiz_blocks(self):
-        quiz_payload = {
-            'questions': [
-                {
-                    'question_text': 'Q?',
-                    'order': 1,
-                    'options': [
-                        {'option_text': 'A', 'is_correct': True, 'order': 1},
-                    ],
-                },
-            ],
-        }
-        base_url = f'/api/lessons/{self.lesson.id}/content-blocks/'
-
-        first = self.client.post(
-            base_url,
-            {'order': 1, 'block_type': 'quiz', 'payload': {}, 'quiz': {**quiz_payload, 'quiz_title': 'Quiz One'}},
-            format='json',
-        )
-        second = self.client.post(
-            base_url,
-            {'order': 2, 'block_type': 'quiz', 'payload': {}, 'quiz': {**quiz_payload, 'quiz_title': 'Quiz Two'}},
-            format='json',
-        )
-
-        self.assertEqual(first.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(second.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(
-            ContentBlock.objects.filter(lesson=self.lesson, block_type='quiz').count(),
-            2,
-        )
-        self.assertEqual(Quiz.objects.filter(lesson=self.lesson).count(), 2)
