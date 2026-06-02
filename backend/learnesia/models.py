@@ -6,9 +6,13 @@ import re
 
 class Course(models.Model):
     STATUS_CHOICES = [
-        ('template', 'Template'),
         ('draft', 'Draft'),
         ('published', 'Published'),
+    ]
+
+    LANGUAGE_CHOICES = [
+        ('id', 'Bahasa Indonesia'),
+        ('en', 'English'),
     ]
 
     course_name = models.CharField(max_length=255)
@@ -21,8 +25,14 @@ class Course(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='template',
+        default='draft',
         db_index=True
+    )
+    language = models.CharField(
+        max_length=10,
+        choices=LANGUAGE_CHOICES,
+        default='id',
+        db_index=True,
     )
     course_thumbnail = models.URLField(blank=True, null=True)
     estimated_time = models.PositiveIntegerField(default=0, help_text="Estimated time to complete in minutes")
@@ -31,8 +41,10 @@ class Course(models.Model):
         return self.course_name
     
     def update_estimated_time(self):
-        """Recalculate total estimated time from lessons"""
-        total_time = self.lessons.aggregate(models.Sum('estimated_time'))['estimated_time__sum'] or 0
+        """Recalculate total estimated time from lessons across all modules."""
+        total_time = Lesson.objects.filter(module__course=self).aggregate(
+            models.Sum('estimated_time')
+        )['estimated_time__sum'] or 0
         if self.estimated_time != total_time:
             self.estimated_time = total_time
             self.save(update_fields=['estimated_time'])
@@ -53,8 +65,23 @@ class Course(models.Model):
 
         super().save(*args, **kwargs)
 
+
+class Module(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    order = models.PositiveIntegerField(default=0, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.name
+
+
 class Lesson(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='lessons')
     lesson_name = models.CharField(max_length=255)
     lesson_slug = models.CharField(max_length=255, blank=True, null=True)
     lesson_learning_objectives = ArrayField(models.CharField(max_length=255), blank=True, default=list)
@@ -89,9 +116,37 @@ class Lesson(models.Model):
 
         super().save(*args, **kwargs)
 
-        # Update parent course estimated time
-        if self.course:
-            self.course.update_estimated_time()
+        if self.module_id:
+            self.module.course.update_estimated_time()
+
+
+class ContentBlock(models.Model):
+    BLOCK_TYPE_CHOICES = [
+        ('text', 'Text'),
+        ('video', 'Video'),
+        ('quiz', 'Quiz'),
+        ('exercise', 'Exercise'),
+    ]
+
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='content_blocks')
+    order = models.PositiveIntegerField(default=0, db_index=True)
+    block_type = models.CharField(max_length=20, choices=BLOCK_TYPE_CHOICES)
+    payload = models.JSONField(default=dict)
+    quiz = models.ForeignKey(
+        'Quiz',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='content_blocks',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f'{self.lesson.lesson_name} — {self.block_type} ({self.order})'
+
 
 class LessonReference(models.Model):
     REFERENCE_TYPE_CHOICES = [
