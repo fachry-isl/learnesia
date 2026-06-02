@@ -10,16 +10,27 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
 # Models and Serializers
-from .models import Course, Lesson, Quiz, QuizQuestion, QuestionOption, LessonFeedback
+from .models import (
+    Course,
+    Module,
+    Lesson,
+    ContentBlock,
+    Quiz,
+    QuizQuestion,
+    QuestionOption,
+    LessonFeedback,
+)
 from .serializers import (
-    CourseSerializer, 
+    CourseSerializer,
     CourseListSerializer,
-    LessonSerializer, 
-    QuizSerializer, 
+    ModuleSerializer,
+    LessonSerializer,
+    ContentBlockSerializer,
+    QuizSerializer,
     QuizDetailSerializer,
     QuizQuestionSerializer,
     QuestionOptionSerializer,
-    LessonFeedbackSerializer
+    LessonFeedbackSerializer,
 )
 
 # Langchain and Structured Output
@@ -93,6 +104,16 @@ class QuizStructure(BaseModel):
 # ViewSets
 # ============================================================================
 
+def courses_with_nested_content():
+    lessons_qs = Lesson.objects.order_by('order').prefetch_related('content_blocks')
+    modules_qs = Module.objects.order_by('order').prefetch_related(
+        Prefetch('lessons', queryset=lessons_qs),
+    )
+    return Course.objects.prefetch_related(
+        Prefetch('modules', queryset=modules_qs),
+    )
+
+
 class CourseViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing Course objects.
@@ -112,7 +133,17 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    lookup_field = 'course_slug'  # Router uses {course_slug}
+    lookup_field = 'course_slug'
+
+    def get_queryset(self):
+        queryset = courses_with_nested_content()
+        if self.action == 'list':
+            if self.request.user.is_authenticated:
+                return queryset
+            return queryset.filter(status='published')
+        if self.request.user.is_authenticated:
+            return queryset
+        return queryset.filter(status='published')
 
     def get_object(self):
         queryset = self.get_queryset()
@@ -139,8 +170,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         """
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]
-        return [IsAuthenticated()]  # overrides global default
-    
+        return [IsAuthenticated()]
 
     @action(detail=False, methods=['post'], url_path='generate')
     def generate(self, request):
@@ -342,6 +372,48 @@ class CourseViewSet(viewsets.ModelViewSet):
         )
 
 
+class ModuleViewSet(viewsets.ModelViewSet):
+    serializer_class = ModuleSerializer
+
+    def get_course(self):
+        lookup = self.kwargs['course_slug']
+        if lookup.isdigit():
+            return get_object_or_404(Course, pk=int(lookup))
+        return get_object_or_404(Course, course_slug=lookup)
+
+    def get_queryset(self):
+        lessons_qs = Lesson.objects.order_by('order').prefetch_related('content_blocks')
+        return Module.objects.filter(course=self.get_course()).order_by('order').prefetch_related(
+            Prefetch('lessons', queryset=lessons_qs),
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(course=self.get_course())
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class ContentBlockViewSet(viewsets.ModelViewSet):
+    serializer_class = ContentBlockSerializer
+
+    def get_lesson(self):
+        return get_object_or_404(Lesson, pk=self.kwargs['lesson_pk'])
+
+    def get_queryset(self):
+        return ContentBlock.objects.filter(lesson=self.get_lesson()).order_by('order')
+
+    def perform_create(self, serializer):
+        serializer.save(lesson=self.get_lesson())
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
 class LessonViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing Lesson objects.
@@ -357,9 +429,12 @@ class LessonViewSet(viewsets.ModelViewSet):
         DELETE /api/lessons/{id}/ - Delete a lesson
         POST /api/lessons/generate/ - Generate detailed lesson content
     """
-    queryset = Lesson.objects.all()
+    queryset = Lesson.objects.prefetch_related('content_blocks')
     serializer_class = LessonSerializer
     lookup_field = 'lesson_slug'
+
+    def get_queryset(self):
+        return Lesson.objects.prefetch_related('content_blocks', 'module__course')
 
     def get_object(self):
         queryset = self.get_queryset()
