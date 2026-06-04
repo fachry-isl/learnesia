@@ -20,16 +20,15 @@ import {
   ArrowLeft,
   Clock,
   CheckCircle,
-  PlayCircle,
   ChevronRight,
   ChevronLeft,
   Share2,
   Bookmark,
   Menu,
   X,
-  Lock,
 } from "lucide-react";
 import { getFlattenedLessons } from "@/utils/courseHelpers";
+import LessonSidebarNav from "@/components/public/LessonSidebarNav";
 
 export default function CourseLessonPage() {
   const { course_slug, lesson_slug } = useParams();
@@ -299,82 +298,15 @@ export default function CourseLessonPage() {
 
           <div className="flex-1 overflow-y-auto py-4">
             <div className="px-6 mb-2 text-xs font-black uppercase tracking-widest text-gray-400">
-              Lessons
+              {course.modules?.length ? "Modules" : "Lessons"}
             </div>
-            <nav className="space-y-1">
-              {sortedLessons?.map((l, index) => {
-                const isActive = l.lesson_slug === lesson.lesson_slug;
-                const isCompleted = index < currentLessonIndex;
-
-                // A lesson is unlocked if it's the first one, or if the previous lesson was completed
-                // Since we don't have a global progress sync yet, we'll assume previous are completed
-                // if they are before the current index for now, but in a real scenario we'd check localStorage for each.
-
-                // Better logic: determine if THIS lesson is unlocked
-                let isUnlocked = index <= currentLessonIndex;
-                if (!isUnlocked && typeof window !== "undefined") {
-                  const prevLessonSlug = sortedLessons[index - 1]?.lesson_slug;
-                  const prevProgress = prevLessonSlug
-                    ? JSON.parse(
-                        localStorage.getItem(`lesson_progress_${prevLessonSlug}`) || "{}",
-                      )
-                    : null;
-
-                  isUnlocked = prevProgress?.hasRead && prevProgress?.quizPassed;
-                }
-
-                const itemClassName = `
-                      w-full flex items-start gap-3 px-6 py-3 transition-colors border-l-4 
-                      ${isActive ? "bg-gray-50 border-black text-gray-900" : isUnlocked ? "border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900" : "border-transparent text-gray-300 cursor-not-allowed"}
-                    `;
-
-                const itemContent = (
-                  <>
-                    <div className="mt-0.5 shrink-0">
-                      {isActive ? (
-                        <PlayCircle className="w-4 h-4 text-black" />
-                      ) : isCompleted ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : !isUnlocked ? (
-                        <Lock className="w-4 h-4 text-gray-300" />
-                      ) : (
-                        <div className="w-4 h-4 rounded-full border-2 border-gray-300 text-[10px] flex items-center justify-center font-bold text-gray-400">
-                          {index + 1}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p
-                        className={`text-sm font-bold ${isActive ? "text-gray-900" : isUnlocked ? "text-gray-600" : "text-gray-300"}`}
-                      >
-                        {l.lesson_name}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {`${l.estimated_time} min`}
-                      </p>
-                    </div>
-                  </>
-                );
-
-                if (isUnlocked) {
-                  return (
-                    <Link
-                      key={l.lesson_slug}
-                      href={`/course/${course_slug}/lesson/${l.lesson_slug}`}
-                      className={itemClassName}
-                    >
-                      {itemContent}
-                    </Link>
-                  );
-                }
-
-                return (
-                  <div key={l.lesson_slug} className={itemClassName}>
-                    {itemContent}
-                  </div>
-                );
-              })}
-            </nav>
+            <LessonSidebarNav
+              courseSlug={course_slug}
+              modules={course.modules}
+              sortedLessons={sortedLessons}
+              activeLessonSlug={lesson.lesson_slug}
+              currentLessonIndex={currentLessonIndex}
+            />
           </div>
         </aside>
 
