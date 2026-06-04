@@ -75,7 +75,10 @@ export function buildCourseJsonLd(course) {
       name: SITE_NAME,
       url: SITE_URL,
     },
-    numberOfLessons: course.lessons?.length ?? undefined,
+    numberOfLessons:
+      course.modules?.reduce((n, m) => n + (m.lessons?.length ?? 0), 0) ??
+      course.lessons?.length ??
+      undefined,
     educationalLevel: "Beginner",
     inLanguage: "en",
     isAccessibleForFree: true,
