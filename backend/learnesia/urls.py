@@ -5,6 +5,8 @@ from .views import (
     ModuleViewSet,
     LessonViewSet,
     ContentBlockViewSet,
+    ReferenceViewSet,
+    LessonCitationViewSet,
     QuizViewSet,
     QuizQuestionViewset,
     QuestionOptionViewset,
@@ -18,6 +20,7 @@ router.register(r'quizzes', QuizViewSet, basename='quiz')
 router.register(r'quiz-questions', QuizQuestionViewset, basename='quiz-question')
 router.register(r'question-options', QuestionOptionViewset, basename='question-option')
 router.register(r'lesson-feedbacks', LessonFeedbackViewSet, basename='lesson-feedback')
+router.register(r'references', ReferenceViewSet, basename='reference')
 
 module_list = ModuleViewSet.as_view({'get': 'list', 'post': 'create'})
 module_detail = ModuleViewSet.as_view({
@@ -34,6 +37,16 @@ content_block_detail = ContentBlockViewSet.as_view({
     'patch': 'partial_update',
     'delete': 'destroy',
 })
+
+citation_list = LessonCitationViewSet.as_view({'get': 'list', 'post': 'create'})
+citation_detail = LessonCitationViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
+    'delete': 'destroy',
+})
+
+lesson_sources = LessonCitationViewSet.as_view({'get': 'sources'})
 
 urlpatterns = [
     path(
@@ -55,6 +68,21 @@ urlpatterns = [
         'lessons/<int:lesson_pk>/content-blocks/<int:pk>/',
         content_block_detail,
         name='lesson-content-block-detail',
+    ),
+    path(
+        'lessons/<int:lesson_pk>/citations/',
+        citation_list,
+        name='lesson-citation-list',
+    ),
+    path(
+        'lessons/<int:lesson_pk>/citations/<int:pk>/',
+        citation_detail,
+        name='lesson-citation-detail',
+    ),
+    path(
+        'lessons/<int:lesson_pk>/sources/',
+        lesson_sources,
+        name='lesson-sources',
     ),
     path('', include(router.urls)),
 ]

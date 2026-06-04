@@ -148,22 +148,46 @@ class ContentBlock(models.Model):
         return f'{self.lesson.lesson_name} — {self.block_type} ({self.order})'
 
 
-class LessonReference(models.Model):
-    REFERENCE_TYPE_CHOICES = [
+class Reference(models.Model):
+    SOURCE_TYPE_CHOICES = [
         ('link', 'Link'),
         ('document', 'Document'),
         ('video', 'Video'),
     ]
 
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='references')
-    reference_title = models.CharField(max_length=255)
-    reference_url = models.URLField(blank=True, null=True)
-    reference_type = models.CharField(max_length=50, choices=REFERENCE_TYPE_CHOICES)
+    url = models.URLField(blank=True, null=True)
+    title = models.CharField(max_length=255)
+    source_type = models.CharField(max_length=50, choices=SOURCE_TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.reference_title
-    
+        return self.title
+
+
+class LessonCitation(models.Model):
+    ROLE_CHOICES = [
+        ('citation', 'Citation'),
+        ('supplementary', 'Supplementary'),
+    ]
+
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='citations')
+    reference = models.ForeignKey(Reference, on_delete=models.CASCADE, related_name='lesson_citations')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    content_block = models.ForeignKey(
+        ContentBlock,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='citations',
+    )
+    order = models.PositiveIntegerField(default=0, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f'{self.lesson.lesson_name} — {self.reference.title} ({self.role})'
 
 
 class Quiz(models.Model):

@@ -1,9 +1,10 @@
+from django.apps import apps
 from django.core.management import call_command
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TransactionTestCase
 
-from learnesia.models import ContentBlock, Course, Lesson, Module, Quiz
+from learnesia.models import ContentBlock, Course, Lesson, LessonCitation, Module, Quiz, Reference
 
 
 class SchemaFoundationMigrationTests(TransactionTestCase):
@@ -74,3 +75,50 @@ class SchemaFoundationMigrationTests(TransactionTestCase):
         self.assertEqual(blocks[1].order, 1)
         self.assertEqual(blocks[1].quiz_id, quiz.id)
         self.assertEqual(blocks[1].payload, {})
+
+
+class LessonReferenceMigrationTests(TransactionTestCase):
+    def test_migrates_lesson_references_to_reference_and_citation(self):
+        migration_before = '0018_reference_lesson_citation'
+        call_command('migrate', 'learnesia', migration_before, verbosity=0)
+
+        executor = MigrationExecutor(connection)
+        state = executor.loader.project_state(('learnesia', migration_before), at_end=True)
+        historical_apps = state.apps
+
+        HistoricalCourse = historical_apps.get_model('learnesia', 'Course')
+        HistoricalModule = historical_apps.get_model('learnesia', 'Module')
+        HistoricalLesson = historical_apps.get_model('learnesia', 'Lesson')
+        HistoricalLessonReference = historical_apps.get_model('learnesia', 'LessonReference')
+
+        course = HistoricalCourse.objects.create(
+            course_name='Legacy Ref Course',
+            status='draft',
+            course_tags=[],
+            course_learning_objectives=[],
+        )
+        module = HistoricalModule.objects.create(course=course, name='Module', order=0)
+        lesson = HistoricalLesson.objects.create(
+            module=module,
+            lesson_name='Legacy Lesson',
+            order=0,
+        )
+        HistoricalLessonReference.objects.create(
+            lesson=lesson,
+            reference_title='Old Doc',
+            reference_url='https://example.com/old',
+            reference_type='document',
+        )
+
+        call_command('migrate', 'learnesia', '0019_remove_lesson_reference', verbosity=0)
+
+        with self.assertRaises(LookupError):
+            apps.get_model('learnesia', 'LessonReference')
+
+        ref = Reference.objects.get(title='Old Doc')
+        self.assertEqual(ref.url, 'https://example.com/old')
+        self.assertEqual(ref.source_type, 'document')
+
+        citation = LessonCitation.objects.get(lesson_id=lesson.id, reference=ref)
+        self.assertEqual(citation.role, 'supplementary')
+        self.assertEqual(citation.order, 0)

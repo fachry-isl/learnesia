@@ -15,6 +15,8 @@ from .models import (
     Module,
     Lesson,
     ContentBlock,
+    Reference,
+    LessonCitation,
     Quiz,
     QuizQuestion,
     QuestionOption,
@@ -26,6 +28,8 @@ from .serializers import (
     ModuleSerializer,
     LessonSerializer,
     ContentBlockSerializer,
+    ReferenceSerializer,
+    LessonCitationSerializer,
     QuizSerializer,
     QuizDetailSerializer,
     QuizQuestionSerializer,
@@ -392,6 +396,45 @@ class ModuleViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class ReferenceViewSet(viewsets.ModelViewSet):
+    queryset = Reference.objects.all()
+    serializer_class = ReferenceSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+
+class LessonCitationViewSet(viewsets.ModelViewSet):
+    serializer_class = LessonCitationSerializer
+
+    def get_lesson(self):
+        return get_object_or_404(Lesson, pk=self.kwargs['lesson_pk'])
+
+    def get_queryset(self):
+        queryset = LessonCitation.objects.filter(
+            lesson=self.get_lesson(),
+        ).select_related('reference').order_by('order')
+        role = self.request.query_params.get('role')
+        if role is not None:
+            queryset = queryset.filter(role=role)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(lesson=self.get_lesson())
+
+    def sources(self, request, lesson_pk=None):
+        citations = self.get_queryset().filter(role='citation')
+        serializer = self.get_serializer(citations, many=True)
+        return Response(serializer.data)
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'sources']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
