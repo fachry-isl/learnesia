@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { BookOpen, Clock, Target, Layers } from "lucide-react";
 import { courseOverviewPath } from "@/utils/seo";
+import { getFlattenedLessons } from "@/utils/courseHelpers";
 
 const PublicCourseCard = ({ course }) => {
+  const lessons = getFlattenedLessons(course);
   const totalObjectives =
-    course.lessons?.reduce(
+    lessons.reduce(
       (sum, lesson) => sum + (lesson.lesson_learning_objectives?.length || 0),
       0,
     ) || 0;
@@ -49,7 +51,7 @@ const PublicCourseCard = ({ course }) => {
                 Lessons
               </p>
               <p className="text-sm font-black text-gray-900">
-                {course.lessons?.length || 0}
+                {lessons.length}
               </p>
             </div>
           </div>

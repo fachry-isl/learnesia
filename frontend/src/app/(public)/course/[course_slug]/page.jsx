@@ -3,20 +3,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCourseById } from "@/services/api";
-import {
-  Clock,
-  CheckCircle,
-  PlayCircle,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import CourseSyllabus from "@/components/public/CourseSyllabus";
+import { getSortedModules } from "@/utils/courseHelpers";
+import { CheckCircle, PlayCircle, ChevronRight } from "lucide-react";
 
 export default function CourseOverviewPage() {
   const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("overview");
-  const [expandedModules, setExpandedModules] = useState({});
   const { course_slug } = useParams();
   const router = useRouter();
 
@@ -35,18 +29,7 @@ export default function CourseOverviewPage() {
       setIsLoading(true);
       const response = await getCourseById(slug);
 
-      if (response.lessons) {
-        response.lessons = [...response.lessons].sort(
-          (a, b) => a.order - b.order,
-        );
-      }
-
       setCourse(response);
-
-      // Initialize module expansion
-      if (response.lessons && response.lessons.length > 0) {
-        setExpandedModules({ [response.lessons[0].id]: true });
-      }
     } catch (error) {
       console.error("Error fetching course detail:", error);
     } finally {
@@ -90,13 +73,6 @@ export default function CourseOverviewPage() {
     }
   };
 
-  const toggleModule = (id) => {
-    setExpandedModules((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] w-full">
@@ -109,6 +85,8 @@ export default function CourseOverviewPage() {
   }
 
   if (!course) return null;
+
+  const sortedModules = getSortedModules(course.modules);
 
   // Extract skills from objectives or description for "Skills you'll gain"
   const skills = course.course_learning_objectives?.slice(0, 6).map((obj) => {
@@ -229,87 +207,20 @@ export default function CourseOverviewPage() {
                 </button> */}
               </div>
 
-              <div className="space-y-4">
-                {course.lessons?.map((lesson, idx) => {
-                  const isExpanded = expandedModules[lesson.id];
-                  return (
-                    <div
-                      key={lesson.id}
-                      className="border border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 transition-colors shadow-sm"
-                    >
-                      {/* Module Header */}
-                      <button
-                        onClick={() => toggleModule(lesson.id)}
-                        className={`w-full flex items-center justify-between p-6 text-left transition-colors ${isExpanded ? "bg-blue-50/20" : "bg-white"}`}
-                      >
-                        <div className="space-y-1">
-                          <h3 className="text-xl font-bold text-gray-900">
-                            {lesson.lesson_name}
-                          </h3>
-                          <div className="flex items-center gap-4 text-xs font-bold font-space text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {`${lesson.estimated_time} min`}
-                            </span>
-                            {/* <span className="flex items-center gap-1">
-                              <FileText className="w-3 h-3" />1 Intelligence
-                              Unit
-                            </span> */}
-                          </div>
-                        </div>
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5 text-gray-400" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-gray-400" />
-                        )}
-                      </button>
-
-                      {/* Module Content (Expanded) */}
-                      {isExpanded && (
-                        <div className="p-6 pt-0 space-y-6 bg-white border-t border-gray-100 animate-in slide-in-from-top-2 duration-300">
-                          <div className="pt-6 space-y-4">
-                            {/* <p className="text-sm text-gray-500 font-medium italic border-l-2 border-black-200 pl-4 py-1">
-                                Explore the core principles and cognitive
-                                frameworks required for this model.
-                              </p> */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {lesson.lesson_learning_objectives
-                                ?.filter(
-                                  (o) => !o.toLowerCase().includes("time"),
-                                )
-                                .map((obj, i) => (
-                                  <div
-                                    key={i}
-                                    className="flex gap-3 text-xs font-bold text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100"
-                                  >
-                                    <div className="w-5 h-5 bg-black-100 text-black-600 flex items-center justify-center rounded-full shrink-0 text-[10px]">
-                                      {i + 1}
-                                    </div>
-                                    {obj}
-                                  </div>
-                                ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="pt-6">
-                <button
-                  onClick={() =>
+              {sortedModules.length > 0 ? (
+                <CourseSyllabus
+                  courseSlug={course_slug}
+                  modules={sortedModules}
+                  defaultExpandedModuleId={sortedModules[0]?.id}
+                  onStartLearning={(lesson) =>
                     router.push(
-                      `/course/${course_slug}/lesson/${course.lessons[0]?.lesson_slug}`,
+                      `/course/${course_slug}/lesson/${lesson.lesson_slug}`,
                     )
                   }
-                  className="w-full py-4 bg-black text-white font-black rounded-xl shadow-xl shadow-gray-200 hover:bg-gray-900 hover:-translate-y-0.5 transition-all active:translate-y-0 uppercase text-xs tracking-widest flex items-center justify-center gap-2"
-                >
-                  <PlayCircle className="w-4 h-4" />
-                  Start Learning
-                </button>
-              </div>
+                />
+              ) : (
+                <p className="text-gray-500 font-medium">No modules published yet.</p>
+              )}
             </section>
 
             {/* 3. CERTIFICATE SECTION */}

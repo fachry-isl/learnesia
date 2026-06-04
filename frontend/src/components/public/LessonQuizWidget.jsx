@@ -4,7 +4,7 @@ import { CheckCircle, XCircle, Info, HelpCircle } from "lucide-react";
 /**
  * A public-facing quiz widget for the lesson page.
  */
-const LessonQuizWidget = ({ quiz, onComplete }) => {
+const LessonQuizWidget = ({ quiz, onComplete, inline = false }) => {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
@@ -45,7 +45,13 @@ const LessonQuizWidget = ({ quiz, onComplete }) => {
   };
 
   return (
-    <div className="my-16 bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+    <div
+      className={
+        inline
+          ? "my-8 bg-white border-4 border-black p-6 md:p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+          : "my-16 bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+      }
+    >
       <div className="flex items-center gap-3 mb-8 border-b-4 border-black pb-4">
         <div className="bg-black p-2 rounded-sm">
           <HelpCircle className="w-6 h-6 text-white" />

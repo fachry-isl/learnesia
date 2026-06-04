@@ -237,6 +237,27 @@ export async function getLessonById(lessonId) {
 }
 
 /**
+ * List lesson citations, optionally filtered by role.
+ * @param {number|string} lessonId
+ * @param {{ role?: 'citation' | 'supplementary' }} [options]
+ */
+export async function getLessonCitations(lessonId, options = {}) {
+  const response = await publicApi.get(`/lessons/${lessonId}/citations/`, {
+    params: options.role ? { role: options.role } : undefined,
+  });
+  return response.data;
+}
+
+/**
+ * Citations only (role=citation) — same data as sources endpoint.
+ * @param {number|string} lessonId
+ */
+export async function getLessonSources(lessonId) {
+  const response = await publicApi.get(`/lessons/${lessonId}/sources/`);
+  return response.data;
+}
+
+/**
  * Create a new lesson
  * @param {Object} lessonData - Lesson data
  * @returns {Promise<Object>} Created lesson

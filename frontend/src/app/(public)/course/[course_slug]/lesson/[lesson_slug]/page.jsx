@@ -7,10 +7,15 @@ import {
   getLessonById,
   getCourseById,
   getQuizByLessonId,
+  getLessonCitations,
   submitLessonFeedback,
 } from "@/services/api";
 import LessonQuizWidget from "@/components/public/LessonQuizWidget";
 import LessonFeedbackModal from "@/components/public/LessonFeedbackModal";
+import ContentBlockSequence, {
+  lessonHasQuizBlocks,
+} from "@/components/public/ContentBlockSequence";
+import LessonSourcesList from "@/components/public/LessonSourcesList";
 import {
   ArrowLeft,
   Clock,
@@ -24,8 +29,7 @@ import {
   X,
   Lock,
 } from "lucide-react";
-import MarkdownRenderer from "@/components/admin/MarkdownRenderer";
-import { getSortedLessons } from "@/utils/courseHelpers";
+import { getFlattenedLessons } from "@/utils/courseHelpers";
 
 export default function CourseLessonPage() {
   const { course_slug, lesson_slug } = useParams();
@@ -35,6 +39,9 @@ export default function CourseLessonPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [quiz, setQuiz] = useState(null);
+  const [citations, setCitations] = useState([]);
+  const [supplementary, setSupplementary] = useState([]);
+  const [passedQuizBlockIds, setPassedQuizBlockIds] = useState([]);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
   const [progress, setProgress] = useState({
@@ -43,7 +50,21 @@ export default function CourseLessonPage() {
     quizPassed: false,
   });
 
-  const sortedLessons = course ? getSortedLessons(course?.lessons) : [];
+  const sortedLessons = course ? getFlattenedLessons(course) : [];
+  const contentBlocks = lesson?.content_blocks ?? [];
+  const usesBlockQuizzes = lessonHasQuizBlocks(contentBlocks);
+  const quizBlockIds = contentBlocks
+    .filter(
+      (block) =>
+        block.block_type === "quiz" && block.quiz?.questions?.length > 0,
+    )
+    .map((block) => block.id);
+  const allBlockQuizzesPassed =
+    quizBlockIds.length > 0 &&
+    quizBlockIds.every((id) => passedQuizBlockIds.includes(id));
+  const quizRequirementMet = usesBlockQuizzes
+    ? quizBlockIds.length === 0 || allBlockQuizzesPassed
+    : progress.quizPassed;
 
   useEffect(() => {
     if (typeof window === "undefined" || !lesson_slug) return;
@@ -91,11 +112,29 @@ export default function CourseLessonPage() {
           getCourseById(course_slug),
         ]);
 
+        const [citationList, supplementaryList] = await Promise.all([
+          getLessonCitations(lessonData.id, { role: "citation" }).catch(() => []),
+          getLessonCitations(lessonData.id, { role: "supplementary" }).catch(
+            () => [],
+          ),
+        ]);
+
         setLesson(lessonData);
         setCourse(courseData);
+        setCitations(citationList);
+        setSupplementary(supplementaryList);
+        setPassedQuizBlockIds([]);
 
-        const quizData = await getQuizByLessonId(lessonData.id, "full");
-        setQuiz(Array.isArray(quizData) ? quizData[0] : quizData);
+        if (!lessonHasQuizBlocks(lessonData.content_blocks)) {
+          const quizData = await getQuizByLessonId(lessonData.id, "full");
+          const resolved = Array.isArray(quizData) ? quizData[0] : quizData;
+          setQuiz(resolved ?? null);
+          if (!resolved?.questions?.length) {
+            setProgress((prev) => ({ ...prev, quizPassed: true }));
+          }
+        } else {
+          setQuiz(null);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -407,23 +446,43 @@ export default function CourseLessonPage() {
                 )}
               </header>
 
-              <section className="prose prose-lg max-w-none">
-                <MarkdownRenderer
-                  content={lesson.lesson_content || "No content available."}
-                />
-              </section>
+              <ContentBlockSequence
+                blocks={contentBlocks}
+                legacyMarkdown={lesson.lesson_content}
+                onQuizComplete={(blockId) => {
+                  setPassedQuizBlockIds((prev) => {
+                    const next = prev.includes(blockId) ? prev : [...prev, blockId];
+                    const ids = (lesson?.content_blocks ?? [])
+                      .filter(
+                        (b) =>
+                          b.block_type === "quiz" &&
+                          b.quiz?.questions?.length > 0,
+                      )
+                      .map((b) => b.id);
+                    if (ids.length > 0 && ids.every((id) => next.includes(id))) {
+                      setProgress((p) => ({ ...p, quizPassed: true }));
+                    }
+                    return next;
+                  });
+                }}
+              />
 
-              {/* Sentinel for reading detection */}
-              <div id="reading-sentinel" className="h-4 w-full" />
-
-              {quiz && (
+              {!usesBlockQuizzes && quiz ? (
                 <LessonQuizWidget
                   quiz={quiz}
                   onComplete={() =>
                     setProgress((prev) => ({ ...prev, quizPassed: true }))
                   }
                 />
-              )}
+              ) : null}
+
+              <LessonSourcesList
+                citations={citations}
+                supplementary={supplementary}
+              />
+
+              {/* Sentinel for reading detection */}
+              <div id="reading-sentinel" className="h-4 w-full" />
 
               <footer className="pt-12 border-t border-gray-100">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -444,10 +503,10 @@ export default function CourseLessonPage() {
                   )}
                   {nextLesson ? (
                     <button
-                      disabled={!(progress.hasRead && progress.quizPassed)}
+                      disabled={!(progress.hasRead && quizRequirementMet)}
                       onClick={() => handleLessonNavigation(nextLesson)}
                       className={`flex flex-col items-end p-4 rounded-xl transition-all text-right shadow-lg ${
-                        progress.hasRead && progress.quizPassed
+                        progress.hasRead && quizRequirementMet
                           ? "bg-black text-white hover:bg-gray-800"
                           : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
                       }`}
@@ -458,7 +517,7 @@ export default function CourseLessonPage() {
                       <span className="font-bold">
                         {nextLesson.lesson_name}
                       </span>
-                      {!(progress.hasRead && progress.quizPassed) && (
+                      {!(progress.hasRead && quizRequirementMet) && (
                         <span className="text-[10px] mt-1 font-bold text-red-400 uppercase tracking-tighter">
                           Complete Reading & Quiz to Unlock
                         </span>
@@ -466,10 +525,10 @@ export default function CourseLessonPage() {
                     </button>
                   ) : (
                     <button
-                      disabled={!(progress.hasRead && progress.quizPassed)}
+                      disabled={!(progress.hasRead && quizRequirementMet)}
                       onClick={handleCompleteCourse}
                       className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all shadow-lg col-span-1 sm:col-start-2 ${
-                        progress.hasRead && progress.quizPassed
+                        progress.hasRead && quizRequirementMet
                           ? "bg-green-600 text-white hover:bg-green-700"
                           : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
                       }`}
@@ -477,7 +536,7 @@ export default function CourseLessonPage() {
                       <span className="font-bold flex items-center gap-2">
                         Complete Course <CheckCircle className="w-5 h-5" />
                       </span>
-                      {!(progress.hasRead && progress.quizPassed) && (
+                      {!(progress.hasRead && quizRequirementMet) && (
                         <span className="text-[10px] mt-1 font-bold text-red-400 uppercase tracking-tighter">
                           Complete Reading & Quiz to Unlock
                         </span>
