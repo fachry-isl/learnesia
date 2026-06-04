@@ -4,16 +4,18 @@ from .models import (
     Module,
     Lesson,
     ContentBlock,
+    Reference,
+    LessonCitation,
     Quiz,
-    LessonReference,
     QuizQuestion,
     QuestionOption,
 )
 
 
-class LessonReferenceInline(admin.TabularInline):
-    model = LessonReference
+class LessonCitationInline(admin.TabularInline):
+    model = LessonCitation
     extra = 1
+    autocomplete_fields = ['reference']
 
 
 class LessonInline(admin.TabularInline):
@@ -67,7 +69,7 @@ class LessonAdmin(admin.ModelAdmin):
     list_display = ['id', 'module', 'lesson_name', 'order', 'created_at']
     list_filter = ['module__course', 'created_at']
     search_fields = ['lesson_name', 'module__course__course_name']
-    inlines = [LessonReferenceInline, ContentBlockInline]
+    inlines = [LessonCitationInline, ContentBlockInline]
 
 
 @admin.register(ContentBlock)
@@ -76,11 +78,11 @@ class ContentBlockAdmin(admin.ModelAdmin):
     list_filter = ['block_type']
 
 
-@admin.register(LessonReference)
-class LessonReferenceAdmin(admin.ModelAdmin):
-    list_display = ['reference_title', 'lesson', 'reference_type', 'created_at']
-    list_filter = ['reference_type', 'created_at']
-    search_fields = ['reference_title', 'lesson__module__course__course_name']
+@admin.register(Reference)
+class ReferenceAdmin(admin.ModelAdmin):
+    list_display = ['title', 'source_type', 'url', 'created_at']
+    list_filter = ['source_type', 'created_at']
+    search_fields = ['title', 'url']
 
 
 @admin.register(Quiz)

@@ -6,6 +6,8 @@ from .models import (
     Module,
     Lesson,
     ContentBlock,
+    Reference,
+    LessonCitation,
     Quiz,
     QuestionOption,
     QuizQuestion,
@@ -219,6 +221,37 @@ class CourseListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = '__all__'
+
+
+class ReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reference
+        fields = ['id', 'url', 'title', 'source_type', 'created_at']
+
+
+class LessonCitationSerializer(serializers.ModelSerializer):
+    reference = ReferenceSerializer(read_only=True)
+    reference_id = serializers.PrimaryKeyRelatedField(
+        queryset=Reference.objects.all(),
+        source='reference',
+        write_only=True,
+    )
+
+    class Meta:
+        model = LessonCitation
+        fields = [
+            'id',
+            'lesson',
+            'reference',
+            'reference_id',
+            'role',
+            'content_block',
+            'order',
+            'created_at',
+        ]
+        extra_kwargs = {
+            'lesson': {'read_only': True},
+        }
 
 
 class LessonFeedbackSerializer(serializers.ModelSerializer):
