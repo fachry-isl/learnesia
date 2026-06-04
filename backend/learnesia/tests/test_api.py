@@ -195,13 +195,114 @@ class ContentBlockAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('payload', response.data)
 
-    def test_rejects_unregistered_block_type(self):
+    def test_rejects_unknown_block_type(self):
+        response = self.client.post(
+            f'/api/lessons/{self.lesson.id}/content-blocks/',
+            {
+                'order': 0,
+                'block_type': 'flashcard',
+                'payload': {'front': 'a', 'back': 'b'},
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('block_type', response.data)
+
+    def test_video_block_crud(self):
+        base_url = f'/api/lessons/{self.lesson.id}/content-blocks/'
+
+        create_response = self.client.post(
+            base_url,
+            {
+                'order': 1,
+                'block_type': 'video',
+                'payload': {
+                    'url': 'https://www.youtube.com/watch?v=abc',
+                    'title': 'Demo Video',
+                    'start': 10,
+                    'end': 60,
+                },
+            },
+            format='json',
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(create_response.data['payload']['title'], 'Demo Video')
+        self.assertEqual(create_response.data['payload']['start'], 10)
+        block_id = create_response.data['id']
+
+        list_response = self.client.get(base_url)
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+        video_block = next(b for b in list_response.data if b['id'] == block_id)
+        self.assertEqual(video_block['block_type'], 'video')
+
+        detail_url = f'{base_url}{block_id}/'
+        update_response = self.client.patch(
+            detail_url,
+            {'payload': {'url': 'https://www.youtube.com/watch?v=xyz', 'title': 'Updated'}},
+            format='json',
+        )
+        self.assertEqual(update_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(update_response.data['payload']['title'], 'Updated')
+        self.assertNotIn('start', update_response.data['payload'])
+
+        delete_response = self.client.delete(detail_url)
+        self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_rejects_malformed_video_payload(self):
         response = self.client.post(
             f'/api/lessons/{self.lesson.id}/content-blocks/',
             {
                 'order': 0,
                 'block_type': 'video',
                 'payload': {'url': 'https://example.com'},
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('payload', response.data)
+
+    def test_exercise_block_crud(self):
+        base_url = f'/api/lessons/{self.lesson.id}/content-blocks/'
+
+        create_response = self.client.post(
+            base_url,
+            {
+                'order': 2,
+                'block_type': 'exercise',
+                'payload': {
+                    'prompt': 'Implement binary search.',
+                    'sample_solution': 'def binary_search(...): ...',
+                    'hints': ['Keep the array sorted', 'Halve the search space'],
+                },
+            },
+            format='json',
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(create_response.data['payload']['prompt'], 'Implement binary search.')
+        block_id = create_response.data['id']
+
+        detail_url = f'{base_url}{block_id}/'
+        update_response = self.client.patch(
+            detail_url,
+            {'payload': {'prompt': 'Implement linear search.'}},
+            format='json',
+        )
+        self.assertEqual(update_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(update_response.data['payload']['prompt'], 'Implement linear search.')
+        self.assertNotIn('sample_solution', update_response.data['payload'])
+
+        delete_response = self.client.delete(detail_url)
+        self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_rejects_malformed_exercise_payload(self):
+        response = self.client.post(
+            f'/api/lessons/{self.lesson.id}/content-blocks/',
+            {
+                'order': 0,
+                'block_type': 'exercise',
+                'payload': {'sample_solution': 'no prompt'},
             },
             format='json',
         )
