@@ -200,11 +200,10 @@ Course
           -> Content Block   (ordered, typed)
 ```
 
-- A Lesson's content is an ordered list of Content Blocks. The v1
-  `Lesson.lesson_content` TextField is retained only as a legacy fallback for
-  rows not yet migrated, and the public renderer falls back to it when a Lesson
-  has no blocks. It carries no new content and should be dropped once the
-  fallback is provably unused. Note that `estimated_time` still reads it.
+- A Lesson's content is an ordered list of Content Blocks, and nothing else.
+  There is no lesson-level markdown field: the Django implementation kept
+  `Lesson.lesson_content` as a fallback for unmigrated rows, and the rebuild has
+  no equivalent. Blocks are the only representation from the first row written.
 - `ContentBlock` is a single table with a `lesson` FK, `order`, a `block_type`
   discriminator, a JSON `payload`, and a nullable `quiz` FK used only when
   `block_type == 'quiz'`. Rationale and alternatives considered:
@@ -257,10 +256,8 @@ in section 9.2.
 ### 5.3 Course lifecycle and language
 
 - **Status collapses to `draft` | `published`.** The legacy `template` status is
-  removed from the model; existing `template` rows migrate to `draft`. "Template"
-  implied reusability that was never actually implemented. Admin routes and
-  components still carrying the `template` name are leftovers to delete, not a
-  surviving concept.
+  removed. "Template" implied reusability that was never actually implemented,
+  and the word does not appear in the rebuilt model, API, or admin UI.
 - **Fine-grained pipeline progress lives on the Generation Run, not on Course
   status.** A Course being generated is simply a Draft.
 - **`Course.language`** (default `id`, Bahasa Indonesia) governs the language of
@@ -381,8 +378,8 @@ degrades rather than failing the run.
 
 ### 5.8 Prompts and rubrics as flat files
 
-All agent prompts and evaluator rubrics live as flat files in
-`backend/learnesia/prompts/` (e.g. `outline_agent.md`,
+All agent prompts and evaluator rubrics live as flat files in the pipeline
+worker's `prompts/` directory (e.g. `outline_agent.md`,
 `content_evaluator_rubric.yaml`), git-versioned, loaded through a prompt loader
 that substitutes template variables such as `{language}`. Changing a prompt or a
 rubric is a file edit, not a code change.
@@ -1406,8 +1403,6 @@ Create focused ADRs/designs before implementation for:
 - Procedural expression language and sandbox.
 - Assessed interactive block taxonomy.
 - Content/template immutable publishing model.
-- Durable job/checkpoint infrastructure — specifically, what replaces the
-  in-process `asyncio` execution model of section 5.4.
 - Identity, child safety, consent, and data retention.
 - The job contract between `apps/api` and `apps/pipeline`: payload versioning,
   states, idempotency keys, retry and cancellation semantics.
