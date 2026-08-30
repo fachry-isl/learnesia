@@ -4,6 +4,8 @@
 **Audience:** Product, engineering, content, and future contributors
 **Last updated:** 2026-08-30
 **Absorbs:** [#29 — PRD: Content Architecture v2](https://github.com/fachry-isl/learnesia/issues/29)
+**Implementation strategy:** greenfield rebuild on Go, Python, and TypeScript
+Next.js — see section 11 and [ADR-0002](adr/0002-greenfield-rebuild-go-python-nextjs.md)
 
 ## 1. Purpose
 
@@ -25,40 +27,46 @@ document and `CONTEXT.md` disagree on a term, `CONTEXT.md` wins.
 
 ## 2. What changed in this revision
 
-Previously the vision document and PRD #29 were separate and partly
-contradictory: the vision described a knowledge-graph platform whose first
-delivery phase was a learner loop, while #29 described — and the team was
-actually building — a block-based content model and a multi-agent generation
-pipeline. This revision merges them.
+Two things changed at once: PRD #29 was merged into this document, and the
+implementation strategy was reversed from a strangler migration to a greenfield
+rebuild.
 
-Substantive changes:
+### 2.1 Greenfield rebuild replaces the Django-to-Go migration
 
-1. **Content Architecture v2 is now recorded as the architecture of record**
-   (new section 5), not as a parallel proposal. The `Course → Module → Lesson →
+Learnesia is rebuilt from scratch on Go, Python, and TypeScript Next.js. No data
+is migrated; the Django backend and its database are abandoned rather than
+strangled. Section 11 is rewritten and [ADR-0002](adr/0002-greenfield-rebuild-go-python-nextjs.md)
+records the decision, the three deployable units, and the Go/Python seam.
+
+The previous plan's trigger conditions are void. They assumed a cost model
+dominated by protecting live traffic and live data; the product has neither, and
+the switching cost will never be lower.
+
+The consequence for sequencing is the important part: section 12 is now a build
+order in which **the learner loop ships before the content factory**. That was
+the central finding of the review this revision responds to.
+
+### 2.2 PRD #29 merged in
+
+1. **Content Architecture v2 is recorded as the architecture of record**
+   (section 5), not as a parallel proposal. The `Course → Module → Lesson →
    Content Block` hierarchy, the Content Block registry, the Reference/Citation
    system, the Generation Pipeline, the two LLM seams, and the Resource Provider
-   interface are all folded in from #29.
-2. **The old vision text assumed a flat authored-course model.** Section 6
-   (formerly section 4) now positions the canonical knowledge graph as a layer
-   *above* the shipped v2 hierarchy rather than a replacement for an unspecified
-   one, and states explicitly that Courses reference Skills rather than owning
-   them.
-3. **The roadmap is annotated with real delivery status** (section 12). The
-   honest position: work jumped ahead to the content factory (original Phase 3)
-   before the learner loop (original Phase 1) exists. The phases are not
-   renumbered — the original sequencing argument still holds and is now recorded
-   as an explicit risk with a gate, rather than silently violated.
-4. **#29's out-of-scope list is merged into the non-goals** (section 14), so
+   interface are all folded in from #29. The *design* survives the rebuild even
+   though the Django implementation of it does not.
+2. **The old vision text assumed a flat authored-course model.** Section 6 now
+   positions the canonical knowledge graph as a layer *above* the block-based
+   hierarchy rather than a replacement for an unspecified one, and states
+   explicitly that Courses reference Skills rather than owning them.
+3. **#29's out-of-scope list is merged into the non-goals** (section 14), so
    there is one place that says what Learnesia is deliberately not building.
-5. **#29's testing decisions are merged into the quality system** (section 9.5).
-6. **The near-term recommendation is revised** (section 16): finish the #29
-   slices already in flight, then gate catalog expansion behind a working
-   learner loop, rather than starting a new narrow-domain build from zero.
-7. Related documents now include #29 and its child issues.
+4. **#29's testing decisions are merged into the quality system** (section 9.5).
+5. **The near-term recommendation is rewritten** (section 16) around the rebuild.
+6. Related documents now include #29, its child issues, and ADR-0002.
 
-No product principle was weakened or removed. The knowledge-graph, mastery, and
-Go-migration direction is unchanged; it is now sequenced against work that
-actually exists.
+No product principle was weakened or removed. The vision, the domain language in
+`CONTEXT.md`, and the target architecture are unchanged — only the route to them
+is different, and shorter.
 
 ## 3. Vision
 
@@ -165,9 +173,17 @@ exist today.
 
 This section merges PRD [#29](https://github.com/fachry-isl/learnesia/issues/29).
 It describes the content model, generation pipeline, and reference system that
-current implementation work targets. Terms are defined canonically in
+implementation work targets. Terms are defined canonically in
 [`CONTEXT.md`](../CONTEXT.md); this section states the engineering decisions, not
 the vocabulary.
+
+**These decisions survive the greenfield rebuild.** Section 11 discards the
+Django implementation, not this design. The hierarchy, the block registry and its
+payload schemas, the reference model, the pipeline topology, the two LLM seams,
+the evaluator-degradation rule, and prompts-as-flat-files all carry across to Go
+and Python unchanged. Where this section describes a Django or Python mechanism
+that does change — the `asyncio` execution model in 5.4 — the replacement is in
+section 11.3.
 
 ### 5.1 Content hierarchy and Content Blocks
 
@@ -288,9 +304,12 @@ Implementation decisions:
   *around* the chosen resources rather than duplicating them. This ordering is a
   product decision, not an implementation detail.
 
-The async-on-ASGI execution model is adequate for admin-triggered runs at current
-volume, but it is not durable against process restart in the way section 10.2
-requires. See section 12 for when this must be replaced.
+The async-on-ASGI execution model was the one part of this design that did not
+survive: it is not durable against process restart in the way section 10.2
+requires. The rebuild replaces it with a Postgres-backed job table and a separate
+worker process — see section 11.3. The rest of the pipeline design is unaffected,
+because the graph, the checkpoints, and the Run states never depended on *how*
+the executor was hosted.
 
 ### 5.5 Evaluators and human checkpoints
 
@@ -371,7 +390,12 @@ rubric is a file edit, not a code change.
 This is what makes "same pipeline architecture, any language" true: the language
 lens is a prompt variable, not a fork.
 
-### 5.9 Migration from v1
+### 5.9 Migration from v1 (historical — not executed)
+
+The greenfield rebuild migrates no data (section 11), so none of the steps below
+will run. They are kept only as a record of what the v1 model contained and how
+it mapped onto v2, which is useful when seeding fresh content.
+
 
 - `template` status → `draft`.
 - Each existing Course's Lessons wrapped in one auto-generated Module.
@@ -398,9 +422,15 @@ Note what is deliberately *not* a seam: the content hierarchy itself, the human
 checkpoints, and the requirement that generated content be reviewed before
 publication.
 
-### 5.11 Delivery status of #29
+### 5.11 Prior delivery status of #29 (historical)
 
-PRD #29 is decomposed into tracer-bullet slices:
+This subsection records what the Django implementation reached before the
+greenfield decision. It is kept because it is the evidence base for that
+decision, and because it says which parts of the design were actually exercised
+and which were only ever specified. The issues below are superseded by the build
+order in section 12.1.
+
+PRD #29 was decomposed into tracer-bullet slices:
 
 | Issue | Slice | State |
 |---|---|---|
@@ -416,11 +446,13 @@ PRD #29 is decomposed into tracer-bullet slices:
 | [#39](https://github.com/fachry-isl/learnesia/issues/39) | Content Agent + Content Evaluator | open |
 | [#40](https://github.com/fachry-isl/learnesia/issues/40) | Admin Generation Run UI: human checkpoints + per-block regenerate | open |
 
-In short: **the content model is shipped; the generation pipeline is not.**
-Sections 5.1–5.3 and 5.9 describe delivered behavior. Sections 5.4–5.8 describe
-committed design that is still in flight.
+In short: **the content model was built and works; the generation pipeline was
+never more than a skeleton.** That asymmetry is why the rebuild ports the block
+renderers and editors but rewrites the pipeline from its design rather than its
+code — there is almost no pipeline code to lose.
 
-Implementation state as of this revision, at a finer grain than issue status:
+Implementation state at the point of the decision, finer-grained than issue
+status:
 
 | Component | State |
 |---|---|
@@ -437,12 +469,12 @@ Implementation state as of this revision, at a finer grain than issue status:
 | Human checkpoint UI (both checkpoints, per-block regenerate) | not started |
 
 The legacy single-shot generation endpoints on the Course, Lesson, and Quiz
-viewsets are still the only working generation path. They have no evaluator and
-no human checkpoint, and are what the pipeline is intended to replace.
+viewsets were the only working generation path — no evaluator, no human
+checkpoint. They are not carried forward.
 
-Two defects in the current working tree block the test suite and the admin
-create-course page; they are recorded in the roadmap review rather than here,
-since they are transient.
+Two defects in that tree blocked the Django test suite and the admin
+create-course page. They are recorded in the roadmap review and in issue #48;
+both are moot in the rebuild.
 
 ## 6. Target product model beyond v2
 
@@ -672,10 +704,11 @@ the platform has sufficient calibrated learner and item data.
 The system should store event history so mastery can be recomputed when the model
 changes. Avoid making a mutable score the only source of truth.
 
-Note the current gap: v2 quiz blocks are auto-graded client-side and exercise
-blocks have no submission at all (section 5.1). **Mastery has no evidence source
-until attempts are recorded server-side.** That is the first dependency of
-section 12's Phase 1.
+Note the gap this closes: in the Django implementation, quiz blocks were graded
+client-side and exercise blocks had no submission at all, so **mastery had no
+evidence source anywhere on the server**. Recording attempts server-side is the
+first dependency of everything in this section, which is why it lands in slice 4
+of the rebuild rather than after the content factory.
 
 ### 7.6 Cold start
 
@@ -963,10 +996,9 @@ internal/
 
 Package APIs should follow domain capabilities rather than database tables.
 
-Current reality: a Django/DRF monolith on ASGI with a Next.js frontend. No Go
-exists yet. The module boundaries above are still useful as a target for how the
-Django app should be organized internally in the meantime — the migration is
-easier from a well-bounded monolith than from a tangled one.
+These boundaries are the target layout for `apps/api` in the greenfield rebuild
+(section 11), not an aspiration to reach later. `generation/` in Go owns Run
+state and job dispatch; the graph execution itself lives in `apps/pipeline`.
 
 ### 10.2 Source of truth and events
 
@@ -987,18 +1019,19 @@ Generation and evaluation must run as durable background jobs rather than
 blocking HTTP requests. Jobs need explicit states, bounded retries, idempotency
 keys, cancellation, timeouts, and inspectable failure reasons.
 
-v2's design satisfies part of this: the LangGraph Postgres checkpointer is meant
-to make *graph state* durable, and `GenerationRun` gives explicit states and
-bounded retries. It does not satisfy the rest — the executing task is an
-in-process `asyncio` task, so a process restart mid-node loses the in-flight
-step, and there is no queue, cancellation, or timeout story. Acceptable at
-admin-triggered volume; a real queue is required before generation is exposed to
-anyone but admins, or before runs matter enough that losing one is expensive.
+The rebuild satisfies this by construction rather than by retrofit. The job table
+of section 11.3 supplies the explicit states, idempotency keys, bounded retries,
+cancellation, and timeouts that a durable job needs; the LangGraph Postgres
+checkpointer makes graph state survive a worker restart; and `GenerationRun` in
+Go remains the inspectable record of what a run did.
 
-Even the durable half is not yet real: the graph compiles without a checkpointer
-and `langgraph-checkpoint-postgres` is not a declared dependency. Until that is
-wired, a paused run cannot survive a restart, which defeats the point of a
-checkpoint that "may last minutes or days."
+This is a direct correction of the Django design, where the executor was an
+in-process `asyncio` task with no queue, no cancellation, and no timeout, and the
+checkpointer was never actually wired — so a pause could not survive a restart,
+defeating the point of a human checkpoint that "may last minutes or days."
+
+The requirement that makes this non-negotiable: **slice 5 is not done until a run
+pauses, the worker is restarted, and the run resumes.**
 
 ### 10.3 API design
 
@@ -1069,143 +1102,198 @@ latency, evaluator pass rate on first attempt, retry-exhaustion rate, and human
 edit distance at each checkpoint — the last of these is the cheapest available
 proxy for generation quality.
 
-## 11. Django-to-Go migration
+## 11. Greenfield rebuild
 
-### 11.1 Decision direction
+Recorded in [ADR-0002](adr/0002-greenfield-rebuild-go-python-nextjs.md). This
+section supersedes the previous strangler-migration plan and its trigger
+conditions.
 
-Go is a suitable target for the main product backend: typed domain contracts,
-low runtime overhead, strong concurrency, and simple deployment fit APIs,
-attempt processing, recommendations, and durable workers.
+### 11.1 Decision
 
-A big-bang rewrite is not recommended while the product model is changing. It
-would spend time reproducing CRUD and admin behavior without proving learning
-value. Use a strangler migration around new domain capabilities.
+Learnesia is rebuilt from scratch on Go, Python, and TypeScript Next.js. No data
+is migrated. The Django/DRF backend, its models, its migrations, and its database
+contents are abandoned rather than strangled.
 
-Python may remain behind a language-independent worker boundary where its AI,
-scientific, symbolic, or evaluation ecosystem provides material value. The
-product architecture should not require Python, but also should not remove it
-for ideological purity.
+The earlier plan — keep Django, build new capabilities in Go, cut over endpoint
+by endpoint with parity tests and shadow reads — was correct for a system with
+users and data to protect. This system has neither. A strangler migration is a
+technique for changing something you cannot stop; nearly its entire cost buys
+safety that is not needed here, and the switching cost will never be lower than
+it is at zero users.
 
-The v2 pipeline is a concrete instance of that boundary: LangGraph,
-`youtube-transcript-api`, and the LLM tooling are Python-ecosystem strengths.
-The generation pipeline is the *last* thing that should move to Go, not the
-first.
+The vision document's own caution still applies and is not waved away: a
+big-bang rewrite while the product model is changing is a real risk. The
+mitigation is that the *domain language is not changing*. `CONTEXT.md`, the block
+payload schemas, ADR-0001's storage shape, and PRD #29's pipeline decisions all
+carry across intact. What is discarded is an implementation, not a design.
 
-### 11.2 Migration sequence
+### 11.2 Three deployable units
 
-1. Document existing API contracts and database invariants.
-2. Stabilize identifiers, authorization rules, and content version boundaries.
-3. Build compact public catalog/course reads in Go.
-4. Build learner identity/profile, attempts, and mastery in Go.
-5. Build deterministic assessment and procedural generation in Go.
-6. Move recommendation logic and reviewable reason codes into Go.
-7. Move content CRUD/versioning and review workflows after parity tests exist.
-8. Move Generation Run orchestration to durable Go workers.
-9. Retire Django endpoints incrementally after traffic and parity verification.
-10. Retain isolated Python workers only where justified by measurable benefit.
+```text
+apps/web        Next.js (TypeScript, App Router) — public site and admin
+apps/api        Go — HTTP API, domain logic, sole owner of Postgres
+apps/pipeline   Python — LangGraph generation worker, no domain-table access
+```
 
-During migration, one service must own writes for each table/domain. Django and
-Go must not independently mutate the same aggregate. Use contract tests,
-shadow/read comparison, and explicit cutover flags.
+**Go owns every domain write.** The one-writer rule of section 10.2 applies from
+the first migration rather than being negotiated during a cutover. Go owns the
+schema.
 
-### 11.3 What not to migrate first
+**Python is a worker behind a job boundary, not a service.** It exists for the
+reason section 11.1 always kept a Python boundary: LangGraph, transcript
+extraction, and LLM tooling are Python-ecosystem strengths with no Go equivalent
+worth building. It has no public HTTP surface and no ORM access to domain tables.
 
-- Stable admin CRUD with no immediate learner impact.
-- Every AI integration before pipeline contracts stabilize.
-- Infrastructure purely to achieve microservice separation.
-- Existing behavior that should be deleted rather than reproduced.
-- **The Generation Pipeline**, while prompts, rubrics, and node topology are
-  still changing weekly.
+**The frontend is a new TypeScript App Router application that ports proven
+components.** The existing frontend is already Next.js on React 19 with Tailwind,
+but it is a client-side React app inside Next.js — `use client` throughout, axios
+fetching, no TypeScript. The new app uses server components for catalog and
+lesson reads. The block renderers, admin block editors, and sources list are
+ported rather than rewritten: they are new, tested, and encode block-type
+behavior that survives the rewrite.
 
-### 11.4 Trigger conditions
+### 11.3 The Go/Python seam
 
-The migration should not start on a date. It should start when at least one of
-these is true:
+The integration point is a **job contract, not a shared database**:
 
-- Attempt/scoring write volume makes Django's per-request overhead a measured
-  problem.
-- Mastery recomputation needs sustained concurrent workers.
-- The domain model has been stable for long enough that parity tests are cheap
-  to write.
+- **Dispatch** — a Postgres-backed job table written by Go. The worker claims
+  jobs with `SELECT … FOR UPDATE SKIP LOCKED`, woken by `LISTEN`/`NOTIFY`. No
+  broker, no Redis, no Celery.
+- **Results** — the worker writes no domain tables. It calls back into Go's
+  internal API with a service token, so payload validation happens once, in Go,
+  at the boundary where admin writes are already validated.
+- **Graph state** — LangGraph checkpoints live in a dedicated `pipeline` Postgres
+  schema owned by Python. Domain tables are never joined to it.
+- **Human checkpoints** — on interrupt, the worker reports the pause to Go, which
+  moves the Generation Run into the matching `awaiting_*_approval` state and
+  serves the review UI. Approval enqueues a resume job carrying the human's
+  edited payload and the graph thread id.
 
-Until then, effort spent on Go is effort not spent on the learner loop.
+This job table must be treated as an API: versioned payloads, explicit states,
+idempotency keys, bounded retries. A sloppy job contract reintroduces exactly the
+coupling the split exists to avoid.
+
+### 11.4 Ongoing cost of the decision
+
+Recorded plainly, because it is real:
+
+- Two backend toolchains, two test runners, two deployment artifacts, and a
+  versioned contract between them.
+- A period with **no working product**, until the Go content domain and the web
+  app reach parity with what exists today. Acceptable only because there are no
+  users; it stops being acceptable the moment there are.
+- `CONTEXT.md` becomes load-bearing — the only artifact surviving the rewrite
+  intact, and the sole guard against the product model drifting while the stack
+  is rebuilt.
+
+Against that: the review follow-ups that were retrofits against Django — per-run
+cost ceiling, executor interface, deterministic rubric validation,
+resource-quality rubric, content versioning — are now design inputs, and cost
+almost nothing to include from the start.
 
 ## 12. Delivery roadmap
 
-The phases below are the intended learning-value sequence. They are annotated
-with actual status, which does not match the intended order.
+The greenfield rebuild (section 11) removes the sequencing conflict that the
+previous plan had accumulated. The build order below puts the **learner loop
+before the content factory** — the correction that motivated this revision.
+Nothing in the previous plan produced a single row of learner evidence, and no
+volume of generated content substitutes for it.
 
-### Phase 0: Foundation and research — *not started*
+### 12.1 Build order
 
-- Select one narrow learning domain: recommended SMP mathematics, one grade band
+Each slice is a tracer bullet: it goes through all three deployable units and
+leaves something demonstrable behind.
+
+**Slice 0 — Foundation.** Monorepo layout, Postgres, Go migrations, the job
+table, CI for all three units, local compose.
+*Exit:* one request traverses web → api → database, and the pipeline worker
+claims and completes a no-op job.
+
+**Slice 1 — Content domain in Go.** Course, Module, Lesson, ContentBlock,
+Reference, LessonCitation. Block payload validation per type. Admin write API and
+compact public catalog reads kept separate from lesson detail reads.
+*Exit:* a course authored through the API serves correct JSON; malformed block
+payloads are rejected at the boundary.
+
+**Slice 2 — Web application.** TypeScript App Router, server components for
+catalog and lesson reads, the four block renderers and the sources list ported
+from the current frontend.
+*Exit:* a seeded course is readable end to end by an anonymous visitor.
+
+**Slice 3 — Admin authoring.** Manual Course/Module/Lesson/Block editing,
+reference management, publish and unpublish. Block editors built as **standalone
+controlled components** — payload in, payload out, no knowledge of whether they
+edit a stored Course or an in-flight Generation Run.
+*Exit:* a course is created and published entirely through the admin UI, with no
+seed script. The editors are reused unchanged by slice 8.
+
+**Slice 4 — Identity and the learner loop.** Accounts, sessions, enrollment,
+recorded attempts, server-side deterministic quiz scoring, resumable progress.
+*Exit:* a learner starts, practices, stops, and resumes on another device;
+attempts are queryable evidence rather than browser state.
+
+**Slice 5 — Pipeline foundation.** Generation Run in Go, job dispatch and claim
+protocol, the Python worker, a LangGraph skeleton with the Postgres checkpointer,
+the two LLM seams, the prompt loader, and a per-run cost ceiling enforced between
+nodes.
+*Exit:* a run with placeholder nodes advances through every status, pauses
+durably **across a worker restart**, and resumes.
+
+**Slice 6 — Outline Agent and Outline Evaluator, with checkpoint 1.**
+*Exit:* a topic produces a reviewed outline; human edits at the checkpoint
+persist and the run resumes from them.
+
+**Slice 7 — Resource Provider and Resource Agent.** Tavily behind the interface,
+best-effort video timestamps, a **resource-quality rubric**, and a manual URL
+override for when search disappoints.
+*Exit:* per-lesson resources are gathered, categorized, and overridable.
+
+**Slice 8 — Content Agent and Content Evaluator, with checkpoint 2.** Per-block
+regenerate, inline evaluator annotations, deterministic validation for every
+mechanically checkable rubric item.
+*Exit:* a full course is generated, reviewed, and published, with pipeline
+metrics (section 13) recorded for the run.
+
+**Slice 9 — Skills and mastery, thin.** Extract and de-duplicate the learning
+objectives the Outline Agent already produces, map Courses to Skills, and derive
+a simple interpretable mastery state from recorded attempts. Show branch
+progress.
+*Exit:* mastery changes from real attempts, and a reviewer can explain why.
+
+**Slice 10 — Procedural interactivity.** `step_solver` first, per
+[`docs/design/interactive-content-blocks.md`](design/interactive-content-blocks.md).
+Restricted expression evaluation through a parsed AST, deterministic seeds,
+variant validation.
+*Exit:* one reviewed template safely produces many valid variants with no
+per-attempt LLM call.
+
+Hard dependencies: slice 3 before slice 8 (shared editors); slice 4 before slice
+9 (mastery needs attempts); slice 5 before slices 6–8.
+
+### 12.2 Research track
+
+Not a code slice, and it should run alongside slices 0–4 rather than blocking
+them:
+
+- Select one narrow learning domain — recommended SMP mathematics, one grade band
   and one semester-sized scope.
 - Interview learners, parents, and educators.
 - Define learning metrics and baseline diagnostics.
 - Formalize canonical Skill vocabulary and graph rules.
-- Resolve brand/trademark/domain risk before significant marketing spend.
+- Resolve brand, trademark, and domain risk before significant marketing spend.
 - Specify privacy and minor-safety requirements.
 
-Exit evidence: validated learner problem, reviewed initial skill graph, and a
+Exit evidence: a validated learner problem, a reviewed initial skill graph, and a
 small target cohort willing to test repeatedly.
 
-### Phase 1: One complete learning loop — *not started*
+### 12.3 Gate before expansion
 
-- Add learner accounts and server-side progress.
-- Record attempts and deterministic scoring evidence.
-- Implement Skill, prerequisite, objective, and Course-to-Skill mappings.
-- Implement simple interpretable mastery state.
-- Deliver one end-to-end unit with concise content and existing quiz blocks.
-- Show personal branch progress and a reasoned next recommendation.
+After slice 8, prove the pipeline once on the narrow domain and record the
+numbers. Then **stop expanding the catalog** until slices 4 and 9 have produced
+measured learning evidence. Volume of generated courses is explicitly not a
+success metric (section 13).
 
-Exit evidence: learners can start, practice, stop, resume on another device, and
-see mastery change from real attempts.
-
-Blocking gap: progress is currently client-side (`localStorage`) and exercises
-have no submission at all, so no learning evidence exists anywhere on the server.
-
-### Phase 2: Procedural interactivity — *not started; designed*
-
-- Define versioned interactive-template contract.
-- Ship numeric input and one manipulation/matching interaction.
-- Build deterministic seeds, answer derivation, and variant validation.
-- Add misconception tags and targeted hints.
-- Add template review and sampled variant QA.
-- Place interactions throughout lessons, not only at lesson end.
-
-Exit evidence: one reviewed template safely produces many diverse variants;
-learning flow stays engaging without a per-attempt LLM call.
-
-Design already exists in
-[`docs/design/interactive-content-blocks.md`](design/interactive-content-blocks.md);
-the v2 block registry is the delivery mechanism, so the marginal cost per new
-interactive type is low.
-
-### Phase 3: Reliable content factory — *in progress (this is #29)*
-
-- Make Generation Runs asynchronous and durable. *(async: yes; durable: partial)*
-- Add content and template versioning/provenance. *(not started)*
-- Add explicit, versioned quality rubrics. *(flat-file rubrics: designed, #37/#39)*
-- Combine deterministic validators, independent evaluators, and human queues.
-  *(registry validation shipped; evaluators and checkpoints in flight)*
-- Add immutable publishing and rollback. *(not started)*
-- Track generation cost and reviewer time per approved skill. *(not started)*
-
-Exit evidence: team can repeatedly transform a curriculum objective into a
-source-backed, interactive, reviewed skill package with known cost and quality.
-
-**Sequencing note.** Phase 3 started before Phases 0–2. The v2 content model
-(#30–#34) was a genuine prerequisite for everything else — a single markdown blob
-per Lesson could not support interactivity, attempts, or block-level
-provenance — so that part of the reordering was correct. The remainder (#36–#40,
-the generation pipeline) is a throughput investment made before there is evidence
-that the content already published produces learning. The risk is scaling
-production of content whose value is unmeasured.
-
-**Gate.** Finish #35–#40 as scoped, then stop expanding the catalog until Phase 1
-exists. Volume of generated courses is explicitly not a success metric
-(section 13).
-
-### Phase 4: Adaptive path — *not started*
+### 12.4 Adaptive path
 
 - Add diagnostics and estimate uncertainty.
 - Add prerequisite remediation, challenge adjustment, and spaced review.
@@ -1216,14 +1304,14 @@ exists. Volume of generated courses is explicitly not a success metric
 Exit evidence: adaptive path improves learning gain or retention against a fixed
 path without increasing frustration or dropout.
 
-### Phase 5: Expand domain and platform — *not started*
+### 12.5 Expand domain and platform
 
 - Extend mathematics coverage.
 - Add logic or coding after sandboxed evaluation exists.
 - Add physics after math prerequisite mapping is reliable.
 - Add biology with stronger factual/source-review workflows.
 - Add additional curriculum and language lenses.
-- Complete remaining Go cutovers when domain behavior is stable.
+- Add remaining capabilities of section 10.1 that earlier slices deferred.
 
 Do not launch mathematics, biology, physics, logic, and coding simultaneously.
 Each requires distinct interaction, verification, and editorial capabilities.
@@ -1299,7 +1387,7 @@ Carried from #29 — deliberately out of scope, with the reason:
 - **Block-level citation linking** — the `LessonCitation.content_block` FK exists
   but stays nullable and unused.
 - **Exercise submission and grading** — exercises are prompt-only with revealable
-  solutions. Revisit as part of Phase 1, since attempts are the evidence source
+  solutions. Revisit in slice 4, since attempts are the evidence source
   mastery needs.
 - **Code sandbox exercises** (Pyodide/WASM) — a separate project.
 - **Auto-translation of course content** — machine-translated educational content
@@ -1321,36 +1409,34 @@ Create focused ADRs/designs before implementation for:
 - Durable job/checkpoint infrastructure — specifically, what replaces the
   in-process `asyncio` execution model of section 5.4.
 - Identity, child safety, consent, and data retention.
-- Django/Go data ownership and endpoint cutover strategy.
+- The job contract between `apps/api` and `apps/pipeline`: payload versioning,
+  states, idempotency keys, retry and cancellation semantics.
 
 ## 16. Near-term recommendation
 
-The original recommendation was to build one narrow, evidence-complete
-mathematics experience from scratch. That is still the right destination, but it
-is no longer the right starting move: the v2 content model is shipped and the
-generation pipeline is half-scoped and in flight. Abandoning it mid-flight would
-waste the sunk work; finishing it *and then continuing to scale content* would
-compound the real risk.
+Build slices 0 through 4 (section 12.1) before writing a line of pipeline code.
 
-Revised sequence:
+That sequence is deliberately unglamorous — foundation, content domain, web app,
+admin authoring, learner loop — and it ends with the one thing the previous plan
+never produced: **a learner whose attempts are recorded on the server.** Every
+adaptive capability in sections 6 and 7 is downstream of that single fact, and
+none of it can be faked with more content.
 
-1. **Finish #35–#40 as scoped.** Do not widen the pipeline's scope. Specifically,
-   resist adding provenance, versioning, or cost tracking into these slices —
-   they belong to the later half of Phase 3.
-2. **Prove the pipeline once, narrowly.** Generate three connected lessons in one
-   domain (recommended: SMP mathematics), all the way through both checkpoints,
-   and record the numbers in section 13's pipeline-quality metrics. That run is
-   the evidence that the content factory works.
-3. **Stop catalog expansion there** and build the Phase 1 learner loop: accounts,
-   server-side progress, recorded attempts, deterministic scoring, and one
-   interpretable mastery state.
-4. **Add Skills as a thin layer** over the existing hierarchy — extract objectives
-   the Outline Agent already produces, de-duplicate them, and map Courses to
-   Skills. Do not build the full graph first.
-5. **Add one procedural interactive type** (`step_solver`) using the existing
-   block registry, to prove Phase 2's mechanism cheaply.
-6. **Measure learning gain** with a small Indonesian learner cohort before
-   expanding subject coverage or starting the Go migration.
+Then, and only then, build the pipeline (slices 5–8), prove it once on three
+connected lessons in one narrow domain — recommended: SMP mathematics — all the
+way through both human checkpoints, and record the numbers from section 13's
+pipeline-quality metrics. That run, not the catalog size, is the evidence that
+the content factory works.
+
+Three things to resist along the way:
+
+1. **Widening the pipeline slices.** Provenance, immutable versioning, and
+   reviewer-time tracking are real needs and belong after slice 8, not inside it.
+2. **Building the knowledge graph up front.** Slice 9 extracts Skills from
+   objectives the Outline Agent already produces. A hand-authored graph before
+   there is content to attach it to is speculative modeling.
+3. **Rebuilding what already works.** The block renderers and admin editors are
+   ported, not rewritten. The rewrite is of the stack, not of every decision.
 
 This tests Learnesia's actual advantage:
 
@@ -1358,9 +1444,8 @@ This tests Learnesia's actual advantage:
 > interactive practice that adapts to each learner and becomes cheaper through
 > reusable procedural templates.
 
-The v2 architecture delivers the first half of that sentence. Nothing currently
-built or planned delivers the second half, and no amount of additional generated
-content will.
+The v2 architecture delivers the first half of that sentence. Slices 4 and 9 are
+the first work in the project's history that delivers any of the second half.
 
 ## Related documents
 
@@ -1368,9 +1453,11 @@ content will.
 - [#29 — PRD: Content Architecture v2](https://github.com/fachry-isl/learnesia/issues/29)
   — the source PRD merged into section 5, with child issues #30–#40.
 - [`docs/adr/0001-hybrid-single-table-content-blocks.md`](adr/0001-hybrid-single-table-content-blocks.md)
-  — Content Block persistence decision.
+  — Content Block persistence decision, carried into the rebuild.
+- [`docs/adr/0002-greenfield-rebuild-go-python-nextjs.md`](adr/0002-greenfield-rebuild-go-python-nextjs.md)
+  — the decision to rebuild rather than migrate, and the Go/Python seam.
 - [`docs/design/interactive-content-blocks.md`](design/interactive-content-blocks.md)
-  — future interactive block design (Phase 2).
+  — future interactive block design (slice 10).
 - [`docs/design/roadmap-review-2026-08-30.md`](design/roadmap-review-2026-08-30.md)
   — assessment of this plan across engineering effort, product impact,
   resources, complexity, and content quality.

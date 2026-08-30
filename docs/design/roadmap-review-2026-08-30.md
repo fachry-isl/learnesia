@@ -5,6 +5,20 @@
 after merging PRD [#29](https://github.com/fachry-isl/learnesia/issues/29)
 **Axes:** Engineering Effort · Product Impact · Resources · Complexity · Content Quality
 
+> **Partly superseded, same day.** After this review, the decision was taken to
+> rebuild from scratch on Go, Python, and TypeScript Next.js rather than migrate
+> — see [ADR-0002](../adr/0002-greenfield-rebuild-go-python-nextjs.md). Three
+> parts of this document no longer apply: recommendation 10 ("do not start the Go
+> migration"), the two blockers in section 7 (they live in code with no future),
+> and the issue-numbered framing of #35–#40, which are superseded by the build
+> order in §12.1 of the vision document.
+>
+> Everything else stands, and most of it got *cheaper*: the axis findings are
+> about the design, not the language, and the follow-ups in section 8 — cost
+> ceiling, executor interface, deterministic rubric validation,
+> resource-quality rubric, instrumentation — are now design inputs to a fresh
+> build rather than retrofits.
+
 Definitions used throughout:
 
 - **Engineering Effort** — build cost in developer time, including tests and the
